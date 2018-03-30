@@ -8,6 +8,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->cmd->setTextColor(QColor(80,0,0));
     ui->cmd->setText("DemoOS 正在启动\n");
+
+
+
     connect(&timer,SIGNAL(timeout()),this,SLOT(kernel()));
     timer.start(1000);
 
@@ -20,7 +23,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::kernel(){
     timer.stop();
+
     cmdPrint("1000ms CYCLE");
+
+
     timer.start(1000);
 }
 
