@@ -7,8 +7,9 @@ class Process
 {
 public:
     Process();
+    Process(unsigned long PID);
     enum PState{WAIT,RUN,READY,UNLOAD,TERMINATED};
-    unsigned long getPid(){return pid;}
+    unsigned long getPid() const{return pid;}
 private:
     unsigned long pid;
     PState state;
@@ -24,6 +25,7 @@ class ProcessList{
 public:
     ProcessList();
     void newProcess();
+    void addProcess(unsigned long PID);
     bool find(unsigned long PID);
 private:
     QList<Process> list;
