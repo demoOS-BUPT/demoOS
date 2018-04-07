@@ -21,15 +21,5 @@ private:
     int CPUtime;            //运行时间（剩余）
 };
 
-class ProcessList{
-public:
-    ProcessList();
-    void newProcess();
-    void addProcess(unsigned long PID);
-    bool find(unsigned long PID);
-private:
-    QList<Process> list;
-    unsigned long lastPID;
-};
 
 #endif // PROCESS_H

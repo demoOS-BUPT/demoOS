@@ -26,9 +26,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += source/main.cpp\
         source/mainwindow.cpp \
-    source/demo_process.cpp
+    source/demo_process.cpp \
+    source/list_op.cpp
 
 HEADERS  += source/mainwindow.h \
-   source/demo_process.h
+   source/demo_process.h \
+    source/list_op.h
 
 FORMS    += source/mainwindow.ui

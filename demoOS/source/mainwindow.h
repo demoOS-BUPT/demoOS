@@ -22,9 +22,12 @@ public:
 private:
     Ui::MainWindow *ui;
     QTimer timer;
-    ProcessList* pnewProQue;     //创建新进程队列 存进程PCB
-    ProcessList* pwaitProQue;     //等待队列 存进程PCB指针
-    ProcessList* preadyProQue;    //就绪队列 存进程PCB指针
+
+    QList<Process> pnewProQue;     //创建新进程队列 存进程PCB
+    unsigned long lastPID;   //便于分配新pid
+
+    QList<Process*> pwaitProQue;     //等待队列 存进程PCB指针
+    QList<Process*> preadyProQue;    //就绪队列 存进程PCB指针
 
     void cmdPrint(QString newLine);
 
