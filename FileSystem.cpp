@@ -1,7 +1,7 @@
 #include<bits/stdc++.h>
 #include "DiskOperate.cpp"
-#define system_size 100*1024*1024   //系统大小  
-#define block_szie 1024 //盘块大小  
+#define system_size 100*1024*1024   //系统大小，单位是字节  
+#define block_szie 1024*1024 //盘块大小  
 #define block_count system_size/block_szie //系统盘块数目
 
 using namespace std;
@@ -76,33 +76,49 @@ void example(){
 				dirOp.list_directory("");
 				endThisOperate = true;
 				break;
-			case "touch":
+			case "mkdir":
 				dirName = args[1];
 				//检查是否存在此目录，不存在则创建
 				break;
-
+            case "touch":
+                fileName = args[1];
+                //创建file
+                break;
 			case "cat":
 				fileName = args[1];
 				//查看文件信息
 				break;
-			case ""
-
-
+            case "cd":
+                dirName = args[1];
+                //switch dir
+                break;
+			default:
+                cout << "未识别" << endl;
+                continue;
 		}
-
-		
 	}
 }
 
 void init_system(){
 	systemStartAddr = (char*)malloc(system_size * sizeof(char));  
+    cout << "磁盘大小:" << system_size << endl;
+    cout << "每块大小:" << block_szie << endl;
+    cout << "盘块数:" << block_count << endl;
     //初始化盘块的位示图  
-    for(int i=0; i<block_count; i++)  
-        systemStartAddr[i] = '0';  
-    //用于存放位示图的空间已被占用  
-    int bitMapSize = block_count * sizeof(char) / block_szie;//位示图占用盘块数:100  
-    for(int i=0; i<bitMapSize; i++)//从零开始分配  
-        systemStartAddr[i] = '1';   //盘块已被使用  
+    memset(systemStartAddr, 0, system_size * sizeof(char));
+    //前三块分别是 bit图，目录项，fcb
+    char* bitmap = systemStartAddr;
+    for(int i=0;i<4;i++)
+        bitmap[i] = '1';
+    Directory* dirList = systemStartAddr + block_szie * 1;
+    FCB* fcbList = systemStartAddr + block_szie * 2;
+    BlockMap* blockList = systemStartAddr + block_szie * 3;
+
+
+    //创建目录 /home
+    //创建目录 /home/www
+    //创建文件 /home/www/in.c
+    //创建文件 /home/out.c
 }
 
 void test_unit(){

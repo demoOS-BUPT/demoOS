@@ -6,11 +6,9 @@ public:
 }DiskOperate;
 
 bool DiskOperate::write(int startBlock, string content){
-
+    for(;;)
 }
 
 string DiskOperate::read(int startBlock, int dataSize){
 
-
-	
 }

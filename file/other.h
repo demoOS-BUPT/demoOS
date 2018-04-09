@@ -14,4 +14,11 @@ FCB*get_new_FCB();
 int get_new_data_block();
 //在磁盘中查看磁盘中是否空间，获得一块磁盘号,失败返回-1
 
+
+typedef class BlockMap {
+public:
+    int currentBlock;
+    int nextBlock;//为-1，即为结束
+}BlockMap;
 #endif // !OTHER_H
+

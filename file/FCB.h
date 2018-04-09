@@ -11,7 +11,7 @@ private:
 	string expandName;//文件扩展名
 	string time;//文件建立时间或者上次修改时间
 	int blockStarNum;  //文件数据起始盘块号 
-	int  blockEndNum;//文件数据结束盘块号 
+	int blockEndNum;//文件数据结束盘块号 
 	int fileSize;//文件大小，盘块为单位  
 	int dataSize;//已写入的内容大小，字节为单位 
 	int readptr;//读指针，字节为单位 
