@@ -1,6 +1,9 @@
 #include"DirOperate.h"
 #include"other.h"
+#include<time.h>
 using namespace std;
+#define _CRT_SECURE_NO_WARNINGS 1
+#pragma warning( disable : 4996 )
 
 int DirOperate::create_file(Directory*lastDirectory,string fileName,char type) {
 	//创建成功返回0，失败返回-1
@@ -30,10 +33,12 @@ int DirOperate::create_file(Directory*lastDirectory,string fileName,char type) {
 			}
 			else {
 				//newFCB->set_expandName(expandFileName);
-				time_t nowtime;
-				nowtime = time(NULL); //获取日历时间   
+				time_t time_second;
+				struct tm nowtime;
+
+				time_second = time(NULL); //获取日历时间   
 				char tmp[64];
-				strftime(tmp, sizeof(tmp), "%Y-%m-%d", localtime(&nowtime));
+				strftime(tmp, sizeof(tmp), "%Y-%m-%d", localtime(&time_second));
 				newFCB->set_time(tmp);
 				newFCB->set_blockStarNum(blockNum);
 				newFCB->set_blockEndNum(blockNum);
@@ -70,18 +75,18 @@ void DirOperate::write_file(FCB*FCBptr, DiskOperate*diskOperate, string content)
 	int blockNum = ceil(content.size()/block_size);
 	int i = 0;
 	int currBlock;
-	currBlock = FCBptr.get_blockStarNum();
+	currBlock = FCBptr->get_blockStarNum();
 
 	for (;i<blockNum-1;i++){
-		string sub = content.substr(content, i*block_size ,(i+1)*block_size);
-		diskOperate.write(currBlock, sub);
-		BlockMap[currBlock] = FCBptr.get_new_block();
+		string sub = content.substr( i*block_size ,block_size);
+		diskOperate->write(currBlock, sub);
+		BlockMap[currBlock] = get_new_block();
 		currBlock = BlockMap[currBlock];
 	}
-	string sub = content.substr(content, i*block_size , content.size());
-	diskOperate.write(currBlock, sub);
+	string sub = content.substr(i*block_size );
+	diskOperate->write(currBlock, sub);
 	BlockMap[currBlock] = -1;
-	FCBptr.set_blockEndNum(currBlock);
+	FCBptr->set_blockEndNum(currBlock);
 }
 
 bool DirOperate::rm_file(FCB*FCBptr) {
@@ -111,6 +116,16 @@ void DirOperate::list_all_directory(Directory*directory) {
 void DirOperate::rm_directory(Directory*directory) {
 	if ('1' == directory->get_type()) {
 		//释放磁盘空间
+		int noCurBlock, noNextBlock;
+		noCurBlock = directory->get_FCBptr()->get_blockStarNum();
+		noNextBlock = BlockMap[noCurBlock];
+		for (int i = 0; i < directory->get_FCBptr()->get_fileSize() && noCurBlock!=-1; i++) {
+			BlockMap[noCurBlock] = -1;
+			noCurBlock = noNextBlock;
+			noNextBlock = BlockMap[noNextBlock];
+		}
+
+		//----------------------------用delete释放空间行吗 感觉不得行啊------------------------------
 		delete directory->get_FCBptr();
 		delete directory;
 	}

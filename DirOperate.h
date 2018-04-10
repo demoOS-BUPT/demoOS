@@ -3,6 +3,9 @@
 #define DIROPERATE_H
 #include<string>
 #include<iostream>
+#include"FCB.h"
+#include"Directory.h"
+#include"DiskOperate.h"
 using namespace std;
 typedef class DirOperate {
 	//÷∏¡Ó≤„

@@ -1,0 +1,4 @@
+﻿  FileSystem.cpp
+d:\os_filesystem\project1\project1\filesystem.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+d:\os_filesystem\project1\project1\filesystem.cpp(37): error C2001: 常量中有换行符
+d:\os_filesystem\project1\project1\filesystem.cpp(38): error C2143: 语法错误: 缺少“;”(在“}”的前面)

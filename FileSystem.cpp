@@ -1,28 +1,47 @@
-#include "DiskOperate.cpp"
-
+#include "other.h"
+#include<string>
 using namespace std;
 
-char* systemStartAddr;
-string currentDir;
-DirOperate dirOp;
-char* bitmap;
-int* BlockMap;
-
 void example(){
-	initSystem();
-	string op;
+	init_system();
+	string op,dirName,fileName;
 	//这里是命令行，在这里进行初始化，循环，交互
 	while (1){
 		cout << "[root@localhost " + currentDir + "]";
 		cin >> op;
 		fflush(stdin);
-		string[] args = op.split(' ');
+		vector<string> args = split(op, " ");
+//		string args[] = op.split(" ");
 		//这里加多空格容错
-		switch (args[0]){
-			case "ls":
+		if (args[0] == "ls"|| args[0]=="ll") {
+			//列出目录
+			dirOp.list_directory(path_to_directory(currentDir));
+		}
+		else if (args[0] == "mkdir") {
+			dirName = args[1];
+			//检查是否存在此目录，不存在则创建
+		}
+		else if (args[0] == "touch") {
+			fileName = args[1];
+			//创建file
+		}
+		else if (args[0] == "cat") {
+			fileName = args[1];
+			//查看文件信息
+		}
+		else if (args[0] == "cd") {
+			dirName = args[1];
+			//switch dir
+		}
+		else{
+			cout <<"未识别"<< endl;
+		}
+		/*
+
+			case 'ls':
+
 			case "ll":
-				//列出目录
-				dirOp.list_directory(currentDir);
+				
 				break;
 			case "mkdir":
 				dirName = args[1];
@@ -43,11 +62,13 @@ void example(){
 			default:
                 cout << "未识别" << endl;
                 continue;
-		}
+
+				*/
+		
 	}
 }
 
-void init_system() {
+void init_system() {
 	systemStartAddr = (char*)malloc(system_size * sizeof(char));  
     cout << "磁盘大小:" << system_size << endl;
     cout << "每块大小:" << block_size << endl;
@@ -59,9 +80,9 @@ void init_system() {
     for(int i=0;i<init_blockMap_block_num;i++)
         bitmap[i] = 1;
 
-	root_directory = systemStartAddr + block_size * init_directory_block_num;
-    root_fcb = systemStartAddr + block_size * init_FCB_block_num;
-    int* BlockMap = systemStartAddr + block_szie * init_blockMap_block_num;
+	root_directory = (Directory *)systemStartAddr + block_size * init_directory_block_num;
+    root_fcb = (FCB *)systemStartAddr + block_size * init_FCB_block_num;
+    BlockMap = (int *)systemStartAddr + block_size * init_blockMap_block_num;
 
     //创建目录 /home
     //创建目录 /home/www

@@ -4,30 +4,13 @@
 #include <vector>
 
 using namespace std;
-/*
-BlockMap::BlockMap() {
-	currentBlock = -1;
-	nextBlock = -1;
-}
-int BlockMap::get_currentBlock() {
-	return currentBlock;
-}
-int BlockMap::get_nextBlock() {
-	return nextBlock;
-}
-void BlockMap::set_currentBlock(int newCurrentBlock) {
-	currentBlock = newCurrentBlock;
-}
-void BlockMap::set_nextBlock(int newNextBlock) {
-	nextBlock = newNextBlock;
-}
-*/
+
 Directory*get_new_Directory() {
 	//在目录存储块为新的目录申请空间，获得新的文件目录指针
 	Directory*newDirectory;
 	if (directory_count < directory_count_max) {
 		//当前磁盘块有空间
-		//newDirectory = new Directory();//要用new还是malloc---------------------------------
+		//newDirectory = new Directory();
 		newDirectory = root_directory + directory_count * sizeof(Directory);
 		directory_count++;
 	}
@@ -40,7 +23,7 @@ Directory*get_new_Directory() {
 		//更改上一块区块表记录
 		current_directory_block = newBlockNum;
 		//newBlockMap->set_currentBlock(newBlockNum);
-		//newDirectory = new Directory();//要用new还是malloc---------------------------------
+		//newDirectory = new Directory();
 		newDirectory = root_directory + directory_count * sizeof(Directory);
 		directory_count=1;
 	}
@@ -86,45 +69,25 @@ void init_blockMap() {
 		BlockMap[i] = -1;
 	}
 }
-/*
-Directory*root_to_directory(Directory*directory,string path) {
-	//在源路径下找到第一个directory的指针
-	//----------------返回值怎么保存---bug--------------------------------
-	Directory* rightDirectory;
-	if (directory->get_fileName() == path) {
-		return directory;
-	}
-	else {
-		for (int i = 0; i < directory->get_fileListNum(); i++) {
-			 root_to_directory(directory->get_fileList(i),path);
-		}
-	}
 
-}
-*/
+
+
 Directory*path_to_directory(string path) {
-	//路径转换成目录的映射
-	//创建目录 /home
-	//创建目录 /home/www
-	//创建文件 /home/www/in.c
-	//创建文件 /home/out.c
-	//string s = "a,b*c*d,e";
+	//路径转换成目录的映射  /home/www/in.c
 	Directory*tmp = root_directory;
 	vector<string> v = split(path, "\/"); //可按多个字符来分隔;--------------扩展名删了------------------------
 	for (vector<string>::size_type i = 0; i != v.size(); ++i) {
 		bool flag = false;
 		//对每个v[i]存的路径名寻找其对应的目录项  树的遍历
-		for (int j = 0; j< tmp->get_fileListNum()&&flag==false; j++) {
+		for (int j = 0; j< tmp->get_fileListNum() && flag==false; j++) {
 			if (v[i] == tmp->get_fileList(j)->get_fileName()) {
-				tmp = tmp->get_fileList[j];
+				tmp = tmp->get_fileList(j);
 				flag = true;
 			}
 		}
 	}
 	return tmp;
-
 }
-
 vector<string> split(const string &s, const string &seperator) {
 	//-----------------------网上找的 用来分隔地址-----------------------------
 	vector<string> result;
@@ -163,6 +126,11 @@ vector<string> split(const string &s, const string &seperator) {
 	}
 	return result;
 }
+void my_spilt(string s, char separator, string* segment) {
+
+}
+
+
 /*
 BlockMap*get_new_blockMap() {
 	//在blockMap的存储磁盘区域申请空间，获得文件新的指针，失败返回null 
@@ -190,4 +158,39 @@ void changeNextBlock(int currentBlock, int initBlock){
 	
 }
 */
+/*
+BlockMap::BlockMap() {
+currentBlock = -1;
+nextBlock = -1;
+}
+int BlockMap::get_currentBlock() {
+return currentBlock;
+}
+int BlockMap::get_nextBlock() {
+return nextBlock;
+}
+void BlockMap::set_currentBlock(int newCurrentBlock) {
+currentBlock = newCurrentBlock;
+}
+void BlockMap::set_nextBlock(int newNextBlock) {
+nextBlock = newNextBlock;
+}
+*/
+/*
+Directory*root_to_directory(Directory*directory,string path) {
+//在源路径下找到第一个directory的指针
+//----------------返回值怎么保存---bug--------------------------------
+Directory* rightDirectory;
+if (directory->get_fileName() == path) {
+return directory;
+}
+else {
+for (int i = 0; i < directory->get_fileListNum(); i++) {
+root_to_directory(directory->get_fileList(i),path);
+}
+}
+
+}
+*/
+
 
