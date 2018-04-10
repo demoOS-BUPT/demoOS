@@ -4,6 +4,7 @@
 #define block_szie 1024*1024 //盘块大小  
 #define block_count system_size/block_szie //系统盘块数目
 
+
 using namespace std;
 
 char* systemStartAddr
