@@ -8,7 +8,7 @@ using namespace std;
 
 typedef class FCB {
 private:
-	string expandName;//文件扩展名
+	//string expandName;//文件扩展名
 	string time;//文件建立时间或者上次修改时间
 	int blockStarNum;  //文件数据起始盘块号 
 	int  blockEndNum;//文件数据结束盘块号 
@@ -20,7 +20,7 @@ private:
 	bool recyleBin;//文件是否放入回收站 0不在回收站 1在回收站
 public:
 	FCB();
-	string get_expandName();
+	//string get_expandName();
 	string get_time();
 	int get_blockStarNum();
 	int get_blockEndNum();

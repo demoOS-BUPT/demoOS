@@ -3,7 +3,7 @@
 using namespace std;
 
 FCB::FCB() {
-	expandName = "";
+	//expandName = "";
 	time = "";
 	blockStarNum = -1;
 	blockEndNum = -1;
@@ -14,11 +14,11 @@ FCB::FCB() {
 	permission = 0;
 	recyleBin = 0;
 }
-
+/*
 string FCB::get_expandName() {
 	return expandName;
 }
-
+*/
 string FCB::get_time() {
 	return time;
 }
@@ -53,10 +53,10 @@ int FCB::get_permission() {
 bool FCB::get_recyleBin() {
 	return recyleBin;
 }
-
+/*
 void FCB::set_expandName(string newExpandName) {
 	this->expandName = newExpandName;
-}
+}*/
 
 void FCB::set_time(string newTime) {
 	this->time = newTime;

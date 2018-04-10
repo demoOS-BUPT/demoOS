@@ -1,4 +1,5 @@
-
+#include<string>
+using namespace std;
 typedef class DiskOperate{
 public:
 	bool write(int startBlock, string content);//从哪开始写，写啥

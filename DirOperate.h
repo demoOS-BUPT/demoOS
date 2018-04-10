@@ -9,8 +9,9 @@ typedef class DirOperate {
 	//推荐在这里负责目录逻辑，仅返回status，在命令行里根据返回status，决定此次操作正确与否
 public:
 	//file
-	int create_file(Directory*lastDirectory, string fileName, string expandFileName, char type); //创建成功返回0，失败返回-1
-	string cat_file(FCB*FCBptr); //return content of file
+	int create_file(Directory*lastDirectory, string fileName, char type); //创建成功返回0，失败返回-1
+	string cat_file(FCB*FCBptr, DiskOperate*diskOperate); //return content of file
+	void rd_file(FCB*FCBptr, DiskOperate*diskOperate, string content);//
 	bool rm_file(FCB*FCBptr); //remove a file, just change the recycleFlag   形参指针是否要改成目录的指针？？	
 					//int change_file(); we need it?or just remove&create
 	void list_directory(Directory*directory);//列出当前目录下的文件或文件夹-1层

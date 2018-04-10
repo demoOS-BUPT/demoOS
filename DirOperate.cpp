@@ -2,11 +2,12 @@
 #include"FCB.h"
 #include"DirOperate.h"
 #include"other.h"
+#include"DiskOperate.cpp"
 #include<iostream>
 #include<ctime>
 using namespace std;
 
-int DirOperate::create_file(Directory*lastDirectory,string fileName,string expandFileName,char type) {
+int DirOperate::create_file(Directory*lastDirectory,string fileName,char type) {
 	//创建成功返回0，失败返回-1
 	//申请目录空间，文件类型判断文件还是文件夹
 	//文件 申请FCB空间，申请文件记录块空间
@@ -33,7 +34,7 @@ int DirOperate::create_file(Directory*lastDirectory,string fileName,string expan
 				return -1;
 			}
 			else {
-				newFCB->set_expandName(expandFileName);
+				//newFCB->set_expandName(expandFileName);
 				time_t nowtime;
 				nowtime = time(NULL); //获取日历时间   
 				char tmp[64];
@@ -48,8 +49,25 @@ int DirOperate::create_file(Directory*lastDirectory,string fileName,string expan
 	return 0;
 }
 
-string DirOperate::cat_file(FCB*FCBptr) {
-	//根据磁盘块号将磁盘块内容转换成字符串返回
+string DirOperate::cat_file(FCB*FCBptr,DiskOperate*diskOperate) {
+	//根据磁盘块号将磁盘块内容转换成字符串返回--------------------读---------------------
+	int noCurrentBlock,noNextBlock;//
+	string content="";
+	noCurrentBlock = FCBptr->get_blockStarNum();
+	noNextBlock = BlockMap[noCurrentBlock];
+	//num = FCBptr->get_fileSize();
+	for (int i = 0; i < FCBptr->get_fileSize()&&noCurrentBlock!=-1; i++) {
+		if ((i + 1) == FCBptr->get_fileSize()) {
+			int lastBlockData = FCBptr->get_dataSize() - block_size*i;
+			content = content + diskOperate->read(noCurrentBlock, lastBlockData);
+		}
+		else {
+			content = content + diskOperate->read(noCurrentBlock, block_size);
+		}
+		noCurrentBlock = noNextBlock;
+		noNextBlock = BlockMap[noNextBlock];
+	}
+	return content;
 }
 
 bool DirOperate::rm_file(FCB*FCBptr) {

@@ -10,8 +10,8 @@ using namespace std;
 #define init_directory_block_num 6
 #define init_FCB_block_num 7
 #define init_blockMap_block_num 8
-#define directory_count_max  block_size / sizeof(Directory)//每块磁盘可以装下的目录项数
-#define FCB_count_max  block_size / sizeof(FCB)//每块磁盘可以装下的FCB数
+int directory_count_max = block_size / sizeof(Directory);//每块磁盘可以装下的目录项数
+int FCB_count_max = block_size / sizeof(FCB);//每块磁盘可以装下的FCB数
 //#define blockMap_count_max  block_size / sizeof(BlockMap)//每块磁盘可以装下的区块表数
 
 int directory_count;//正在使用的磁盘当前的目录项数
@@ -38,13 +38,13 @@ int get_new_block();
 Directory*path_to_directory(string path);
 //路径转换成目录的映射 D:\\os_filesystem\\Project1
 
-Directory*root_to_directory(Directory*directory,string path);
+//Directory*root_to_directory(Directory*directory,string path);
 //在源路径下找到第一个directory的指针
 
 //void changeNextBlock(int currentBlock,int initBlock);
 //根据第一块的磁盘块号遍历找到当前磁盘块，在其后链接下一块
 
-int BlockMap[block_count+1];
+int BlockMap[block_count+1];//---------------应该定义到磁盘上吧----------------------------------
 
 void init_blockMap();
 /*

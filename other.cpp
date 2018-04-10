@@ -76,6 +76,7 @@ void init_blockMap() {
 		BlockMap[i] = -1;
 	}
 }
+/*
 Directory*root_to_directory(Directory*directory,string path) {
 	//在源路径下找到第一个directory的指针
 	//----------------返回值怎么保存---bug--------------------------------
@@ -90,15 +91,27 @@ Directory*root_to_directory(Directory*directory,string path) {
 	}
 
 }
-
+*/
 Directory*path_to_directory(string path) {
-	//路径转换成目录的映射 D:\\os_filesystem\\Project1
+	//路径转换成目录的映射
+	//创建目录 /home
+	//创建目录 /home/www
+	//创建文件 /home/www/in.c
+	//创建文件 /home/out.c
 	//string s = "a,b*c*d,e";
-	vector<string> v = split(path, "\\"); //可按多个字符来分隔;
+	Directory*tmp = root;
+	vector<string> v = split(path, "\/"); //可按多个字符来分隔;--------------扩展名删了------------------------
 	for (vector<string>::size_type i = 0; i != v.size(); ++i) {
+		bool flag = false;
 		//对每个v[i]存的路径名寻找其对应的目录项  树的遍历
+		for (int j = 0; j< tmp->get_fileListNum()&&flag==false; j++) {
+			if (v[i] == tmp->get_fileList(j)->get_fileName()) {
+				tmp = tmp->get_fileList[j];
+				flag = true;
+			}
+		}
 	}
-
+	return tmp;
 
 }
 
