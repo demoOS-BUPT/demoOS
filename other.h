@@ -44,7 +44,8 @@ Directory*root_to_directory(Directory*directory,string path);
 //void changeNextBlock(int currentBlock,int initBlock);
 //根据第一块的磁盘块号遍历找到当前磁盘块，在其后链接下一块
 
-int BlockMap[block_count+1];
+//这个不该用
+//int BlockMap[block_count+1];
 
 void init_blockMap();
 /*

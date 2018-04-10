@@ -68,7 +68,15 @@ int get_new_block() {
 	//在磁盘中查看磁盘中是否空间，获得一块磁盘号,失败返回-1
 	//对位图逐bit检索查找空余的磁盘
 	//找到空余磁盘 置1 返回其代表的磁盘号
-	
+	int i = init_blockMap_block_num;
+	for (;i<block_count;i++){
+		if (bitmap[i] == 0){
+			bitmap[i] = 1;
+			return i;
+		}
+	}
+	cout << "disk is full" << endl;
+	return -1;
 }
 
 void init_blockMap() {

@@ -10,7 +10,7 @@ using namespace std;
 char* systemStartAddr
 string currentDir;
 DirOperate dirOp;
-
+char* bitmap;
 //磁盘操作
 typedef class DiskOperate{
 public:
@@ -108,9 +108,9 @@ void init_system(){
     //初始化盘块的位示图  
     memset(systemStartAddr, 0, system_size * sizeof(char));
     //前三块分别是 bit图，目录项，fcb
-    char* bitmap = systemStartAddr;
-    for(int i=0;i<4;i++)
-        bitmap[i] = '1';
+    bitmap = systemStartAddr;
+    for(int i=0;i<init_blockMap_block_num;i++)
+        bitmap[i] = 1;
     Directory* dirList = systemStartAddr + block_szie * 1;
     FCB* fcbList = systemStartAddr + block_szie * 2;
     BlockMap* blockList = systemStartAddr + block_szie * 3;
