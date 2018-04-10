@@ -9,6 +9,9 @@ public:
     Process();
     Process(unsigned long PID);
     enum PState{WAIT,RUN,READY,UNLOAD,TERMINATED};
+
+    //打印进程参数
+    void printInfo();
     unsigned long getPid() const{return pid;}
 private:
     unsigned long pid;

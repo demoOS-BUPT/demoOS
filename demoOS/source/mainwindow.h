@@ -4,8 +4,10 @@
 #include <QTimer>
 #include <QList>
 #include "demo_process.h"
+#include "list_op.h"
 //#include <QString>
 #include <QtCore>
+#include <QDebug>
 
 namespace Ui {
 class MainWindow;
@@ -23,7 +25,9 @@ private:
     Ui::MainWindow *ui;
     QTimer timer;
 
-    QList<Process> pnewProQue;     //创建新进程队列 存进程PCB
+    QList<Process> pcbPool;
+
+    QList<Process*> pnewProQue;     //创建新进程队列 存进程PCB
     unsigned long lastPID;   //便于分配新pid
 
     QList<Process*> pwaitProQue;     //等待队列 存进程PCB指针

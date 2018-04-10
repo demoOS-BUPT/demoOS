@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->cmd->setText("DemoOS 正在启动\n");
 
     this->lastPID = -1;
+    this->pcbPool.clear();
     this->pnewProQue.clear();
     this->pwaitProQue.clear();
     this->preadyProQue.clear();
@@ -29,8 +30,17 @@ void MainWindow::kernel(){
 
     cmdPrint("1000ms CYCLE");
 
+    //每个时间片建个进程吼吼，但是新建进程的信息不足###################################################
+    newProcess(this->pcbPool,this->pnewProQue,this->lastPID);
+
+    qDebug()<<"new";
+    printQue(this->pnewProQue);
 
     timer.start(1000);
+
+    chgState(this->pnewProQue, this->pwaitProQue,0);
+
+
 }
 
 void MainWindow::cmdPrint(QString newLine){
