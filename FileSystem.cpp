@@ -3,39 +3,56 @@
 using namespace std;
 
 void example(){
+	//-----------------------currentDir怎么修改-------------------------------
 	init_system();
 	string op,dirName,fileName;
 	//这里是命令行，在这里进行初始化，循环，交互
-	while (1){
+	while (1) {
 		cout << "[root@localhost " + currentDir + "]";
-		cin >> op;
+		getline(cin,op);
+		//cin >> op;
 		fflush(stdin);
 		vector<string> args = split(op, " ");
-//		string args[] = op.split(" ");
-		//这里加多空格容错
-		if (args[0] == "ls"|| args[0]=="ll") {
+		//		string args[] = op.split(" ");
+				//这里加多空格容错
+		if (args[0] == "ls" || args[0] == "ll") {
 			//列出目录
-			dirOp.list_directory(path_to_directory(currentDir));
+			dirOp->list_directory(path_to_directory(currentDir));
 		}
 		else if (args[0] == "mkdir") {
 			dirName = args[1];
 			//检查是否存在此目录，不存在则创建
 		}
 		else if (args[0] == "touch") {
-			fileName = args[1];
 			//创建file
+			fileName = args[1];
+			vector<string> args = split(op, ".");//根据是否有. 判断文件类型
+			if (args.size() == 1) {
+				//创建的文件是文件夹
+				if (-1 == dirOp->create_file(path_to_directory(currentDir), fileName, '0')) {
+					cout << "Failed in creating files." << endl;
+				}
+			}
+			else {
+				//创建的文件是文件
+				if (-1 == dirOp->create_file(path_to_directory(currentDir), fileName, '1')) {
+					cout << "Failed in creating files." << endl;
+				}
+			}
 		}
 		else if (args[0] == "cat") {
 			fileName = args[1];
+			dirOp->cat_file(path_to_directory(currentDir)->get_FCBptr(), diskOP);
 			//查看文件信息
 		}
 		else if (args[0] == "cd") {
 			dirName = args[1];
 			//switch dir
 		}
-		else{
-			cout <<"未识别"<< endl;
+		else {
+			cout << "unidentification!" << endl;
 		}
+	}
 		/*
 
 			case 'ls':
@@ -66,9 +83,11 @@ void example(){
 				*/
 		
 	}
-}
+
 
 void init_system() {
+	dirOp = new DirOperate();
+	diskOP=new DiskOperate();
 	systemStartAddr = (char*)malloc(system_size * sizeof(char));  
     cout << "磁盘大小:" << system_size << endl;
     cout << "每块大小:" << block_size << endl;

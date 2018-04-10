@@ -5,6 +5,26 @@
 
 using namespace std;
 
+
+int directory_count_max = block_size / sizeof(Directory);//每块磁盘可以装下的目录项数
+int FCB_count_max = block_size / sizeof(FCB);//每块磁盘可以装下的FCB数
+
+int directory_count;//正在使用的磁盘当前的目录项数
+int FCB_count;//正在使用的磁盘当前的的FCB数
+
+int current_directory_block;//当前目录所在磁盘号
+int current_FCB_block;//当前FCB所在磁盘号
+
+Directory*root_directory;//目录的源结点
+FCB*root_fcb;//FCB源结点
+
+int* BlockMap;
+char* systemStartAddr;
+string currentDir;
+DirOperate*dirOp;
+DiskOperate*diskOP;
+char* bitmap;
+
 Directory*get_new_Directory() {
 	//在目录存储块为新的目录申请空间，获得新的文件目录指针
 	Directory*newDirectory;
