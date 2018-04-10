@@ -1,10 +1,5 @@
-#include"Directory.h"
-#include"FCB.h"
 #include"DirOperate.h"
 #include"other.h"
-#include"DiskOperate.cpp"
-#include<iostream>
-#include<ctime>
 using namespace std;
 
 int DirOperate::create_file(Directory*lastDirectory,string fileName,char type) {

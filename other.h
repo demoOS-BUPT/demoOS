@@ -3,6 +3,11 @@
 #define OTHER_H
 #include"Directory.h"
 #include"FCB.h"
+#include"DirOperate.h"
+//#include"DiskOperate.cpp"
+#include<iostream>
+#include<ctime>
+#include<string>
 using namespace std;
 #define system_size 100*1024*1024   //系统大小，单位是字节  
 #define block_size 1024*1024 //盘块大小  
@@ -21,7 +26,8 @@ int FCB_count ;//正在使用的磁盘当前的的FCB数
 int current_directory_block;//全局变量暂且用下划线风格命名
 int current_FCB_block;
 //int current_blockMap_block;
-Directory*root;//目录的源节点 ---------------------初始化时赋值-----------
+Directory*root_directory;//目录的源节点 ---------------------初始化时赋值-----------
+FCB*root_fcb;
 
 Directory*get_new_Directory(); 
 //在目录存储块为新的目录申请空间，获得新的文件目录指针
@@ -46,8 +52,14 @@ Directory*path_to_directory(string path);
 
 
 //这个不该用
-//int BlockMap[block_count+1];
+int BlockMap[block_count+1];
 
+char* systemStartAddr;
+string currentDir;
+DirOperate dirOp;
+char* bitmap;
+
+void init_system();
 
 void init_blockMap();
 /*
@@ -65,5 +77,11 @@ public:
 }BlockMap;
 */
 
+
+typedef class DiskOperate {
+public:
+	bool write(int startBlock, string content);//从哪开始写，写啥
+	string read(int startBlock, int dataSize);//从哪，多长
+}DiskOperate;
 
 #endif // !OTHER_H

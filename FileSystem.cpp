@@ -47,10 +47,10 @@ void example(){
 	}
 }
 
-void init_system(){
+void init_system() {
 	systemStartAddr = (char*)malloc(system_size * sizeof(char));  
     cout << "磁盘大小:" << system_size << endl;
-    cout << "每块大小:" << block_szie << endl;
+    cout << "每块大小:" << block_size << endl;
     cout << "盘块数:" << block_count << endl;
     //初始化盘块的位示图  
     memset(systemStartAddr, 0, system_size * sizeof(char));
@@ -58,11 +58,17 @@ void init_system(){
     bitmap = systemStartAddr;
     for(int i=0;i<init_blockMap_block_num;i++)
         bitmap[i] = 1;
+<<<<<<< HEAD
 
     //这里应该创建全局变量，不知道全局变量名字
     Directory* dirList = systemStartAddr + block_szie * init_directory_block_num;
     FCB* fcbList = systemStartAddr + block_szie * init_FCB_block_num;
     int* BlockMap = systemStartAddr + block_szie * init_blockMap_block_num;
+=======
+	root_directory = systemStartAddr + block_size * 1;
+    root_fcb = systemStartAddr + block_size * 2;
+    //BlockMap* blockList = systemStartAddr + block_szie * 3;-----------------------------
+>>>>>>> 932130c8e5221c871b98c7ecd5b1d2e1cc2f897a
 
 
     //创建目录 /home

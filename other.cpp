@@ -27,7 +27,8 @@ Directory*get_new_Directory() {
 	Directory*newDirectory;
 	if (directory_count < directory_count_max) {
 		//当前磁盘块有空间
-		newDirectory = new Directory();//要用new还是malloc---------------------------------
+		//newDirectory = new Directory();//要用new还是malloc---------------------------------
+		newDirectory = root_directory + directory_count * sizeof(Directory);
 		directory_count++;
 	}
 	else {
@@ -39,7 +40,8 @@ Directory*get_new_Directory() {
 		//更改上一块区块表记录
 		current_directory_block = newBlockNum;
 		//newBlockMap->set_currentBlock(newBlockNum);
-		newDirectory = new Directory();//要用new还是malloc---------------------------------
+		//newDirectory = new Directory();//要用new还是malloc---------------------------------
+		newDirectory = root_directory + directory_count * sizeof(Directory);
 		directory_count=1;
 	}
 	return newDirectory;
@@ -59,7 +61,7 @@ FCB*get_new_FCB() {
 		current_FCB_block = newBlockNum;
 		//newBlockMap->set_currentBlock(newBlockNum);
 	}
-	FCB*newFCB = new FCB();
+	FCB*newFCB = root_fcb + FCB_count * sizeof(FCB);
 	FCB_count++;
 	return newFCB;
 }
@@ -107,7 +109,7 @@ Directory*path_to_directory(string path) {
 	//创建文件 /home/www/in.c
 	//创建文件 /home/out.c
 	//string s = "a,b*c*d,e";
-	Directory*tmp = root;
+	Directory*tmp = root_directory;
 	vector<string> v = split(path, "\/"); //可按多个字符来分隔;--------------扩展名删了------------------------
 	for (vector<string>::size_type i = 0; i != v.size(); ++i) {
 		bool flag = false;
