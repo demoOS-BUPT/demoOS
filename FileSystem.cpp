@@ -58,18 +58,10 @@ void init_system() {
     bitmap = systemStartAddr;
     for(int i=0;i<init_blockMap_block_num;i++)
         bitmap[i] = 1;
-<<<<<<< HEAD
 
-    //这里应该创建全局变量，不知道全局变量名字
-    Directory* dirList = systemStartAddr + block_szie * init_directory_block_num;
-    FCB* fcbList = systemStartAddr + block_szie * init_FCB_block_num;
+	root_directory = systemStartAddr + block_size * init_directory_block_num;
+    root_fcb = systemStartAddr + block_size * init_FCB_block_num;
     int* BlockMap = systemStartAddr + block_szie * init_blockMap_block_num;
-=======
-	root_directory = systemStartAddr + block_size * 1;
-    root_fcb = systemStartAddr + block_size * 2;
-    //BlockMap* blockList = systemStartAddr + block_szie * 3;-----------------------------
->>>>>>> 932130c8e5221c871b98c7ecd5b1d2e1cc2f897a
-
 
     //创建目录 /home
     //创建目录 /home/www
