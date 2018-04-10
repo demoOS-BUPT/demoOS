@@ -52,11 +52,11 @@ int DirOperate::create_file(Directory*lastDirectory,string fileName,char type) {
 string DirOperate::cat_file(FCB*FCBptr,DiskOperate*diskOperate) {
 	//¸ù¾Ý´ÅÅÌ¿éºÅ½«´ÅÅÌ¿éÄÚÈÝ×ª»»³É×Ö·û´®·µ»Ø--------------------¶Á---------------------
 	int noCurrentBlock,noNextBlock;//
-	string content="";
+	string content = "";
 	noCurrentBlock = FCBptr->get_blockStarNum();
 	noNextBlock = BlockMap[noCurrentBlock];
 	//num = FCBptr->get_fileSize();
-	for (int i = 0; i < FCBptr->get_fileSize()&&noCurrentBlock!=-1; i++) {
+	for (int i = 0; i < FCBptr->get_fileSize() && noCurrentBlock!=-1; i++) {
 		if ((i + 1) == FCBptr->get_fileSize()) {
 			int lastBlockData = FCBptr->get_dataSize() - block_size*i;
 			content = content + diskOperate->read(noCurrentBlock, lastBlockData);
@@ -68,6 +68,25 @@ string DirOperate::cat_file(FCB*FCBptr,DiskOperate*diskOperate) {
 		noNextBlock = BlockMap[noNextBlock];
 	}
 	return content;
+}
+
+//write file
+void DirOperate::write_file(FCB*FCBptr, DiskOperate*diskOperate, string content) {
+	int blockNum = ceil(content.size()/block_size);
+	int i = 0;
+	int currBlock;
+	currBlock = FCBptr.get_blockStarNum();
+
+	for (;i<blockNum-1;i++){
+		string sub = content.substr(content, i*block_size ,(i+1)*block_size);
+		diskOperate.write(currBlock, sub);
+		BlockMap[currBlock] = FCBptr.get_new_block();
+		currBlock = BlockMap[currBlock];
+	}
+	string sub = content.substr(content, i*block_size , content.size());
+	diskOperate.write(currBlock, sub);
+	BlockMap[currBlock] = -1;
+	FCBptr.set_blockEndNum(currBlock);
 }
 
 bool DirOperate::rm_file(FCB*FCBptr) {

@@ -1,63 +1,12 @@
-#include<bits/stdc++.h>
 #include "DiskOperate.cpp"
-#define system_size 100*1024*1024   //系统大小，单位是字节  
-#define block_szie 1024*1024 //盘块大小  
-#define block_count system_size/block_szie //系统盘块数目
-
 
 using namespace std;
 
-char* systemStartAddr
+char* systemStartAddr;
 string currentDir;
 DirOperate dirOp;
 char* bitmap;
-//磁盘操作
-typedef class DiskOperate{
-public:
-	bool write(int startBlock, string content);//从哪开始写，写啥
-	bool read(int startBlock, int dataSize);//从哪，多长
-}DiskOperate;
-
-//指令层
-//推荐在这里负责目录逻辑，仅返回status，在命令行里根据返回status，决定此次操作正确与否
-typedef class DirOperate{
-public:
-	//file
-	int create_file(); //return int startBlock
-	string cat_file(); //return content of file
-	bool rm_file(); //remove a file, just change the recycleFlag
-	//int change_file(); we need it?or just remove&create
-
-	void list_directory();
-	void touch_directory();//创建目录
-	void rm_directory();
-}DirOperate;
-
-
-//复制了word
-typedef class FCB{
-public:
-    string time;          //文件建立时间或者上次修改时间
-    int blockStartNum;   //文件数据起始盘块号  
-    int blockEndtNum;   //文件数据起始盘块号  
-    int fileSize;   //文件大小，盘块为单位  
-    int dataSize;   //已写入的内容大小，字节为单位  
-    int readptr;    //读指针，字节为单位  
-    int link;   //文件链接数  
-    int permission;   // 文件读写权限 0可读写 1只读 2只写
-    bool recycleBin;
-}FCB;
-
-typedef class Directory{
-public:
-    char fileName[59];
-    char type;  //文件类型,0文件夹,1文件  
-    int startBlock; //文件是FCB起始盘块 文件夹是当前磁盘块号
-    Directory* folderPtr; //下一层目录项
-    Directory fileList[20];//本目录下内容？
-}Directory;  
-
-
+int* BlockMap;
 
 void example(){
 	initSystem();
@@ -66,7 +15,6 @@ void example(){
 	while (1){
 		cout << "[root@localhost " + currentDir + "]";
 		cin >> op;
-		bool endThisOperate = false;
 		fflush(stdin);
 		string[] args = op.split(' ');
 		//这里加多空格容错
@@ -74,8 +22,7 @@ void example(){
 			case "ls":
 			case "ll":
 				//列出目录
-				dirOp.list_directory("");
-				endThisOperate = true;
+				dirOp.list_directory(currentDir);
 				break;
 			case "mkdir":
 				dirName = args[1];
@@ -111,9 +58,11 @@ void init_system(){
     bitmap = systemStartAddr;
     for(int i=0;i<init_blockMap_block_num;i++)
         bitmap[i] = 1;
-    Directory* dirList = systemStartAddr + block_szie * 1;
-    FCB* fcbList = systemStartAddr + block_szie * 2;
-    BlockMap* blockList = systemStartAddr + block_szie * 3;
+
+    //这里应该创建全局变量，不知道全局变量名字
+    Directory* dirList = systemStartAddr + block_szie * init_directory_block_num;
+    FCB* fcbList = systemStartAddr + block_szie * init_FCB_block_num;
+    int* BlockMap = systemStartAddr + block_szie * init_blockMap_block_num;
 
 
     //创建目录 /home
