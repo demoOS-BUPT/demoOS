@@ -30,7 +30,7 @@ public:
 	int get_link();
 	int get_permission();
 	bool get_recyleBin();
-	void set_expandName(string newExpandName);
+	//void set_expandName(string newExpandName);
 	void set_time(string newTime);
 	void set_blockStarNum(int newBlockStarNum);
 	void set_blockEndNum(int newBlockEndNum);
