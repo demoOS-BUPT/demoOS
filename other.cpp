@@ -31,7 +31,7 @@ Directory*get_new_Directory() {
 	if (directory_count < directory_count_max) {
 		//当前磁盘块有空间
 		//newDirectory = new Directory();
-		newDirectory = root_directory + directory_count * sizeof(Directory);
+		newDirectory =new( root_directory + directory_count * sizeof(Directory))Directory;
 		directory_count++;
 	}
 	else {
@@ -44,7 +44,7 @@ Directory*get_new_Directory() {
 		current_directory_block = newBlockNum;
 		//newBlockMap->set_currentBlock(newBlockNum);
 		//newDirectory = new Directory();
-		newDirectory = root_directory + directory_count * sizeof(Directory);
+		newDirectory =new( root_directory + directory_count * sizeof(Directory))Directory;
 		directory_count=1;
 	}
 	return newDirectory;
@@ -64,7 +64,7 @@ FCB*get_new_FCB() {
 		current_FCB_block = newBlockNum;
 		//newBlockMap->set_currentBlock(newBlockNum);
 	}
-	FCB*newFCB = root_fcb + FCB_count * sizeof(FCB);
+	FCB*newFCB =new( root_fcb + FCB_count * sizeof(FCB))FCB;
 	FCB_count++;
 	return newFCB;
 }
@@ -85,6 +85,9 @@ int get_new_block() {
 }
 
 void init_blockMap() {
+	//cout << "block_count" <<block_count<< endl;
+	//cout << block_size << endl;
+	//cout << (sizeof(BlockMap) / sizeof(BlockMap[0])) << endl;
 	for (int i = 0; i < block_count; i++) {
 		BlockMap[i] = -1;
 	}
@@ -95,7 +98,7 @@ void init_blockMap() {
 Directory*path_to_directory(string path) {
 	//路径转换成目录的映射  /home/www/in.c
 	Directory*tmp = root_directory;
-	vector<string> v = split(path, "\/"); //可按多个字符来分隔;--------------扩展名删了------------------------
+	vector<string> v = split(path, "/"); //可按多个字符来分隔;--------------扩展名删了------------------------
 	for (vector<string>::size_type i = 0; i != v.size(); ++i) {
 		bool flag = false;
 		//对每个v[i]存的路径名寻找其对应的目录项  树的遍历

@@ -1,5 +1,6 @@
 #include "other.h"
 #include<string>
+#include<new>
 using namespace std;
 
 void example(){
@@ -26,8 +27,8 @@ void example(){
 		else if (args[0] == "touch") {
 			//创建file
 			fileName = args[1];
-			vector<string> args = split(op, ".");//根据是否有. 判断文件类型
-			if (args.size() == 1) {
+			vector<string> tmp = split(fileName, ".");//根据是否有. 判断文件类型
+			if (tmp.size() == 1) {
 				//创建的文件是文件夹
 				if (-1 == dirOp->create_file(path_to_directory(currentDir), fileName, '0')) {
 					cout << "Failed in creating files." << endl;
@@ -86,23 +87,35 @@ void example(){
 
 
 void init_system() {
+	//初始化有问题！！！！！！！！！block_count太多了 一块记录块根本不够存的
 	dirOp = new DirOperate();
 	diskOP=new DiskOperate();
 	systemStartAddr = (char*)malloc(system_size * sizeof(char));  
-    cout << "磁盘大小:" << system_size << endl;
-    cout << "每块大小:" << block_size << endl;
-    cout << "盘块数:" << block_count << endl;
+    cout << "system size:" << system_size << endl;
+    cout << "block size:" << block_size << endl;
+    cout << "block count:" << block_count << endl;
     //初始化盘块的位示图  
     memset(systemStartAddr, 0, system_size * sizeof(char));
     //前三块分别是 bit图，目录项，fcb
     bitmap = systemStartAddr;
     for(int i=0;i<init_blockMap_block_num;i++)
         bitmap[i] = 1;
-
+	//-------------------------------------root初始化------------------------------------
+	//在实际的物理地址上有指针创建对象
+	//void*buf= systemStartAddr + block_size * init_directory_block_num;
+	//cout <<( systemStartAddr + block_size * init_directory_block_num )<< endl;
+	//cout << buf << endl;
+	//root_directory = new(systemStartAddr + block_size * init_directory_block_num)Directory;
 	root_directory = (Directory *)systemStartAddr + block_size * init_directory_block_num;
-    root_fcb = (FCB *)systemStartAddr + block_size * init_FCB_block_num;
-    BlockMap = (int *)systemStartAddr + block_size * init_blockMap_block_num;
-
+	//cout << root_directory << endl;
+	root_fcb = (FCB*)systemStartAddr + block_size * init_FCB_block_num;
+    BlockMap = new(systemStartAddr + block_size * init_blockMap_block_num)int[block_count+1];
+	//root_directory = new Directory();//不知道物理地址会不会变
+	//cout << root_directory << endl;
+	//root_directory->set_fileName("root");
+	//root_directory->set_type('0');
+	init_blockMap();
+	//directory FCB物理上顺序存储 逻辑上链式存储
     //创建目录 /home
     //创建目录 /home/www
     //创建文件 /home/www/in.c
@@ -111,6 +124,9 @@ void init_system() {
 
 void test_unit(){
 	//这里调试
+	//注册时间格式没有分秒
+	//初始化时候不该生成对象
+	//创建文件的时候文件名有误
 }
 
 int main(){

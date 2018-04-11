@@ -13,7 +13,7 @@ using namespace std;
 
 #define system_size 100*1024*1024   //系统大小，单位是字节  
 #define block_size 1024*1024 //盘块大小  
-#define block_count system_size/block_size //系统盘块数目
+#define block_count 100 //系统盘块数目
 #define init_directory_block_num 6//---------------------------------------转换-----------------
 #define init_FCB_block_num 7
 #define init_blockMap_block_num 8
