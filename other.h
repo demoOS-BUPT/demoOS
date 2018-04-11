@@ -14,7 +14,7 @@ using namespace std;
 #define system_size 100*1024*1024   //系统大小，单位是字节  
 #define block_size 1024*1024 //盘块大小  
 #define block_count 100 //系统盘块数目
-#define init_directory_block_num 6//---------------------------------------转换-----------------
+#define init_directory_block_num 6//---------------------------------------转换要计算得出----------------------------
 #define init_FCB_block_num 7
 #define init_blockMap_block_num 8
 
@@ -33,6 +33,7 @@ extern FCB*root_fcb;//FCB源结点
 extern int* BlockMap;//区块表
 extern char* systemStartAddr;
 extern string currentDir;
+extern Directory*lastDir;
 extern DirOperate*dirOp;
 extern DiskOperate*diskOP;
 extern char* bitmap;
@@ -48,6 +49,8 @@ int get_new_block();
 
 Directory*path_to_directory(string path);
 //路径转换成目录的映射 /home/www/zxh.txt
+
+string path_to_filename(string op);
 
 void init_system();
 //系统初始化

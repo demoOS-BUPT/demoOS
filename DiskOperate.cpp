@@ -10,7 +10,7 @@ public:
 */
 bool DiskOperate::write(int startBlock, string content){
     char arrContent[block_size];
-    strcpy(arrContent, content.c_str());
+    strcpy_s(arrContent, content.c_str());
     char * startAdd = startBlock * block_size + systemStartAddr;//块号+起始地址
     for(int i = 0;i<content.size();i++){
         startAdd[i] = arrContent[i];

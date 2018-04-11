@@ -18,10 +18,15 @@ int DirOperate::create_file(Directory*lastDirectory,string fileName,char type) {
 		//newDirectory = new Directory();
 		newDirectory->set_fileName(fileName);
 		newDirectory->set_type(type);
+		if (type == '0') {
+			lastDir = newDirectory;
+		}
+		
 		if (!lastDirectory->add_fileDirectory(newDirectory)) {
 			return -1;
 		}
 		if ('0' == type) {
+			currentDir = currentDir + '/' + fileName;
 			//文件夹的目录
 			return 0;
 		}
@@ -97,7 +102,7 @@ bool DirOperate::rm_file(FCB*FCBptr) {
 }
 
 void DirOperate::list_directory(Directory*directory) {
-	cout << directory->get_fileName() << endl << endl;
+	cout << directory->get_fileName() <<endl<< endl;
 	for (int i = 0; i < directory->get_fileListNum(); i++) {
 		cout << directory->get_fileList(i)->get_fileName() << endl;
 	}
@@ -105,10 +110,12 @@ void DirOperate::list_directory(Directory*directory) {
 
 void DirOperate::list_all_directory(Directory*directory) {
 	if ('1' == directory->get_type()) {
-		cout << directory->get_fileName();
+		//cout << directory->get_fileName()<<endl;
+		return;
 	}
 	else {
 		for (int i = 0; i < directory->get_fileListNum(); i++) {
+			cout << directory->get_fileList(i)->get_fileName() << endl;
 			list_all_directory(directory->get_fileList(i));
 		}
 	}
@@ -135,4 +142,38 @@ void DirOperate::rm_directory(Directory*directory) {
 			rm_directory(directory->get_fileList(i));
 		}
 	}
+}
+
+void DirOperate::change_directory(string newPath) {
+	//判断是不是文件夹  cd命令必须列出来全部地址 否则我怎么知道你是哪个文件夹
+	Directory*tmp = root_directory;
+	if (newPath == "/") {
+		lastDir = root_directory;
+		currentDir = "";
+	}
+	else {
+		vector<string> v = split(newPath, "/");
+		string newPath = "";
+		for (vector<string>::size_type i = 0; i != v.size(); ++i) {
+			bool flag = false;
+			//对每个v[i]存的路径名寻找其对应的目录项  树的遍历
+			for (int j = 0; j < tmp->get_fileListNum() && flag == false; j++) {
+				if (v[i] == tmp->get_fileList(j)->get_fileName()) {
+					tmp = tmp->get_fileList(j);
+					flag = true;
+					newPath = newPath + '/' + v[i];
+				}
+			}
+			currentDir = newPath;
+		}
+		/*
+		for (vector<string>::size_type i = 0; i != v.size(); ++i) {
+			string newPath = "";
+			newPath = newPath + '/' + v[i];
+			currentDir = newPath;
+		}*/
+		lastDir = tmp;
+	}
+	//找到要转换的文件夹目录
+	//更改当前目录以及最新记录指针
 }

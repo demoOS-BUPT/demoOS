@@ -21,6 +21,7 @@ FCB*root_fcb;//FCB源结点
 int* BlockMap;
 char* systemStartAddr;
 string currentDir;
+Directory*lastDir;
 DirOperate*dirOp;
 DiskOperate*diskOP;
 char* bitmap;
@@ -96,20 +97,60 @@ void init_blockMap() {
 
 
 Directory*path_to_directory(string path) {
-	//路径转换成目录的映射  /home/www/in.c
+	//路径转换成目录的映射  /home/www/in.c----->www所在文件夹的目录项指针
+	//                 /home/www/zxh----->www所在文件夹
 	Directory*tmp = root_directory;
-	vector<string> v = split(path, "/"); //可按多个字符来分隔;--------------扩展名删了------------------------
-	for (vector<string>::size_type i = 0; i != v.size(); ++i) {
-		bool flag = false;
-		//对每个v[i]存的路径名寻找其对应的目录项  树的遍历
-		for (int j = 0; j< tmp->get_fileListNum() && flag==false; j++) {
-			if (v[i] == tmp->get_fileList(j)->get_fileName()) {
-				tmp = tmp->get_fileList(j);
-				flag = true;
+	if (path[0] == '/') {
+		//	     / home / work / www / a.c
+		vector<string> v = split(path, "/"); //可按多个字符来分隔;--------------扩展名删了------------------------
+		for (vector<string>::size_type i = 0; i != v.size()-1; ++i) {
+			bool flag = false;
+			//对每个v[i]存的路径名寻找其对应的目录项  树的遍历
+			for (int j = 0; j < tmp->get_fileListNum() && flag == false; j++) {
+				if (v[i] == tmp->get_fileList(j)->get_fileName()) {
+					tmp = tmp->get_fileList(j);
+					flag = true;
+				}
 			}
 		}
+		for (vector<string>::size_type i = 0; i != v.size()-1; ++i) {
+			string newPath = "";
+			newPath = newPath + '/' + v[i];
+			currentDir = newPath;//自动转换目录  /home/www
+		}
+		lastDir = tmp;
 	}
-	return tmp;
+	else if (path[0] == '.'&&path[1] == '/') {
+		// . / a.c
+		//vector<string> v = split(path, "/");
+	}
+	else {
+		//	touch a.c
+	}
+	return lastDir;
+}
+
+string path_to_filename(string op) {
+	// /home/www/in.c----->in.c
+	//a.c->a.c
+	//./a.c->a.c
+	string filename;
+	if (op[0] == '/'||op[0]=='.') {
+		//	     / home / work / www / a.c
+		//   ./a.c
+		vector<string> v = split(op, "/"); 
+		filename = v[v.size() - 1];
+		
+	}
+	/*
+	else if (op[0] == '.'&&op[1] == '/') {
+		// . / a.c
+		filename= filename = v[v.size() - 1];
+	}*/
+	else {
+		filename = op;
+	}
+	return filename;
 }
 vector<string> split(const string &s, const string &seperator) {
 	//-----------------------网上找的 用来分隔地址-----------------------------
@@ -199,21 +240,21 @@ void BlockMap::set_nextBlock(int newNextBlock) {
 nextBlock = newNextBlock;
 }
 */
-/*
-Directory*root_to_directory(Directory*directory,string path) {
-//在源路径下找到第一个directory的指针
-//----------------返回值怎么保存---bug--------------------------------
-Directory* rightDirectory;
-if (directory->get_fileName() == path) {
-return directory;
-}
-else {
-for (int i = 0; i < directory->get_fileListNum(); i++) {
-root_to_directory(directory->get_fileList(i),path);
-}
-}
+
+Directory*root_to_directory() {
+	//在源路径下找到当前directory的指针
+	//----------------返回值怎么保存---bug--------------------------------
+	Directory* rightDirectory;
+	if (root_directory->get_fileName() == currentDir) {
+		return root_directory;
+	}
+	else {
+		for (int i = 0; i < root_directory->get_fileListNum(); i++) {
+			root_to_directory();
+		}
+	}
 
 }
-*/
+
 
 

@@ -15,6 +15,7 @@ public:
 	int create_file(Directory*lastDirectory, string fileName, char type); //创建成功返回0，失败返回-1
 	string cat_file(FCB*FCBptr, DiskOperate*diskOperate); //return content of file
 	void write_file(FCB*FCBptr, DiskOperate*diskOperate, string content);//
+	void change_directory(string newpath);
 	bool rm_file(FCB*FCBptr); //remove a file, just change the recycleFlag   形参指针是否要改成目录的指针？？	
 					//int change_file(); we need it?or just remove&create
 	void list_directory(Directory*directory);//列出当前目录下的文件或文件夹-1层
