@@ -22,28 +22,30 @@ void example(){
 		}
 		else if (args[0] == "mkdir") {
 			dirName = args[1];
-			//检查是否存在此目录，不存在则创建
+	        //创建的文件是文件
+            if (-1 == dirOp->create_file(path_to_directory(currentDir), dirName, '1')) {
+                cout << "Failed in creating files." << endl;
+            }
 		}
 		else if (args[0] == "touch") {
 			//创建file
 			fileName = args[1];
-			vector<string> tmp = split(fileName, ".");//根据是否有. 判断文件类型
-			if (tmp.size() == 1) {
-				//创建的文件是文件夹
-				if (-1 == dirOp->create_file(path_to_directory(currentDir), fileName, '0')) {
-					cout << "Failed in creating files." << endl;
-				}
-			}
-			else {
-				//创建的文件是文件
-				if (-1 == dirOp->create_file(path_to_directory(currentDir), fileName, '1')) {
-					cout << "Failed in creating files." << endl;
-				}
+			if (-1 == dirOp->create_file(path_to_directory(currentDir), fileName, '0')) {
+				cout << "Failed in creating files." << endl;
 			}
 		}
+        else if (args[0] == "vim") {
+            string fileContent;
+            fileName = args[1];
+            cout << "Please input file content:";
+            cin >> fileContent;
+
+            dirOp->write_file(path_to_directory(currentDir+"/"+fileName)->get_FCBptr(), diskOP, fileContent);
+            //写文件
+        }
 		else if (args[0] == "cat") {
 			fileName = args[1];
-			dirOp->cat_file(path_to_directory(currentDir)->get_FCBptr(), diskOP);
+			dirOp->cat_file(path_to_directory(currentDir+"/"+fileName)->get_FCBptr(), diskOP);
 			//查看文件信息
 		}
 		else if (args[0] == "cd") {

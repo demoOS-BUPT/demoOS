@@ -1,6 +1,7 @@
 #include"DirOperate.h"
 #include"other.h"
 #include<time.h>
+#include<math.h>
 using namespace std;
 #define _CRT_SECURE_NO_WARNINGS 1
 #pragma warning( disable : 4996 )
