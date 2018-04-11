@@ -6,15 +6,28 @@
 Process* newProcess(QList<Process*> &pcbPool);
 
 //在队列间移动 s_list -> d_list
-void move(QList<Process*>& s_list, QList<Process*>& d_list, unsigned long PID);
+void moveProcess(QList<Process*>& s_list, QList<Process*>& d_list, unsigned long PID);
 
 //结束进程，在所有list中删除进程,然后释放Process对象
-void termiProcess(QList<QList<Process*>> &lists, unsigned long PID);
+void termiProcess(QList<Process*> &pcbPool,
+                  QList<Process*> &readyQueue,
+                  QList<Process*> &runningQueue,
+                  QList<Process*> &waitQueue, unsigned long PID);
 
 //list中查找PID,若没有返回nullptr
 Process* find(QList<Process*> list, unsigned long PID);
 
 //队列状态打印
-QString printQue(QList<Process*> q);
+QString printQue(QList<Process*> &q);
+
+//进程调度函数
+void processDispatch(QList<Process*> &pcbPool,
+                     QList<Process*> &readyQueue,
+                     QList<Process*> &runningQueue,
+                     QList<Process*> &waitQueue);
+
+//进程执行
+void execute(QList<Process*> &pcbPool,
+             QList<Process*> &runningQueue);
 
 #endif // LIST_OP_H

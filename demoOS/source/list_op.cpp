@@ -33,7 +33,7 @@ Process* newProcess(QList<Process*>& pcbPool)
 }
 
 //状态转移 s_list -> d_list
-void chgState(QList<Process*>& s_list, QList<Process*>&d_list, unsigned long PID){
+void moveProcess(QList<Process*>& s_list, QList<Process*>&d_list, unsigned long PID){
     Process* p=nullptr;
     for ( int i=0; i!=s_list.size(); ++i ){//在s_list中查找PID
        Process* pcbi=s_list.at(i);
@@ -49,23 +49,31 @@ void chgState(QList<Process*>& s_list, QList<Process*>&d_list, unsigned long PID
     return;
 }
 
-void termiProcess(QList<QList<Process*>> &lists, unsigned long PID)
+void termiProcess(QList<Process*> &pcbPool,
+                  QList<Process*> &readyQueue,
+                  QList<Process*> &runningQueue,
+                  QList<Process*> &waitQueue, unsigned long PID)
 {
     Process* p=nullptr;
-    for(int i=0;i<lists.size();i++){
-        QList<Process*> list=lists.at(i);
-        p=find(list,PID);
-        if(p!=nullptr)break;//找到进程指针
-    }
+    p=find(pcbPool,PID);
     if(p==nullptr)return;//进程不存在
-    for(int i=0;i<lists.size();i++){//从所有队列删除
-        QList<Process*> list=lists.at(i);
-        for(int j=0;j<list.size();j++)
-            if(list.at(j)->getPid()==PID){//删除队列中进程,假设只有一个
-                list.removeAt(j);
-                break;
-            }
-    }
+
+    //从所有队列删除 (用了宏 对不起！)
+    #define REMOVE_FROM_LIST(LISTNAME) do{\
+        for(int j=0;j<LISTNAME.size();j++)\
+            if(LISTNAME.at(j)->getPid()==PID){\
+                LISTNAME.removeAt(j);\
+                break;\
+            }\
+    }\
+    while(false);
+
+    REMOVE_FROM_LIST(pcbPool)
+    REMOVE_FROM_LIST(readyQueue)
+    REMOVE_FROM_LIST(runningQueue)
+    REMOVE_FROM_LIST(waitQueue)
+
+
     delete p;//释放
     return;
 }
@@ -88,4 +96,39 @@ QString printQue(QList<Process*> &q)
        ret+=QString::number(q.at(i)->getPid())+" ";
     }
     return ret;
+}
+
+//进程调度函数
+void processDispatch(QList<Process*> &pcbPool,
+                     QList<Process*> &readyQueue,
+                     QList<Process*> &runningQueue,
+                     QList<Process*> &waitQueue){
+    //终结进程
+    QList<Process*> killList;
+    for(int i=0;i<runningQueue.size();i++){
+        Process* p=runningQueue.at(i);
+        if(p->getCPUtime()<=0) killList.append(p);
+    }
+    for(int i=0;i<killList.size();i++){
+        termiProcess(pcbPool,readyQueue,runningQueue,waitQueue,
+                     killList.at(i)->getPid());
+    }
+
+    //进程调度:时间片轮转
+    Process* in,out;
+    if(!readyQueue.isEmpty())
+        in=readyQueue.at(0);
+    else return;//没有就绪的进程
+    if(!runningQueue.isEmpty())
+        out=runningQueue.at(0);
+    moveProcess(runningQueue,readyQueue,out->getPid());
+    moveProcess(readyQueue,runningQueue,in->getPid());
+}
+
+//进程执行
+void execute(QList<Process*> &pcbPool,QList<Process*> &runningQueue){
+    for(int i=0;i<runningQueue.size();i++){
+        Process* p=runningQueue.at(i);
+        p->setCPUtime(p->getCPUtime()-1);
+    }
 }

@@ -8,6 +8,7 @@
 //#include <QString>
 #include <QtCore>
 #include <QDebug>
+#include <random>
 
 namespace Ui {
 class MainWindow;
@@ -25,16 +26,17 @@ private:
     Ui::MainWindow *ui;
     QTimer timer;
 
-    QList<Process> pcbPool;
+    QList<Process*> pcbPool;    //所有进程
 
-    QList<Process*> pnewProQue;     //创建新进程队列 存进程PCB
-    unsigned long lastPID;   //便于分配新pid
+    QList<Process*> waitQueue;     //等待队列
+    QList<Process*> readyQueue;    //就绪队列
+    QList<Process*> runningQueue;   //在运行
 
-    QList<Process*> pwaitProQue;     //等待队列 存进程PCB指针
-    QList<Process*> preadyProQue;    //就绪队列 存进程PCB指针
+    std::mt19937 rand;//用 rand()得到随机数
 
     void cmdPrint(QString newLine);
 
+    void createProcess(int cpuTime);//创建一个新进程，若成功放入就绪队列。
 
 private slots:
     void kernel();

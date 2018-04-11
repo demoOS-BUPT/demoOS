@@ -9,11 +9,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->cmd->setTextColor(QColor(80,0,0));
     ui->cmd->setText("DemoOS 正在启动\n");
 
-    this->lastPID = -1;
     this->pcbPool.clear();
-    this->pnewProQue.clear();
-    this->pwaitProQue.clear();
-    this->preadyProQue.clear();
+    this->waitQueue.clear();
+    this->readyQueue.clear();
+    this->runningQueue.clear();//清空进程
 
     connect(&timer,SIGNAL(timeout()),this,SLOT(kernel()));
     timer.start(1000);
@@ -25,21 +24,45 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::createProcess(int cpuTime){
+    Process* p=newProcess(this->pcbPool);
+    if(p!=nullptr){//创建成功
+        p->setCPUtime(cpuTime);
+        this->readyQueue.append(p);
+        cmdPrint(QString("新建进程：PID %1 CPU时间： %2")
+                    .arg(p->getPid()).arg(p->getCPUtime()));
+        return;
+    }
+    else{
+        cmdPrint(QString("新建进程：无法新建进程"));
+        return;
+    }
+}
+
 void MainWindow::kernel(){
     timer.stop();
 
     cmdPrint("1000ms CYCLE");
 
-    //每个时间片建个进程吼吼，但是新建进程的信息不足###################################################
-    newProcess(this->pcbPool,this->pnewProQue,this->lastPID);
+    if(rand()%4==0)
+        this->createProcess(rand()%7+1);
+
+    processDispatch(pcbPool,readyQueue,runningQueue,waitQueue);//进程调度函数
+    execute(pcbPool,runningQueue);//进程执行
+
+    QString s("所有进程：\n");
+    s+=printQue(pcbPool);
+    cmdPrint(s);
+    s="就绪：\n";
+    s+=printQue(readyQueue);
+    cmdPrint(s);
+    s="运行：\n";
+    s+=printQue(runningQueue);
+    cmdPrint(s);
 
     qDebug()<<"new";
-    printQue(this->pnewProQue);
 
     timer.start(1000);
-
-    chgState(this->pnewProQue, this->pwaitProQue,0);
-
 
 }
 
@@ -55,3 +78,4 @@ void MainWindow::cmdPrint(QString newLine){
     ui->cmd->setText(text);
     ui->cmd->moveCursor(QTextCursor::End);
 }
+

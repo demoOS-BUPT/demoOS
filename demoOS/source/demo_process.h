@@ -13,6 +13,10 @@ public:
     //打印进程参数
     void printInfo();
     unsigned long getPid() const{return pid;}
+    void setState(PState s){state=s;}
+    PState getState() {return this->state;}
+    void setCPUtime(int t) {this->CPUtime=t;}
+    int getCPUtime() {return this->CPUtime;}
 private:
     unsigned long pid;
     PState state;
