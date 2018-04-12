@@ -42,12 +42,13 @@ void MainWindow::createProcess(int cpuTime){
 void MainWindow::kernel(){
     timer.stop();
 
-    cmdPrint("1000ms CYCLE");
+    //cmdPrint("1000ms CYCLE");
 
-    if(rand()%4==0)
-        this->createProcess(rand()%7+1);
+    cmdPrint("---------------------------------------");
+    if(rand()%3==0)
+        this->createProcess(rand()%10+1);
 
-    processDispatch(pcbPool,readyQueue,runningQueue,waitQueue);//进程调度函数
+    processDispatch(pcbPool,readyQueue,runningQueue,waitQueue,RR);//进程调度函数
     execute(pcbPool,runningQueue);//进程执行
 
     QString s("所有进程：\n");

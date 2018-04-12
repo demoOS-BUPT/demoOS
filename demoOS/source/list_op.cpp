@@ -102,7 +102,8 @@ QString printQue(QList<Process*> &q)
 void processDispatch(QList<Process*> &pcbPool,
                      QList<Process*> &readyQueue,
                      QList<Process*> &runningQueue,
-                     QList<Process*> &waitQueue){
+                     QList<Process*> &waitQueue,
+                     ProcessAlg alg){
     //终结进程
     QList<Process*> killList;
     for(int i=0;i<runningQueue.size();i++){
@@ -114,15 +115,35 @@ void processDispatch(QList<Process*> &pcbPool,
                      killList.at(i)->getPid());
     }
 
-    //进程调度:时间片轮转
-    Process* in,out;
-    if(!readyQueue.isEmpty())
-        in=readyQueue.at(0);
-    else return;//没有就绪的进程
-    if(!runningQueue.isEmpty())
-        out=runningQueue.at(0);
-    moveProcess(runningQueue,readyQueue,out->getPid());
-    moveProcess(readyQueue,runningQueue,in->getPid());
+    //进程调度
+    switch (alg) {
+        case RR:{
+            Process* in=nullptr,* out=nullptr;
+            if(!readyQueue.isEmpty())
+                in=readyQueue.at(0);
+            if(!runningQueue.isEmpty())
+                out=runningQueue.at(0);
+            if(out!=nullptr&&in!=nullptr){
+                moveProcess(runningQueue,readyQueue,out->getPid());
+                moveProcess(readyQueue,runningQueue,in->getPid());
+            }
+            else if(out==nullptr&&in!=nullptr){
+                moveProcess(readyQueue,runningQueue,in->getPid());
+            }
+            else break;//这个分支in==nullptr,没有可以换入的。
+            break;
+        }
+        case FCFS:
+        default:{
+            if(runningQueue.isEmpty()&&
+                    !readyQueue.isEmpty()){
+                Process* in=readyQueue.at(0);
+                moveProcess(readyQueue,runningQueue,in->getPid());
+            }
+            break;
+        }
+    }
+
 }
 
 //进程执行
