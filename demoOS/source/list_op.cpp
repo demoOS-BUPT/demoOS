@@ -144,6 +144,116 @@ void processDispatch(QList<Process*> &pcbPool,
             else break;//这个分支in==nullptr,没有可以换入的。
             break;
         }
+        case PRI_RR:{
+            Process* in=nullptr,* out=nullptr;
+            if(!readyQueue.isEmpty())
+            {   //优先级最高的来
+                int min = lowest_pri+1;
+                in = readyQueue.at(0);
+                for(int i=0; i < readyQueue.size();i++){
+                   if(readyQueue.at(i)->getPriority() < min)
+                   {
+                       in = readyQueue.at(i);
+                       min = readyQueue.at(i)->getPriority();
+                   }
+                }
+            }
+            if(!runningQueue.isEmpty())
+                out=runningQueue.at(0);//下一个了
+            if(out!=nullptr&& in != nullptr){
+                moveProcess(runningQueue,readyQueue,out->getPid());
+            }
+            if(in!=nullptr){
+                moveProcess(readyQueue,runningQueue,in->getPid());
+            }
+            else break;//这个分支in==nullptr,没有可以换入的。
+            break;
+        }
+        case DYNAMIC_PRI:{
+            Process* in=nullptr,* out=nullptr;
+            if(!readyQueue.isEmpty())
+            {   //优先级最高的来
+                int min = lowest_pri+1;
+                in = readyQueue.at(0);
+                for(int i=0; i < readyQueue.size();i++)
+                {
+                   if(readyQueue.at(i)->getPriority() < min)
+                   {
+                       in = readyQueue.at(i);
+                       min = readyQueue.at(i)->getPriority();
+                   }
+                }
+            }
+            if(!runningQueue.isEmpty())
+                out=runningQueue.at(0);//下一个了
+            if(out!=nullptr&& in != nullptr){
+                moveProcess(runningQueue,readyQueue,out->getPid());
+                if( out->getPriority() < lowest_pri )
+                {
+                    out->setPriority( out->getPriority()+1 );
+                }
+
+            }
+            if(in!=nullptr){
+                moveProcess(readyQueue,runningQueue,in->getPid());
+            }
+            else break;//这个分支in==nullptr,没有可以换入的。
+            break;
+        }
+        case PREEEM_PRI:{
+            Process* in=nullptr,* out=nullptr;
+            if(!readyQueue.isEmpty())
+            {   //找到优先级最高的
+                int min = lowest_pri+1;
+                in = readyQueue.at(0);
+                for(int i=0; i < readyQueue.size();i++)
+                {
+                    if(readyQueue.at(i)->getPriority() < min)
+                    {
+                        in = readyQueue.at(i);
+                        min = readyQueue.at(i)->getPriority();
+                    }
+                }
+            }
+            if(!runningQueue.isEmpty())
+            {   //比较需不需要抢占
+                out=runningQueue.at(0);//多个运行队列的话还要挑一个最差的…………待补充
+
+                if(out->getPriority() <= in->getPriority())
+                {   //高优先级抢占
+                    moveProcess(runningQueue,readyQueue,out->getPid());
+                    moveProcess(readyQueue,runningQueue,in->getPid());
+                }
+             }
+             else if(in!=nullptr){
+                 moveProcess(readyQueue,runningQueue,in->getPid());
+             }
+             else break;//这个分支in==nullptr,没有可以换入的。
+             break;
+        }
+        case NONPREEM_PRI:{
+            if(!runningQueue.isEmpty())
+                return;
+
+            //运行队列空了
+            Process* in=nullptr;
+            if(!readyQueue.isEmpty())
+            {   //优先级最高的来
+                int min = lowest_pri+1;
+                in = readyQueue.at(0);
+                for(int i=0; i < readyQueue.size();i++){
+                    if(readyQueue.at(i)->getPriority() < min)
+                    {
+                           in = readyQueue.at(i);
+                           min = readyQueue.at(i)->getPriority();
+
+                    }
+                }
+                moveProcess(readyQueue,runningQueue,in->getPid());
+            }
+            else break;//这个分支in==nullptr,没有可以换入的。
+            break;
+        }
         default:{
             if(runningQueue.isEmpty()&&
                     !readyQueue.isEmpty()){

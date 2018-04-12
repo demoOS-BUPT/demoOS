@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->ui->processAlgComboBox->addItems(QStringList()<<"RR 时间片轮转"<<"FCFS 批处理");
+    this->ui->processAlgComboBox->addItems(QStringList()<<"RR 时间片轮转"<<"FCFS 批处理"<<"优先级+RR"<<"动态优先级"<<"抢占式优先级"<<"非抢占式优先级");
     ui->cmd->setTextColor(QColor(80,0,0));
     ui->cmd->setText("DemoOS 正在启动\n");
 
