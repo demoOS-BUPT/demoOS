@@ -2,7 +2,7 @@
 #define LIST_OP_H
 #include "mainwindow.h"
 
-enum ProcessAlg{RR,FCFS};
+enum ProcessAlg{RR=0,FCFS=1};
 
 //创建新进程(空的),并存放在pcbPool中,若失败返回nullptr
 Process* newProcess(QList<Process*> &pcbPool);

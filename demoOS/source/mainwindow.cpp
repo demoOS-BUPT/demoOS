@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    this->ui->processAlgComboBox->addItems(QStringList()<<"RR 时间片轮转"<<"FCFS 批处理");
     ui->cmd->setTextColor(QColor(80,0,0));
     ui->cmd->setText("DemoOS 正在启动\n");
 
@@ -45,10 +46,11 @@ void MainWindow::kernel(){
     //cmdPrint("1000ms CYCLE");
 
     cmdPrint("---------------------------------------");
-    if(rand()%3==0)
+    if(rand()%(pcbPool.size()+1)==0)
         this->createProcess(rand()%10+1);
 
-    processDispatch(pcbPool,readyQueue,runningQueue,waitQueue,RR);//进程调度函数
+    ProcessAlg alg=static_cast<ProcessAlg>(ui->processAlgComboBox->currentIndex());
+    processDispatch(pcbPool,readyQueue,runningQueue,waitQueue,alg);//进程调度函数
     execute(pcbPool,runningQueue);//进程执行
 
     QString s("所有进程：\n");
