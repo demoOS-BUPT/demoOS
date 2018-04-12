@@ -63,8 +63,6 @@ void MainWindow::kernel(){
     s+=printQue(runningQueue);
     cmdPrint(s);
 
-    qDebug()<<"new";
-
     timer.start(1000);
 
 }
