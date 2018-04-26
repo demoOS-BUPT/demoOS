@@ -36,7 +36,9 @@ private:
 
     void cmdPrint(QString newLine);
 
-    void createProcess(int cpuTime);//创建一个新进程，若成功放入就绪队列。
+    void createProcess(int cpuTime,int priority);//创建一个新进程，若成功放入就绪队列。
+
+    void printQueue();
 
 private slots:
     void kernel();

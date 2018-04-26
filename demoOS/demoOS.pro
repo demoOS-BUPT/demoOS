@@ -45,3 +45,6 @@ HEADERS  += source/mainwindow.h \
     source/FS/other.h
 
 FORMS    += source/mainwindow.ui
+
+RESOURCES += \
+    resource/res.qrc
