@@ -32,7 +32,7 @@ SOURCES += source/main.cpp\
     source/FS/DirOperate.cpp \
     source/FS/DiskOperate.cpp \
     source/FS/FCB.cpp \
-    source/FS/other.cpp
+    source/FS/other.cpp \
 
 HEADERS  += source/mainwindow.h \
    source/demo_process.h \
