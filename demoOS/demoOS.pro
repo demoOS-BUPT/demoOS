@@ -1,10 +1,11 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2018-04-26T11:58:51
+# Project created by QtCreator 2018-03-30T08:53:35
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core \
+gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -23,9 +24,24 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 
-SOURCES += main.cpp\
-        mainwindow.cpp
+SOURCES += source/main.cpp\
+        source/mainwindow.cpp \
+    source/demo_process.cpp \
+    source/list_op.cpp \
+    source/FS/Directory.cpp \
+    source/FS/DirOperate.cpp \
+    source/FS/DiskOperate.cpp \
+    source/FS/FCB.cpp \
+    source/FS/other.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += source/mainwindow.h \
+   source/demo_process.h \
+    source/list_op.h \
+    source/RAM/firstfit.h \
+    source/FS/Directory.h \
+    source/FS/DirOperate.h \
+    source/FS/DiskOperate.h \
+    source/FS/FCB.h \
+    source/FS/other.h
 
-FORMS    += mainwindow.ui
+FORMS    += source/mainwindow.ui
