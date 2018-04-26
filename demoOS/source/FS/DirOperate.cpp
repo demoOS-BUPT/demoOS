@@ -2,6 +2,7 @@
 #include"other.h"
 #include<time.h>
 #include<math.h>
+
 using namespace std;
 #define _CRT_SECURE_NO_WARNINGS 1
 #pragma warning( disable : 4996 )
@@ -111,6 +112,15 @@ void DirOperate::list_directory(Directory*directory) {
 	}
 }
 
+QString DirOperate::list_directory_qt(Directory*directory) {
+    QStringList ret;
+    ret << QString::fromStdString(directory->get_fileName()) <<"\n";
+    for (int i = 0; i < directory->get_fileListNum(); i++) {
+        ret << QString::fromStdString(directory->get_fileList(i)->get_fileName());
+    }
+    return ret.join('\n');
+}
+
 void DirOperate::list_all_directory(Directory*directory) {
 	if ('1' == directory->get_type()) {
 		//cout << directory->get_fileName()<<endl;
@@ -122,6 +132,21 @@ void DirOperate::list_all_directory(Directory*directory) {
 			list_all_directory(directory->get_fileList(i));
 		}
 	}
+}
+
+QString DirOperate::list_all_directory_qt(Directory*directory) {
+    QStringList ret;
+    if ('1' == directory->get_type()) {
+        //cout << directory->get_fileName()<<endl;
+        return "";
+    }
+    else {
+        for (int i = 0; i < directory->get_fileListNum(); i++) {
+            ret << QString::fromStdString(directory->get_fileList(i)->get_fileName())<<"\n";
+            ret << list_all_directory_qt(directory->get_fileList(i));
+        }
+    }
+    return ret.join(' ');
 }
 
 void DirOperate::rm_directory(Directory*directory) {

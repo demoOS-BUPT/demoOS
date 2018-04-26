@@ -5,10 +5,15 @@
 #include <QList>
 #include "demo_process.h"
 #include "list_op.h"
-//#include <QString>
 #include <QtCore>
 #include <QDebug>
 #include <random>
+
+#include "FS/other.h"
+#include<string>
+#include<new>
+#include<cstdlib>
+#include<cstring>
 
 namespace Ui {
 class MainWindow;
@@ -39,6 +44,8 @@ private:
     void createProcess(int cpuTime,int priority);//创建一个新进程，若成功放入就绪队列。
 
     void printQueue();
+
+    void FS_init();//FS子系统初始化
 
 private slots:
     void kernel();

@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -32,6 +33,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->waitQueue.clear();
     this->readyQueue.clear();
     this->runningQueue.clear();//清空进程
+
+    FS_init();//磁盘子系统初始化
 
     connect(&timer,SIGNAL(timeout()),this,SLOT(kernel()));
     timer.start(1000);
@@ -117,5 +120,156 @@ void MainWindow::cmdPrint(QString newLine){
 
 void MainWindow::on_pushButton_clicked()//用户指令
 {
-    QString cmdString=ui->input->toPlainText();
+    QString op=ui->input->toPlainText();
+    cmdPrint(">"+op);//回显
+    ui->input->clear();
+    //磁盘交互
+    QStringList args =op.split(" ");
+    //		string args[] = op.split(" ");
+             //这里加多空格容错
+    int argc=args.size();
+    /*cmdPrint(QString("argc=%1").arg(argc));
+    for(int i=0;i<args.size();i++){
+        cmdPrint(args.at(i));
+    }
+    cmdPrint("------------------------");*/
+    if(argc==0)return;
+    if(args.at(0)=="?" || args.at(0)=="help"){
+        cmdPrint("帮助：\n"
+                 "\t表示说明：[参数] [可选参数]*\n"
+                 "\t指令帮助：\n"
+                 "\thelp 或 ?: 打印帮助\n"
+                 "\tls 或 ll: ls [路径]* 列出当前路径或指定路径下目录树\n"
+                 "\tmkdir: mkdir [路径] 创建目录\n"
+                 "\ttouch: touch [文件] 创建文件\n"
+                 "\tvim: vim [文件] 编辑文件\n"
+                 "\tcat: cat [文件] 显示文件内容\n"
+                 "\tcd: cd [路径] 进入目录\n");
+        return;
+    }
+    if (args.at(0) == "ls" || args.at(0) == "ll") {
+        //列出目录
+        //  ll  || ls ||  ll /zxh/a
+        if (argc == 1) {
+            cmdPrint(dirOp->list_all_directory_qt(root_directory));
+        }
+        else {
+            dirOp->change_directory(args.at(1).toStdString());
+            cmdPrint(dirOp->list_all_directory_qt(lastDir));
+        }
+    }
+    else if (args.at(0) == "mkdir") {
+        if(argc<2){
+            cmdPrint("usage: mkdir [path]");
+            return;
+        }
+       string dirName = path_to_filename(args.at(1).toStdString());
+        //创建的文件是文件
+       if (-1 == dirOp->create_file(path_to_directory(args.at(1).toStdString()),dirName,'0')) {
+       cmdPrint("创建文件失败");
+       }
+    }
+    else if (args.at(0) == "touch") {
+       //创建file
+        if(argc<2){
+            cmdPrint("用法: touch [文件]");
+            return;
+        }
+        string fileName = path_to_filename(args.at(1).toStdString());
+        if (-1 == dirOp->create_file(path_to_directory(args.at(1).toStdString()), fileName, '1')) {
+            cmdPrint("创建文件失败");
+        }
+    }
+    else if (args.at(0) == "vim") {
+        if(argc<2){
+            cmdPrint("用法: vim [文件]");
+            return;
+        }
+        string fileName = args.at(1).toStdString();
+        cmdPrint("输入文件内容:");
+        QString fileContent;
+        //cin >> fileContent;
+        Directory*fileDir=lastDir;
+        for (int i = 0; i < lastDir->get_fileListNum(); i++) {
+           if (fileName == lastDir->get_fileList(i)->get_fileName()) {
+               fileDir = lastDir->get_fileList(i);
+               break;
+           }
+        }
+        dirOp->write_file(fileDir->get_FCBptr(), diskOP, fileContent.toStdString());
+          //写文件
+    }
+    else if (args.at(0) == "cat") {
+        if(argc<2){
+            cmdPrint("用法: cat [文件]");
+            return;
+        }
+       string fileName = args.at(1).toStdString();
+       Directory*fileDir = lastDir;
+       for (int i = 0; i < lastDir->get_fileListNum(); i++) {
+            if (fileName == lastDir->get_fileList(i)->get_fileName()) {
+                fileDir = lastDir->get_fileList(i);
+                break;
+            }
+        }
+        cmdPrint(QString::fromStdString(
+                     dirOp->cat_file(fileDir->get_FCBptr(), diskOP)));
+        //查看文件信息
+    }
+    else if (args.at(0) == "cd") {
+        //cd /home/zxh
+        //dirName = args[1];
+        if(argc<2){
+            cmdPrint("用法: cd [路径]");
+            return;
+        }
+       dirOp->change_directory(args.at(1).toStdString());
+        //switch dir
+    }
+    else {
+        cmdPrint(QString("%1 不是有效的命令。").arg(args.at(0)));
+    }
+
+}
+
+
+void MainWindow::FS_init() {
+    dirOp = new DirOperate();
+    diskOP=new DiskOperate();
+    systemStartAddr = (char*)malloc(system_size * sizeof(char));
+    cmdPrint(QString("磁盘容量:%1 B").arg(system_size));
+    cmdPrint(QString("块尺寸:%1 B").arg(block_size));
+    cmdPrint(QString("块数目:%1 块").arg(block_count));
+    //初始化盘块的位示图
+    memset(systemStartAddr, 0, system_size * sizeof(char));
+    //前三块分别是 bit图，目录项，fcb
+    bitmap = systemStartAddr;
+    for(int i=0;i<init_blockMap_block_num+5;i++)
+        bitmap[i] = 1;
+    //void*buf= systemStartAddr + block_size * init_directory_block_num;
+    //cout <<( systemStartAddr + block_size * init_directory_block_num )<< endl;
+    //cout << buf << endl;
+    //root_directory = new(systemStartAddr + block_size * init_directory_block_num)Directory;
+    directory_count = 0;
+    FCB_count = 0;
+    //root_directory = (Directory *)systemStartAddr + block_size * init_directory_block_num;
+    root_directory = new(systemStartAddr + block_size * init_directory_block_num)Directory;
+    directory_count++;
+    root_directory->set_fileName("/");
+    root_directory->set_type('0');
+    lastDir = root_directory;
+    //currentDir = "/";
+    //cout << root_directory << endl;
+    //root_fcb = (FCB*)systemStartAddr + block_size * init_FCB_block_num;
+    root_fcb = new(systemStartAddr + block_size * init_FCB_block_num)FCB;
+    FCB_count++;
+    BlockMap = new(systemStartAddr + block_size * init_blockMap_block_num)int[block_count+1];
+    //root_directory = new Directory();//不知道物理地址会不会变
+    //cout << root_directory << endl;
+    init_blockMap();
+    //directory FCB物理上顺序存储 逻辑上链式存储
+    //创建目录 /home
+    //创建目录 /home/www
+    //创建文件 /home/www/in.c
+    //创建文件 /home/out.c
 }

@@ -21,6 +21,12 @@
    <layout class="QHBoxLayout" name="horizontalLayout_3">
     <item>
      <widget class="QGroupBox" name="groupBox_2">
+      <property name="font">
+       <font>
+        <family>等线</family>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
       <property name="title">
        <string>命令提示符</string>
       </property>
@@ -29,6 +35,12 @@
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
           <widget class="QTextBrowser" name="cmd">
+           <property name="font">
+            <font>
+             <family>等线 Light</family>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
            <property name="focusPolicy">
             <enum>Qt::NoFocus</enum>
            </property>
@@ -80,6 +92,12 @@
     </item>
     <item>
      <widget class="QGroupBox" name="groupBox">
+      <property name="font">
+       <font>
+        <family>等线</family>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
       <property name="title">
        <string>任务管理器</string>
       </property>
