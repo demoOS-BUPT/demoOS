@@ -1,4 +1,5 @@
 #include "list_op.h"
+#include "demo_process.h"
 
 //获取新PID,返回0表示失败
 unsigned long getNewPID(QList<Process*>& pcbPool)

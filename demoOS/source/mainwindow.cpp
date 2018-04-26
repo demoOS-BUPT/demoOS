@@ -80,3 +80,8 @@ void MainWindow::cmdPrint(QString newLine){
     ui->cmd->moveCursor(QTextCursor::End);
 }
 
+
+void MainWindow::on_pushButton_clicked()//用户指令
+{
+    QString cmdString=ui->input->toPlainText();
+}

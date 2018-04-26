@@ -1,6 +1,6 @@
 #ifndef LIST_OP_H
 #define LIST_OP_H
-#include "mainwindow.h"
+#include "demo_process.h"
 
 enum ProcessAlg{RR=0,FCFS=1,PRI_RR=2,DYNAMIC_PRI=3,PREEEM_PRI=4,NONPREEM_PRI=5};
 

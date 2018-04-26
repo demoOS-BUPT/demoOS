@@ -41,6 +41,7 @@ private:
 private slots:
     void kernel();
 
+    void on_pushButton_clicked();
 };
 
 #endif // MAINWINDOW_H
