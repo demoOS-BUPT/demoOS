@@ -50,14 +50,14 @@ void moveProcess(QList<Process*>& s_list, QList<Process*>&d_list, unsigned long 
     return;
 }
 
-void termiProcess(QList<Process*> &pcbPool,
+int termiProcess(QList<Process*> &pcbPool,
                   QList<Process*> &readyQueue,
                   QList<Process*> &runningQueue,
                   QList<Process*> &waitQueue, unsigned long PID)
 {
     Process* p=nullptr;
     p=find(pcbPool,PID);
-    if(p==nullptr)return;//进程不存在
+    if(p==nullptr)return 0;//进程不存在
 
     //从所有队列删除 (用了宏 对不起！)
     #define REMOVE_FROM_LIST(LISTNAME) do{\
@@ -76,7 +76,7 @@ void termiProcess(QList<Process*> &pcbPool,
 
 
     delete p;//释放
-    return;
+    return 1;
 }
 
 Process* find(QList<Process*> list, unsigned long PID)
@@ -220,7 +220,7 @@ void processDispatch(QList<Process*> &pcbPool,
             {   //比较需不需要抢占
                 out=runningQueue.at(0);//多个运行队列的话还要挑一个最差的…………待补充
 
-                if(out->getPriority() <= in->getPriority())
+                if(out->getPriority() > in->getPriority())
                 {   //高优先级抢占
                     moveProcess(runningQueue,readyQueue,out->getPid());
                     moveProcess(readyQueue,runningQueue,in->getPid());

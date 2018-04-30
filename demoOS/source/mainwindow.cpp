@@ -117,7 +117,6 @@ void MainWindow::cmdPrint(QString newLine){
     ui->cmd->moveCursor(QTextCursor::End);
 }
 
-
 void MainWindow::on_pushButton_clicked()//用户指令
 {
     QString op=ui->input->toPlainText();
@@ -226,6 +225,72 @@ void MainWindow::on_pushButton_clicked()//用户指令
        dirOp->change_directory(args.at(1).toStdString());
         //switch dir
     }
+    else if (args.at(0) == "kill") {
+        //kill PID
+        if(argc != 2){
+            cmdPrint("用法: kill [PID]");
+            return;
+        }
+        if(!termiProcess(this->pcbPool,this->readyQueue,this->waitQueue,this->runningQueue,args.at(1).toInt()))
+        {
+            cmdPrint("该进程不存在，请重新输入");
+        }
+        else
+        {
+            cmdPrint("终止进程成功！");
+        }
+    }
+    else if (args.at(0) == "npro") {
+        //create process
+        if(argc < 2){
+            cmdPrint("用法: npro [-t](CPU时间 默认随机) [-p]（优先级0-7 默认7）");
+            return;
+        }
+
+        int cpu_time = rand()%10+1;
+        int prior = 7;
+
+        for(int i = 1; i < argc; ++i)
+        {
+            if(args.at(i) == "-t")
+            {
+                if(!strIsDigit(args.at(++i)))
+                {
+                    cmdPrint("cpu时间需为整数型");
+                    return;
+                }
+                else
+                {
+                    cpu_time = args.at(i).toInt();
+                }
+            }
+            else if(args.at(i) == "-p")
+            {
+                if(!strIsDigit(args.at(++i)))
+                {
+                    cmdPrint("优先级需为0-7间的整数");
+                    return;
+                }
+                else
+                {   int temp = args.at(i).toInt();
+                    if(temp >= 0 && temp <= 7)
+                    {
+                        prior = temp;
+                    }
+                    else
+                    {
+                        cmdPrint("优先级需为0至7间的整数");
+                    }
+                }
+            }
+            else
+            {    cmdPrint("用法: npro [-t](CPU时间 默认随机) [-p]（优先级0-7 默认7）");
+                 return;
+            }
+        }
+        this->createProcess(cpu_time,prior);
+        cmdPrint("创建进程成功！");
+    }
     else {
         cmdPrint(QString("%1 不是有效的命令。").arg(args.at(0)));
     }
@@ -272,4 +337,22 @@ void MainWindow::FS_init() {
     //创建目录 /home/www
     //创建文件 /home/www/in.c
     //创建文件 /home/out.c
+}
+
+
+int strIsDigit(QString str)
+{
+    QByteArray t = str.toLatin1();
+    const char *s = t.data();
+
+    while(*s && *s >= '0' && *s <= '9')s++;
+
+    if(*s)
+    {
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
 }
