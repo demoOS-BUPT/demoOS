@@ -78,7 +78,7 @@ string DirOperate::cat_file(FCB*FCBptr,DiskOperate*diskOperate) {
 
 //write file
 void DirOperate::write_file(FCB*FCBptr, DiskOperate*diskOperate, string content) {
-	int blockNum = ceil(content.size()/block_size);
+	int blockNum = ceil(content.size()/block_size);//»¹ÊÇ0£¿£¿£¿£¿
 	int i = 0;
 	int currBlock;
 	currBlock = FCBptr->get_blockStarNum();

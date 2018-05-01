@@ -10,7 +10,9 @@ void example(){
 	//这里是命令行，在这里进行初始化，循环，交互
 	while (1) {
 		cout << "[root@localhost " + currentDir + "]";
-		getline(cin,op);
+		op = "";
+		fflush(stdin);
+		getline(cin,op,'\n');
 		//cin >> op;
 		fflush(stdin);
 		vector<string> args = split(op, " ");
@@ -46,7 +48,8 @@ void example(){
             string fileContent;
             fileName = args[1];
             cout << "Please input file content:";
-            cin >> fileContent;
+            //cin >> fileContent;
+			getline(cin, fileContent, '\n');
 			Directory*fileDir=lastDir;
 			for (int i = 0; i < lastDir->get_fileListNum(); i++) {
 				if (fileName == lastDir->get_fileList(i)->get_fileName()) {
@@ -55,6 +58,8 @@ void example(){
 				}
 			}
             dirOp->write_file(fileDir->get_FCBptr(), diskOP, fileContent);
+			//cin.clear();
+			//cin.sync();
             //写文件
         }
 		else if (args[0] == "cat") {
@@ -66,7 +71,8 @@ void example(){
 					break;
 				}
 			}
-			dirOp->cat_file(fileDir->get_FCBptr(), diskOP);
+			//dirOp->cat_file(fileDir->get_FCBptr(), diskOP);
+			cout << dirOp->cat_file(fileDir->get_FCBptr(), diskOP) << endl;
 			//查看文件信息
 		}
 		else if (args[0] == "cd") {
@@ -142,6 +148,7 @@ void init_system() {
 	root_fcb = new(systemStartAddr + block_size * init_FCB_block_num)FCB;
 	FCB_count++;
     BlockMap = new(systemStartAddr + block_size * init_blockMap_block_num)int[block_count+1];
+	bitmap[init_blockMap_block_num] = 1;
 	//root_directory = new Directory();//不知道物理地址会不会变
 	//cout << root_directory << endl;
 	init_blockMap();
@@ -154,8 +161,10 @@ void init_system() {
 
 void test_unit(){
 	//这里调试
+	//-----------------------未完成------------------
 	//注册时间格式没有分秒
 	//创建的时候当前目录重名问题
+	//读写的时候没有判断是否已经创建
 }
 
 int main(){
