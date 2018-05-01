@@ -1,19 +1,21 @@
 #include "other.h"
 #include<string>
 #include<new>
+#include<cstdlib>
+#include<cstring>
 using namespace std;
 
 void example(){
 	//-----------------------currentDir怎么修改-------------------------------
 	init_system();
-	string op,dirName,fileName;
+	string op,dirName,fileName, fileContent;
 	//这里是命令行，在这里进行初始化，循环，交互
 	while (1) {
-		cout << "[root@localhost " + currentDir + "]";
 		op = "";
+		cout << "[root@localhost " + currentDir + "]";
+
 		fflush(stdin);
-		getline(cin,op,'\n');
-		//cin >> op;
+		getline(cin,op, '\n');
 		fflush(stdin);
 		vector<string> args = split(op, " ");
 		//		string args[] = op.split(" ");
@@ -45,12 +47,13 @@ void example(){
 			}
 		}
         else if (args[0] == "vim") {
-            string fileContent;
+            
             fileName = args[1];
             cout << "Please input file content:";
             //cin >> fileContent;
 			getline(cin, fileContent, '\n');
 			Directory*fileDir=lastDir;
+			
 			for (int i = 0; i < lastDir->get_fileListNum(); i++) {
 				if (fileName == lastDir->get_fileList(i)->get_fileName()) {
 					fileDir = lastDir->get_fileList(i);
@@ -71,7 +74,7 @@ void example(){
 					break;
 				}
 			}
-			//dirOp->cat_file(fileDir->get_FCBptr(), diskOP);
+
 			cout << dirOp->cat_file(fileDir->get_FCBptr(), diskOP) << endl;
 			//查看文件信息
 		}
@@ -128,7 +131,7 @@ void init_system() {
     memset(systemStartAddr, 0, system_size * sizeof(char));
     //前三块分别是 bit图，目录项，fcb
     bitmap = systemStartAddr;
-    for(int i=0;i<init_blockMap_block_num;i++)
+    for(int i=0;i<init_blockMap_block_num+5;i++)
         bitmap[i] = 1;
 	//void*buf= systemStartAddr + block_size * init_directory_block_num;
 	//cout <<( systemStartAddr + block_size * init_directory_block_num )<< endl;

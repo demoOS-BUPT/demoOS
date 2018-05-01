@@ -1,4 +1,5 @@
 #include<string>
+#include<cstring>
 #include"other.h"
 using namespace std;
 /*
@@ -9,17 +10,15 @@ public:
 }DiskOperate;
 */
 bool DiskOperate::write(int startBlock, string content){
-	//BlockMap = new(systemStartAddr + block_size * init_blockMap_block_num)int[block_count + 1];
-	char *block = new(startBlock * block_size + systemStartAddr)char[block_size];
-    //char arrContent[block_size];
-    //strcpy_s(arrContent, content.c_str());
-    //char * startAdd = startBlock * block_size + systemStartAddr;//块号+起始地址
-	
-    for(int i = 0;i<content.size();i++){
-        //startAdd[i] = arrContent[i];
-		block[i] = content[i];
+
+    char arrContent[block_size];
+    strcpy_s(arrContent, content.c_str());
+    int i = 0;
+    char * startAdd = startBlock * block_size + systemStartAddr;//块号+起始地址
+    for(i = 0;i<content.size();i++){
+        startAdd[i] = arrContent[i];
     }
-	fflush(stdin);
+    startAdd[i] = '\0';
     return true;
 }
 

@@ -78,13 +78,15 @@ string DirOperate::cat_file(FCB*FCBptr,DiskOperate*diskOperate) {
 
 //write file
 void DirOperate::write_file(FCB*FCBptr, DiskOperate*diskOperate, string content) {
-	int blockNum = ceil(content.size()/block_size);//»¹ÊÇ0£¿£¿£¿£¿
+
+	int blockNum = ceil((double)content.size()/100);
+
 	int i = 0;
 	int currBlock;
 	currBlock = FCBptr->get_blockStarNum();
 
 	for (;i<blockNum-1;i++){
-		string sub = content.substr( i*block_size ,block_size);
+		string sub = content.substr(i*block_size ,block_size);
 		diskOperate->write(currBlock, sub);
 		BlockMap[currBlock] = get_new_block();
 		currBlock = BlockMap[currBlock];
@@ -92,6 +94,8 @@ void DirOperate::write_file(FCB*FCBptr, DiskOperate*diskOperate, string content)
 	string sub = content.substr(i*block_size );
 	diskOperate->write(currBlock, sub);
 	BlockMap[currBlock] = -1;
+	FCBptr->set_fileSize(blockNum);
+	FCBptr->set_dataSize(content.size());
 	FCBptr->set_blockEndNum(currBlock);
 }
 
