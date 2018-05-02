@@ -122,11 +122,12 @@ void MainWindow::cmdPrint(QString newLine){
 void MainWindow::on_pushButton_clicked()//用户指令
 {
     QString op=ui->input->toPlainText();
-    qDebug()<<op;
+
     cmdPrint(">"+op);//回显
     ui->input->clear();
     //磁盘交互
-    QStringList args =op.split(" ");
+    QStringList args =op.split(QRegularExpression("\\s+"),QString::SkipEmptyParts);
+    qDebug()<<args;
     //		string args[] = op.split(" ");
              //这里加多空格容错
     int argc=args.size();
@@ -190,8 +191,6 @@ void MainWindow::on_pushButton_clicked()//用户指令
             return;
         }
         string fileName = args.at(1).toStdString();
-        cmdPrint("输入文件内容...");
-        QString fileContent=QInputDialog::getMultiLineText(this,"输入文件内容","");
         //cin >> fileContent;
         Directory*fileDir=lastDir;
         for (int i = 0; i < lastDir->get_fileListNum(); i++) {
@@ -200,6 +199,13 @@ void MainWindow::on_pushButton_clicked()//用户指令
                break;
            }
         }
+        QString fileContent=QString::fromStdString(dirOp->cat_file(fileDir->get_FCBptr(), diskOP));
+        qDebug()<<"reached file:"+fileContent;
+        cmdPrint("输入文件内容...");
+        bool ok;
+        fileContent=QInputDialog::getMultiLineText(this,"输入文件内容...","",fileContent,&ok);
+        qDebug()<<"write to file:"+fileContent;
+        if(!ok)return;
         dirOp->write_file(fileDir->get_FCBptr(), diskOP, fileContent.toStdString());
           //写文件
     }
