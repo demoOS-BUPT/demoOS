@@ -37,9 +37,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     FS_init();//磁盘子系统初始化
 
+    //connect(ui->pauseButton,SIGNAL(clicked()),this,SLOT(on_pauseButton_clicked()));
     connect(&timer,SIGNAL(timeout()),this,SLOT(kernel()));
     timer.start(1000);
-
 }
 
 MainWindow::~MainWindow()
@@ -88,6 +88,7 @@ void MainWindow::createProcess(int cpuTime,int priority){
 }
 
 void MainWindow::kernel(){
+    qDebug()<<"kernel";
     timer.stop();
 
     //cmdPrint("1000ms CYCLE");
@@ -121,6 +122,7 @@ void MainWindow::cmdPrint(QString newLine){
 void MainWindow::on_pushButton_clicked()//用户指令
 {
     QString op=ui->input->toPlainText();
+    qDebug()<<op;
     cmdPrint(">"+op);//回显
     ui->input->clear();
     //磁盘交互
@@ -339,22 +341,15 @@ void MainWindow::FS_init() {
     //创建文件 /home/out.c
 }
 
-
-int strIsDigit(QString str)
+void MainWindow::on_pauseButton_clicked()
 {
-    QByteArray t = str.toLatin1();
-    const char *s = t.data();
-
-    while(*s && *s >= '0' && *s <= '9')s++;
-
-    if(*s)
-    {
-        return 0;
+    qDebug()<<"pause";
+    if(timer.isActive()){
+        qDebug()<<"stop";
+        timer.stop();
     }
-    else
-    {
-        return 1;
+    else{
+        qDebug()<<"start";
+        timer.start(1000);
     }
 }
-
-
