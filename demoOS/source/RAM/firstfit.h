@@ -32,11 +32,9 @@ struct memList	//空闲内存链表
 	{}
 };
 
-namespace FIRSTFIT   
-{//首次适应算法
 
-	class Firstfit 
-	{
+class Firstfit 
+{
 	private:
 		size_t		_memNum;			//总内存大小
 		size_t		_blockNum;	    	//内存块数目
@@ -84,11 +82,8 @@ namespace FIRSTFIT
 			++_pcbNum;
 		}
 
-		void pop()   //删除一个进程
+		void pop(int id)   //删除一个进程
 		{
-			int id = 0;
-			cout << "Please input <ID> of the process to be deleted:" << endl;
-			cin >> id;
 
 			//若删除第一个该怎么办
 			Pcb* prev = _find(id);   //返回该进程的前一个进程
@@ -100,7 +95,9 @@ namespace FIRSTFIT
 			Pcb* cur = prev->next;
 			_memRecover(cur);	//分情况处理要回收的内存
 			prev->next = cur->next;
+			_memNum += cur->needMem;
 			delete cur;
+			
 			cout << "Success!" << endl;
 		}
 
@@ -116,11 +113,8 @@ namespace FIRSTFIT
 			cout << "NULL\n" << endl;
 		}
 
-		void PrintPcbMem()
+		void PrintPcbMem(int id)
 		{
-			int id = 0;
-			cout << "Please input <ID> of the process:";
-			cin >> id;
 			Pcb* cur = _find(id);
 			if (cur == NULL)
 			{
@@ -142,7 +136,7 @@ namespace FIRSTFIT
 			memList* cur = _memHead;
 			if (size > _memNum)
 			{
-				cout << "Memory allocation failed" << endl;
+				cout << "Memory allocation failed1" << endl;
 				return;
 			}
 			while (cur && cur->msize < size)
@@ -152,7 +146,7 @@ namespace FIRSTFIT
 
 			if (NULL == cur)
 			{
-				cout << "Memory allocation failed" << endl;
+				cout << "Memory allocation failed2" << endl;
 				exit(-1);
 			}
 
@@ -160,6 +154,7 @@ namespace FIRSTFIT
 			pcb->end = pcb->begin + size;
 			pcb->realMem = size;
 			cur->first += size;
+			cur->msize = cur->end - cur->first;
 			if (cur->first == cur->end)
 			{
 				if (cur == _memHead)
@@ -194,7 +189,7 @@ namespace FIRSTFIT
 				}
 				cur = cur->next;
 			}
-			cur = best
+			cur = best;
 			if (NULL == cur)
 			{
 				cout << "Memory allocation failed" << endl;
@@ -205,6 +200,7 @@ namespace FIRSTFIT
 			pcb->end = pcb->begin + size;
 			pcb->realMem = size;
 			cur->first += size;
+			cur->msize = cur->end - cur->first;
 			if (cur->first == cur->end)
 			{
 				if (cur == _memHead)
@@ -328,7 +324,7 @@ namespace FIRSTFIT
 
 	};
 
-}
+
 
 
 

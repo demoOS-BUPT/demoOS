@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QInputDialog>
 using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -187,8 +188,8 @@ void MainWindow::on_pushButton_clicked()//用户指令
             return;
         }
         string fileName = args.at(1).toStdString();
-        cmdPrint("输入文件内容:");
-        QString fileContent;
+        cmdPrint("输入文件内容...");
+        QString fileContent=QInputDialog::getMultiLineText(this,"输入文件内容","");
         //cin >> fileContent;
         Directory*fileDir=lastDir;
         for (int i = 0; i < lastDir->get_fileListNum(); i++) {
