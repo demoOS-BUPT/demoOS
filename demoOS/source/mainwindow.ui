@@ -81,6 +81,9 @@
              <property name="text">
               <string>提交命令</string>
              </property>
+             <property name="shortcut">
+              <string>Ctrl+Return</string>
+             </property>
             </widget>
            </item>
           </layout>
