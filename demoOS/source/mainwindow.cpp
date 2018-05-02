@@ -8,6 +8,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    runGif=new QMovie(":/run1.gif");
+    stopGif=new QMovie(":/stop3.gif");
+    runGif->start();
+    stopGif->start();
+    ui->timerIcon->setMovie(runGif);
     this->ui->processAlgComboBox->addItems(QStringList()
                                            <<"RR 时间片轮转"
                                            <<"FCFS 批处理"
@@ -352,10 +357,14 @@ void MainWindow::on_pauseButton_clicked()
     qDebug()<<"pause";
     if(timer.isActive()){
         qDebug()<<"stop";
+        ui->timerIcon->setMovie(stopGif);
+        ui->pauseButton->setText("继续");
         timer.stop();
     }
     else{
         qDebug()<<"start";
+        ui->timerIcon->setMovie(runGif);
+        ui->pauseButton->setText("时停");
         timer.start(1000);
     }
 }

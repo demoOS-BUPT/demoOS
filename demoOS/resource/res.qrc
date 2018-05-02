@@ -2,4 +2,13 @@
     <qresource prefix="/icon">
         <file alias="icon">icon.png</file>
     </qresource>
+    <qresource prefix="/">
+        <file>run.gif</file>
+        <file>run1.gif</file>
+        <file>stop.gif</file>
+        <file>stop1.gif</file>
+        <file>stop2.gif</file>
+        <file>run2.gif</file>
+        <file>stop3.gif</file>
+    </qresource>
 </RCC>
