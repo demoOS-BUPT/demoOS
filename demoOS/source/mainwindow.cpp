@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
+#define CYCLE 1000
 using namespace std;
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -10,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->processAlgComboBox->addItems(QStringList()
                                            <<"RR 时间片轮转"
                                            <<"FCFS 批处理"
-                                           <<"优先级+RR"
+                                           <<"多级反馈队列"
                                            <<"动态优先级"
                                            <<"抢占式优先级"
                                            <<"非抢占式优先级"
@@ -37,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     FS_init();//磁盘子系统初始化
 
     connect(&timer,SIGNAL(timeout()),this,SLOT(kernel()));
-    timer.start(1000);
+    timer.start(CYCLE);
 
 }
 
@@ -86,6 +89,7 @@ void MainWindow::createProcess(int cpuTime,int priority){
     }
 }
 
+
 void MainWindow::kernel(){
     timer.stop();
 
@@ -100,10 +104,25 @@ void MainWindow::kernel(){
 
     printQueue();
 
-    timer.start(1000);
+    timer.start(CYCLE);
 
 }
+int strIsDigit(QString str)
+{
+    QByteArray t = str.toLatin1();
+    const char *s = t.data();
 
+    while(*s && *s >= '0' && *s <= '9')s++;
+
+    if(*s)
+    {
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
+}
 void MainWindow::cmdPrint(QString newLine){
     QString text=ui->cmd->document()->toPlainText();
     QStringList lines=text.split('\n');
@@ -340,19 +359,4 @@ void MainWindow::FS_init() {
 }
 
 
-int strIsDigit(QString str)
-{
-    QByteArray t = str.toLatin1();
-    const char *s = t.data();
 
-    while(*s && *s >= '0' && *s <= '9')s++;
-
-    if(*s)
-    {
-        return 0;
-    }
-    else
-    {
-        return 1;
-    }
-}

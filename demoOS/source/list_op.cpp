@@ -147,9 +147,9 @@ void processDispatch(QList<Process*> &pcbPool,
         }
         case PRI_RR:{
             Process* in=nullptr,* out=nullptr;
+            int min = lowest_pri+1;
             if(!readyQueue.isEmpty())
-            {   //优先级最高的来
-                int min = lowest_pri+1;
+            {   //找到优先级最高
                 in = readyQueue.at(0);
                 for(int i=0; i < readyQueue.size();i++){
                    if(readyQueue.at(i)->getPriority() < min)
@@ -159,15 +159,18 @@ void processDispatch(QList<Process*> &pcbPool,
                    }
                 }
             }
+
             if(!runningQueue.isEmpty())
                 out=runningQueue.at(0);//下一个了
-            if(out!=nullptr&& in != nullptr){
+
+            //比较队列层次
+            if(out!=nullptr&& in != nullptr && min <= runningQueue.at(0)->getPriority()){
                 moveProcess(runningQueue,readyQueue,out->getPid());
             }
-            if(in!=nullptr){
+            if(in!=nullptr && runningQueue.isEmpty()){
                 moveProcess(readyQueue,runningQueue,in->getPid());
             }
-            else break;//这个分支in==nullptr,没有可以换入的。
+            else break;//这个分支in==nullptr或无需换入
             break;
         }
         case DYNAMIC_PRI:{
