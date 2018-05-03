@@ -134,17 +134,6 @@ void processDispatch(QList<Process*> &pcbPool,
             else break;//这个分支in==nullptr,没有可以换入的。
             break;
         }
-        case FCFS:{
-            if(!runningQueue.isEmpty())
-                return;
-            Process* in=nullptr;
-            if(!readyQueue.isEmpty())
-            {   in=readyQueue.at(0);
-                moveProcess(readyQueue,runningQueue,in->getPid());
-            }
-            else break;//这个分支in==nullptr,没有可以换入的。
-            break;
-        }
         case PRI_RR:{
             Process* in=nullptr,* out=nullptr;
             if(!readyQueue.isEmpty())
@@ -255,6 +244,7 @@ void processDispatch(QList<Process*> &pcbPool,
             else break;//这个分支in==nullptr,没有可以换入的。
             break;
         }
+        case FCFS:
         default:{
             if(runningQueue.isEmpty()&&
                     !readyQueue.isEmpty()){
