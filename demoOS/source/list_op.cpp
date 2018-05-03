@@ -67,12 +67,12 @@ int termiProcess(QList<Process*> &pcbPool,
                 break;\
             }\
     }\
-    while(false);
+    while(false)
 
-    REMOVE_FROM_LIST(pcbPool)
-    REMOVE_FROM_LIST(readyQueue)
-    REMOVE_FROM_LIST(runningQueue)
-    REMOVE_FROM_LIST(waitQueue)
+    REMOVE_FROM_LIST(pcbPool);
+    REMOVE_FROM_LIST(readyQueue);
+    REMOVE_FROM_LIST(runningQueue);
+    REMOVE_FROM_LIST(waitQueue);
 
 
     delete p;//释放

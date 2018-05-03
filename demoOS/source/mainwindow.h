@@ -6,6 +6,7 @@
 #include "demo_process.h"
 #include "list_op.h"
 #include <QtCore>
+#include <QtGui>
 #include <QDebug>
 #include <random>
 
@@ -30,6 +31,8 @@ public:
 private:
     Ui::MainWindow *ui;
     QTimer timer;
+    QMovie *runGif;
+    QMovie *stopGif;
 
     QList<Process*> pcbPool;    //所有进程
 
@@ -51,6 +54,7 @@ private slots:
     void kernel();
 
     void on_pushButton_clicked();
+    void on_pauseButton_clicked();
 };
 
 #endif // MAINWINDOW_H

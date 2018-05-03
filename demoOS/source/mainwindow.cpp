@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #define CYCLE 1000
+#include <QInputDialog>
 using namespace std;
 
 
@@ -10,6 +11,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    runGif=new QMovie(":/run1.gif");
+    stopGif=new QMovie(":/stop3.gif");
+    runGif->start();
+    stopGif->start();
+    ui->timerIcon->setMovie(runGif);
     this->ui->processAlgComboBox->addItems(QStringList()
                                            <<"RR 时间片轮转"
                                            <<"FCFS 批处理"
@@ -39,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     FS_init();//磁盘子系统初始化
 
+    //connect(ui->pauseButton,SIGNAL(clicked()),this,SLOT(on_pauseButton_clicked()));
     connect(&timer,SIGNAL(timeout()),this,SLOT(kernel()));
     timer.start(CYCLE);
 
@@ -91,6 +98,7 @@ void MainWindow::createProcess(int cpuTime,int priority){
 
 
 void MainWindow::kernel(){
+    qDebug()<<"kernel";
     timer.stop();
 
     //cmdPrint("1000ms CYCLE");
@@ -139,10 +147,12 @@ void MainWindow::cmdPrint(QString newLine){
 void MainWindow::on_pushButton_clicked()//用户指令
 {
     QString op=ui->input->toPlainText();
+
     cmdPrint(">"+op);//回显
     ui->input->clear();
     //磁盘交互
-    QStringList args =op.split(" ");
+    QStringList args =op.split(QRegularExpression("\\s+"),QString::SkipEmptyParts);
+    qDebug()<<args;
     //		string args[] = op.split(" ");
              //这里加多空格容错
     int argc=args.size();
@@ -162,7 +172,9 @@ void MainWindow::on_pushButton_clicked()//用户指令
                  "\ttouch: touch [文件] 创建文件\n"
                  "\tvim: vim [文件] 编辑文件\n"
                  "\tcat: cat [文件] 显示文件内容\n"
-                 "\tcd: cd [路径] 进入目录\n");
+                 "\tcd: cd [路径] 进入目录\n"
+                 "\tnpro: npro [-t] (CPU时间 默认随机1~10) [-p] (优先级0-7 默认7) 创建进程\n"
+                 "\tkill: kill [pid] 杀死进程\n");
         return;
     }
     if (args.at(0) == "ls" || args.at(0) == "ll") {
@@ -204,8 +216,6 @@ void MainWindow::on_pushButton_clicked()//用户指令
             return;
         }
         string fileName = args.at(1).toStdString();
-        cmdPrint("输入文件内容:");
-        QString fileContent;
         //cin >> fileContent;
         Directory*fileDir=lastDir;
         for (int i = 0; i < lastDir->get_fileListNum(); i++) {
@@ -214,6 +224,13 @@ void MainWindow::on_pushButton_clicked()//用户指令
                break;
            }
         }
+        QString fileContent=QString::fromStdString(dirOp->cat_file(fileDir->get_FCBptr(), diskOP));
+        qDebug()<<"reached file:"+fileContent;
+        cmdPrint("输入文件内容...");
+        bool ok;
+        fileContent=QInputDialog::getMultiLineText(this,"输入文件内容...","",fileContent,&ok);
+        qDebug()<<"write to file:"+fileContent;
+        if(!ok)return;
         dirOp->write_file(fileDir->get_FCBptr(), diskOP, fileContent.toStdString());
           //写文件
     }
@@ -261,52 +278,49 @@ void MainWindow::on_pushButton_clicked()//用户指令
     }
     else if (args.at(0) == "npro") {
         //create process
-        if(argc < 2){
-            cmdPrint("用法: npro [-t](CPU时间 默认随机) [-p]（优先级0-7 默认7）");
+        if(argc >5){
+            cmdPrint("用法: npro [-t] (CPU时间 默认随机1~10) [-p] (优先级0-7 默认7)");
             return;
         }
 
-        int cpu_time = rand()%10+1;
-        int prior = 7;
+        int cpu_time = -1;
+        int prior = -1;
 
-        for(int i = 1; i < argc; ++i)
+        int i = 1;
+        while(i < argc)
         {
             if(args.at(i) == "-t")
             {
-                if(!strIsDigit(args.at(++i)))
+                bool ok;
+                cpu_time=args.at(i+1).toInt(&ok);
+                if(!ok||cpu_time<=0)
                 {
-                    cmdPrint("cpu时间需为整数型");
+                    cmdPrint(QString("参数 \"%1\"无效，cpu时间需为正整数")
+                             .arg(args.at(i+1)));
                     return;
                 }
-                else
-                {
-                    cpu_time = args.at(i).toInt();
-                }
+                i+=2;
             }
             else if(args.at(i) == "-p")
             {
-                if(!strIsDigit(args.at(++i)))
+                bool ok;
+                prior=args.at(i+1).toInt(&ok);
+                if(!ok||prior<0||prior>7)
                 {
-                    cmdPrint("优先级需为0-7间的整数");
+                    cmdPrint(QString("参数 \"%1\"无效，优先级为0~7的整数")
+                             .arg(args.at(i+1)));
                     return;
                 }
-                else
-                {   int temp = args.at(i).toInt();
-                    if(temp >= 0 && temp <= 7)
-                    {
-                        prior = temp;
-                    }
-                    else
-                    {
-                        cmdPrint("优先级需为0至7间的整数");
-                    }
-                }
+                i+=2;
             }
-            else
-            {    cmdPrint("用法: npro [-t](CPU时间 默认随机) [-p]（优先级0-7 默认7）");
-                 return;
+            else{
+                cmdPrint(QString("无法识别参数 \"%1\"").arg(args.at(i)));
+                cmdPrint("用法: npro [-t] (CPU时间 默认随机1~10) [-p] (优先级0-7 默认7)");
+                return;
             }
         }
+        if(cpu_time<=0)cpu_time=this->rand()%10+1;
+        if(prior<0)prior=7;
         this->createProcess(cpu_time,prior);
         cmdPrint("创建进程成功！");
     }
@@ -358,5 +372,19 @@ void MainWindow::FS_init() {
     //创建文件 /home/out.c
 }
 
-
-
+void MainWindow::on_pauseButton_clicked()
+{
+    qDebug()<<"pause";
+    if(timer.isActive()){
+        qDebug()<<"stop";
+        ui->timerIcon->setMovie(stopGif);
+        ui->pauseButton->setText("继续");
+        timer.stop();
+    }
+    else{
+        qDebug()<<"start";
+        ui->timerIcon->setMovie(runGif);
+        ui->pauseButton->setText("时停");
+        timer.start(1000);
+    }
+}
