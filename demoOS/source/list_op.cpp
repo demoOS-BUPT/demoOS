@@ -134,6 +134,7 @@ void processDispatch(QList<Process*> &pcbPool,
             else break;//这个分支in==nullptr,没有可以换入的。
             break;
         }
+        /*
         case FCFS:{
             if(!runningQueue.isEmpty())
                 return;
@@ -145,6 +146,7 @@ void processDispatch(QList<Process*> &pcbPool,
             else break;//这个分支in==nullptr,没有可以换入的。
             break;
         }
+        */
         case PRI_RR:{
             Process* in=nullptr,* out=nullptr;
             int min = lowest_pri+1;
