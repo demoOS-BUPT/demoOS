@@ -17,6 +17,8 @@ using namespace std;
 #define init_directory_block_num 6//---------------------------------------转换要计算得出----------------------------
 #define init_FCB_block_num 7
 #define init_blockMap_block_num 8
+#define DIRECTORY_TYPE 0
+#define FILE_TYPE 1
 
 extern int directory_count_max;//每块磁盘可以装下的目录项数
 extern int FCB_count_max ;//每块磁盘可以装下的FCB数
@@ -34,6 +36,7 @@ extern int* BlockMap;//区块表
 extern char* systemStartAddr;
 extern string currentDir;
 extern Directory*lastDir;
+extern Directory*curDir;
 extern DirOperate*dirOp;
 extern DiskOperate*diskOP;
 extern char* bitmap;
@@ -48,9 +51,14 @@ int get_new_block();
 //在磁盘中查看磁盘中是否空间，获得一块磁盘号,失败返回-1
 
 Directory*path_to_directory(string path);
-//路径转换成目录的映射 /home/www/zxh.txt
+//路径转换成目录的映射 /home/www/zxh.txt 操作如果需要判断文件类型就传正确文件类型不需要判断传-1
 
 string path_to_filename(string op);
+
+void update_dir(void);
+//通过currentDir当前路径名 更新curDir lastDir指针
+
+string get_lastPath(string curPath);
 
 void init_system();
 //系统初始化

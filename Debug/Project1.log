@@ -1,5 +1,4 @@
-﻿  DiskOperate.cpp
-d:\os_filesystem\project1\project1\diskoperate.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
-d:\os_filesystem\project1\project1\diskoperate.cpp(18): warning C4018: “<”: 有符号/无符号不匹配
+﻿  FileSystem.cpp
+d:\os_filesystem\project1\project1\filesystem.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
   Project1.vcxproj -> D:\os_filesystem\Project1\Debug\Project1.exe
   Project1.vcxproj -> D:\os_filesystem\Project1\Debug\Project1.pdb (Partial PDB)

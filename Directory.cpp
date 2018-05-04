@@ -9,6 +9,8 @@ Directory::Directory() {
 		fileList[i] = NULL;
 	}
 	fileListNum = 0;
+	curDir = NULL;
+	lastDir = NULL;
 }
 
 string Directory::get_fileName() {
@@ -47,6 +49,11 @@ void Directory::set_all_fileList(Directory*newFileList[]) {
 int Directory::get_fileListNum() {
 	return fileListNum;
 }
+
+void Directory::set_fileListNum(int newFileListNum) {
+	fileListNum = newFileListNum;
+}
+
 bool  Directory::add_fileDirectory(Directory*directory) {
 	if (fileListNum < DIRECTORY_MAX) {
 		fileList[fileListNum] = directory;
@@ -56,4 +63,17 @@ bool  Directory::add_fileDirectory(Directory*directory) {
 	else {
 		return false;
 	}
+}
+
+Directory* Directory::get_curDir() {
+	return curDir;
+}
+void Directory::set_curDir(Directory*newCurDir) {
+	curDir = newCurDir;
+}
+Directory* Directory::get_lastDir() {
+	return lastDir;
+}
+void Directory::set_lastDir(Directory*newLastDir) {
+	lastDir = newLastDir;
 }

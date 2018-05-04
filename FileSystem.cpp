@@ -24,13 +24,32 @@ void example(){
 			//列出目录
 			//  ll  || ls ||  ll /zxh/a
 			if (args.size() == 1) {
+				dirOp->list_directory(curDir);
+			}
+			else if(args[1]=="*"|| args[1] == "-a"){
+				dirOp->list_all_directory(curDir);
+			}
+			else {
+				fileName = path_to_filename(args[1]);
+				Directory*fileDir = path_to_directory(args[1]);
+				for (int i = 0; i < fileDir->get_fileListNum(); i++) {
+					if (fileName == fileDir->get_fileList(i)->get_fileName()) {
+						fileDir = fileDir->get_fileList(i);
+						break;
+					}
+				}
+				dirOp->list_directory(fileDir);
+			}
+
+			/*
+			if (args.size() == 1) {
 				dirOp->list_all_directory(root_directory);
 			}
 			else {
 				dirOp->change_directory(args[1]);
 				dirOp->list_all_directory(lastDir);
 			}
-			
+			*/
 		}
 		else if (args[0] == "mkdir") {
 			dirName = path_to_filename(args[1]);
@@ -48,41 +67,89 @@ void example(){
 		}
         else if (args[0] == "vim") {
             
-            fileName = args[1];
-            cout << "Please input file content:";
-            //cin >> fileContent;
-			getline(cin, fileContent, '\n');
-			Directory*fileDir=lastDir;
-			
-			for (int i = 0; i < lastDir->get_fileListNum(); i++) {
-				if (fileName == lastDir->get_fileList(i)->get_fileName()) {
-					fileDir = lastDir->get_fileList(i);
-					break;
-				}
+            //fileName = args[1];
+			fileName = path_to_filename(args[1]);
+           
+			Directory*fileDir;
+			//fileDir = curDir;
+			fileDir = path_to_directory(args[1]);
+			if (fileDir == NULL) {
+				cout << "Error! Can't find the file." << endl;
 			}
-            dirOp->write_file(fileDir->get_FCBptr(), diskOP, fileContent);
-			//cin.clear();
-			//cin.sync();
-            //写文件
+			else {
+				for (int i = 0; i < fileDir->get_fileListNum(); i++) {
+					if (fileName == fileDir->get_fileList(i)->get_fileName()) {
+						fileDir = fileDir->get_fileList(i);
+						break;
+					}
+				}
+				if (fileDir->get_type() == '1') {
+					cout << "Please input file content:";
+					//cin >> fileContent;
+					getline(cin, fileContent, '\n');
+					dirOp->write_file(fileDir->get_FCBptr(), diskOP, fileContent);
+					//cin.clear();
+					//cin.sync();
+					//写文件
+				}
+				else {
+					cout << "Error! Can't find the file." << endl;
+				}
+				
+			}
+			
         }
 		else if (args[0] == "cat") {
-			fileName = args[1];
-			Directory*fileDir = lastDir;
-			for (int i = 0; i < lastDir->get_fileListNum(); i++) {
-				if (fileName == lastDir->get_fileList(i)->get_fileName()) {
-					fileDir = lastDir->get_fileList(i);
-					break;
-				}
+			fileName = path_to_filename(args[1]);
+			Directory*fileDir = path_to_directory(args[1]);
+			if (fileDir == NULL) {
+				cout << "Error! Can't find the file." << endl;
 			}
+			else {
+				//fileName = args[1];
+				//Directory*fileDir = curDir;
+				for (int i = 0; i < fileDir->get_fileListNum(); i++) {
+					if (fileName == fileDir->get_fileList(i)->get_fileName()) {
+						fileDir = fileDir->get_fileList(i);
+						break;
+					}
+				}
 
-			cout << dirOp->cat_file(fileDir->get_FCBptr(), diskOP) << endl;
-			//查看文件信息
+				if (fileDir->get_type() == '1') {
+					cout << dirOp->cat_file(fileDir->get_FCBptr(), diskOP) << endl;
+					//查看文件信息
+				}
+				else {
+					cout << "Error! Can't find the file." << endl;
+				}
+				
+			}
+			
 		}
 		else if (args[0] == "cd") {
 			//cd /home/zxh
 			//dirName = args[1];
 			dirOp->change_directory(args[1]);
 			//switch dir
+		}
+		else if (args[0] == "rm") {
+			fileName = path_to_filename(args[1]);
+			Directory*fileDir=NULL , *lastDir= path_to_directory(args[1]);
+			if (lastDir == NULL) {
+				cout << "Error! Can't find the file." << endl;
+			}
+			else {
+				for (int i = 0; i < lastDir->get_fileListNum(); i++) {
+					if (fileName == lastDir->get_fileList(i)->get_fileName()) {
+						fileDir = lastDir->get_fileList(i);
+						break;
+					}
+				}
+				dirOp->rm_directory(fileDir, lastDir);
+			}
+			
+
+			
 		}
 		else {
 			cout << "unidentification!" << endl;
@@ -144,7 +211,8 @@ void init_system() {
 	directory_count++;
 	root_directory->set_fileName("/");
 	root_directory->set_type('0');
-	lastDir = root_directory;
+	curDir = root_directory;
+	lastDir = NULL;
 	//currentDir = "/";
 	//cout << root_directory << endl;
 	//root_fcb = (FCB*)systemStartAddr + block_size * init_FCB_block_num;
