@@ -244,6 +244,41 @@ void processDispatch(QList<Process*> &pcbPool,
             else break;//这个分支in==nullptr,没有可以换入的。
             break;
         }
+        case NSJF:{
+                int i;
+                int min=1000;
+                if(!runningQueue.isEmpty()) return;
+                Process * in=nullptr;
+                if(!readyQueue.isEmpty()){
+                    for(i=0;i<readyQueue.size();i++){
+                        if(readyQueue.at(i)->getCPUtime()<min){
+                            in=readyQueue.at(i);
+                            min=readyQueue.at(i)->getCPUtime();
+                        }
+                    }
+                    moveProcess(readyQueue,runningQueue,in->getPid());
+                }
+                break;
+            }
+            case SJF:{
+                int i;
+                int min=1000;
+                Process * in=nullptr, * out=nullptr;
+                if(!readyQueue.isEmpty()){
+                    for(i=0;i<readyQueue.size();i++){
+                        if(readyQueue.at(i)->getCPUtime()<min){
+                            in=readyQueue.at(i);
+                            min=readyQueue.at(i)->getCPUtime();
+                        }
+                    }
+                }
+
+                if(min<runningQueue.at(0)->getCPUtime()){
+                    moveProcess(runningQueue,readyQueue,out->getPid());
+                    moveProcess(readyQueue,runningQueue,in->getPid());
+                }
+                break;
+            }
         case FCFS:
         default:{
             if(runningQueue.isEmpty()&&
