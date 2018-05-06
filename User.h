@@ -20,6 +20,7 @@ public:
 	string get_password();
 	string get_group();
 	bool is_login();
+	bool change_user(string userName, string password);
 }User;
 
 #endif // !USER_H

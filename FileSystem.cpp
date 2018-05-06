@@ -159,8 +159,17 @@ void example(){
 		else if (args[0] == "whoami") {
 			cout << currentUser->get_username() << endl;
 		}
-		else if (args[0] == "whoami") {
-			cout << currentUser->get_username() << endl;
+		else if (args[0] == "whichgroup") {
+			cout << currentUser->get_group() << endl;
+		}
+		else if (args[0] == "su") {
+			string username = args[1], password;
+			cout << "Password:";
+			cin >> password;
+			if(currentUser->change_user(username, password))
+				cout << "Success" << endl;
+			else
+				cout << "Error" << endl;
 		}
 		else {
 			cout << "unidentification!" << endl;

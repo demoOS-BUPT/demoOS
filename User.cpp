@@ -48,3 +48,13 @@ bool User::is_login(){
 	cout << "Access Denied" << endl;
 	return false;
 }
+
+bool User::change_user(string userName, string password){
+	for(int i=0;i<=5;i++){
+		if (userArr[i].get_username() == userName && userArr[i].get_password() == password){
+			currentUser->init(userArr[i].get_username(), userArr[i].get_password(), userArr[i].get_group());
+			return true;
+		}
+	}
+	return false;
+}
