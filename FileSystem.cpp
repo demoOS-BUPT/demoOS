@@ -16,7 +16,7 @@ void example(){
 	//这里是命令行，在这里进行初始化，循环，交互
 	while (1) {
 		op = "";
-		cout << "["+currentUser->get_username() +"@localhost " + currentDir + "]";
+		cout << ""+currentUser->get_username() +"@geek_linux:"+currentDir+"# ";
 
 		fflush(stdin);
 		getline(cin,op, '\n');
@@ -24,7 +24,7 @@ void example(){
 		vector<string> args = split(op, " ");
 		//		string args[] = op.split(" ");
 				//这里加多空格容错
-		if (args[0] == "ls" || args[0] == "ll") {
+		if (args[0] == "ls") {
 			//列出目录
 			//  ll  || ls ||  ll /zxh/a
 			if (args.size() == 1) {
@@ -55,6 +55,11 @@ void example(){
 			}
 			*/
 		}
+		else if (args[0] == "ll") {
+			if (args.size() == 1){
+				dirOp->ll_directory(curDir);
+			}
+		}
 		else if (args[0] == "mkdir") {
 			dirName = path_to_filename(args[1]);
 	        //创建的文件是文件
@@ -70,10 +75,8 @@ void example(){
 			}
 		}
         else if (args[0] == "vim") {
-            
             //fileName = args[1];
 			fileName = path_to_filename(args[1]);
-           
 			Directory*fileDir;
 			//fileDir = curDir;
 			fileDir = path_to_directory(args[1]);
@@ -154,7 +157,10 @@ void example(){
 		}
 		//User
 		else if (args[0] == "whoami") {
-			cout << "whoami" << endl;
+			cout << currentUser->get_username() << endl;
+		}
+		else if (args[0] == "whoami") {
+			cout << currentUser->get_username() << endl;
 		}
 		else {
 			cout << "unidentification!" << endl;

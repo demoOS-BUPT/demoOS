@@ -15,8 +15,8 @@ Directory::Directory() {
 	owner = "root";
 	group = "root";
 	authority[0] = 7;
-	authority[1] = 7;
-	authority[2] = 7;
+	authority[1] = 4;
+	authority[2] = 4;
 }
 
 string Directory::get_fileName() {
@@ -94,17 +94,36 @@ string Directory::get_group(){
 
 string Directory::get_authority(){
 	string autho = "";
+	if (this->type == 0)
+		autho = "d";
+	else
+		autho = "-";
+
 	for (int i=0;i<3;i++){
-		char s[12];             //设定12位对于存储32位int值足够  
-    	itoa(this->authority[i],s,10);            //itoa函数亦可以实现，但是属于C中函数，在C++中推荐用流的方法  
-    	string str_tmp = s;
-		autho += str_tmp;
+		if (this->authority[i] >= 4)
+			autho += "r";
+		else
+			autho += "-";
+		if ((this->authority[i]%4) >= 2)
+			autho += "w";
+		else
+			autho += "-";
+		if ((this->authority[i]%2) >= 1)
+			autho += "x";
+		else
+			autho += "-";
 	}
 	return autho;
 }
 
 string Directory::get_change_time(){
-	return this->changeTime;
+	time_t t;
+	tm* local;
+	char buf[64];
+	t = time(NULL);
+	local = localtime(&t);
+	strftime(buf, 64, "%B  %d %H:%M", local);
+	return buf;//this->changeTime;
 }
 
 void Directory::set_owner(string owner){

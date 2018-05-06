@@ -205,6 +205,26 @@ void DirOperate::list_all_directory(Directory*directory) {
 	}
 }
 
+void DirOperate::ll_directory(Directory*directory) {
+	if ('1' == directory->get_type()) {
+		//cout << directory->get_fileName()<<endl;
+		return;
+	}
+	else {
+	//drwxr-xr-x  2 root root 4096 Feb  2 09:40 Videos
+		for (int i = 0; i < directory->get_fileListNum(); i++) {
+			Directory* tmpDirectory = directory->get_fileList(i);
+			cout << tmpDirectory->get_authority() << "  ";
+			cout << tmpDirectory->get_fileListNum() << " ";
+			cout << tmpDirectory->get_owner() << " ";
+			cout << tmpDirectory->get_group() << " ";
+			cout << 4096 << "\t";
+			cout << tmpDirectory->get_change_time() << " ";
+			cout << tmpDirectory->get_fileName() << endl;
+		}
+	}
+}
+
 void DirOperate::rm_directory(Directory*dir,Directory*lastDir) {
 	if ('1' == dir->get_type()) {
 		rm_file(dir, lastDir);
