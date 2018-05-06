@@ -17,6 +17,11 @@ private:
 	int fileListNum;
 	Directory* curDir;
 	Directory* lastDir;
+
+	string owner;
+	string group;
+	int authority[3]; //owner group others
+	string changeTime;
 public:
 	Directory();
 	string get_fileName();
@@ -35,5 +40,16 @@ public:
 	void set_curDir(Directory*newCurDir);
 	Directory*get_lastDir();
 	void set_lastDir(Directory*newLastDir);
+
+	string get_owner();
+	string get_group();
+	string get_authority();
+	string get_change_time();
+
+	void set_owner(string owner);
+	void set_group(string group);
+	void set_change_time();
+	void set_authority(int x[]);
+	bool is_authority(string userName, string group, string action);
 }Directory;
 #endif // !DIRECTORY_H

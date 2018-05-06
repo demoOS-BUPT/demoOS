@@ -229,7 +229,7 @@ void DirOperate::change_directory(string inputNewPath) {
 			//根目录
 			curDir = root_directory;
 			lastDir = NULL;
-			currentDir = "";
+			currentDir = "/";
 		}
 		else {
 			//绝对路径
@@ -266,6 +266,8 @@ void DirOperate::change_directory(string inputNewPath) {
 		curDir = lastDir;
 		lastDir = lastDir->get_curDir();
 		currentDir= get_lastPath(currentDir);
+		if (currentDir == "")
+			currentDir = "/";
 	}
 	else {
 		//相对路径
@@ -290,7 +292,10 @@ void DirOperate::change_directory(string inputNewPath) {
 					if (v[i] == tmp->get_fileList(j)->get_fileName()) {
 						tmp = tmp->get_fileList(j);
 						flag = true;
-						newPath = newPath + '/' + v[i];
+						if (newPath == "/")
+							newPath = '/' + v[i];
+						else
+							newPath = newPath + '/' + v[i];
 					}
 				}
 			}

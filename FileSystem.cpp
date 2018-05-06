@@ -6,13 +6,17 @@
 using namespace std;
 
 void example(){
-	//-----------------------currentDir怎么修改-------------------------------
-	init_system();
 	string op,dirName,fileName, fileContent;
+
+	bool isLogin = false;
+	while (! isLogin){
+		isLogin = currentUser->is_login();
+	}
+
 	//这里是命令行，在这里进行初始化，循环，交互
 	while (1) {
 		op = "";
-		cout << "[root@localhost " + currentDir + "]";
+		cout << "["+currentUser->get_username() +"@localhost " + currentDir + "]";
 
 		fflush(stdin);
 		getline(cin,op, '\n');
@@ -146,48 +150,28 @@ void example(){
 					}
 				}
 				dirOp->rm_directory(fileDir, lastDir);
-			}
-			
-
-			
+			}			
+		}
+		//User
+		else if (args[0] == "whoami") {
+			cout << "whoami" << endl;
 		}
 		else {
 			cout << "unidentification!" << endl;
 		}
 	}
-		/*
-
-			case 'ls':
-
-			case "ll":
-				
-				break;
-			case "mkdir":
-				dirName = args[1];
-				//检查是否存在此目录，不存在则创建
-				break;
-            case "touch":
-                fileName = args[1];
-                //创建file
-                break;
-			case "cat":
-				fileName = args[1];
-				//查看文件信息
-				break;
-            case "cd":
-                dirName = args[1];
-                //switch dir
-                break;
-			default:
-                cout << "未识别" << endl;
-                continue;
-
-				*/
 		
-	}
+}
 
 
 void init_system() {
+	string username = "root";
+	string password = "toor";
+	currentUser = new User();
+	userArr = new User[20];
+	currentUser->init(username, password, username);
+	userArr[0].init(username, password, username);
+
 	dirOp = new DirOperate();
 	diskOP=new DiskOperate();
 	systemStartAddr = (char*)malloc(system_size * sizeof(char));  
@@ -213,7 +197,7 @@ void init_system() {
 	root_directory->set_type('0');
 	curDir = root_directory;
 	lastDir = NULL;
-	//currentDir = "/";
+	currentDir = "/";
 	//cout << root_directory << endl;
 	//root_fcb = (FCB*)systemStartAddr + block_size * init_FCB_block_num;
 	root_fcb = new(systemStartAddr + block_size * init_FCB_block_num)FCB;
@@ -224,10 +208,13 @@ void init_system() {
 	//cout << root_directory << endl;
 	init_blockMap();
 	//directory FCB物理上顺序存储 逻辑上链式存储
-    //创建目录 /home
-    //创建目录 /home/www
-    //创建文件 /home/www/in.c
-    //创建文件 /home/out.c
+	//
+
+	dirOp->create_file(path_to_directory("/tmp"),path_to_filename("/tmp"),'0');
+	dirOp->create_file(path_to_directory("/root"),path_to_filename("/root"),'0');
+	dirOp->create_file(path_to_directory("/home"),path_to_filename("/home"),'0');
+	dirOp->create_file(path_to_directory("/home/a.c"), path_to_filename("/home/a.c"), '1');
+
 }
 
 void test_unit(){
@@ -239,6 +226,7 @@ void test_unit(){
 }
 
 int main(){
+	init_system();
 	example();
 
 	return 0;

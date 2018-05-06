@@ -27,6 +27,9 @@ DirOperate*dirOp;
 DiskOperate*diskOP;
 char* bitmap;
 
+User* currentUser;
+User* userArr;
+
 Directory*get_new_Directory() {
 	//在目录存储块为新的目录申请空间，获得新的文件目录指针
 	Directory*newDirectory;

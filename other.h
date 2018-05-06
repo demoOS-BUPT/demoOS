@@ -5,6 +5,7 @@
 #include"FCB.h"
 #include"DirOperate.h"
 #include"DiskOperate.h"
+#include"User.h"
 #include<iostream>
 #include<ctime>
 #include<string>
@@ -40,6 +41,9 @@ extern Directory*curDir;
 extern DirOperate*dirOp;
 extern DiskOperate*diskOP;
 extern char* bitmap;
+
+extern User* currentUser;
+extern User* userArr;
 
 Directory*get_new_Directory(); 
 //在目录存储块为新的目录申请空间，获得新的文件目录指针
