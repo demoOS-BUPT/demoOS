@@ -192,7 +192,6 @@ void DirOperate::list_directory(Directory*directory) {
 }
 
 void DirOperate::list_all_directory(Directory*directory) {
-	cout << "."<<endl<<".." << endl;
 	if ('1' == directory->get_type()) {
 		//cout << directory->get_fileName()<<endl;
 		return;
@@ -218,7 +217,7 @@ void DirOperate::ll_directory(Directory*directory) {
 			cout << tmpDirectory->get_fileListNum() << " ";
 			cout << tmpDirectory->get_owner() << " ";
 			cout << tmpDirectory->get_group() << " ";
-			cout << 4096 << "\t";
+			cout << 4096 << "  ";
 			cout << tmpDirectory->get_change_time() << " ";
 			cout << tmpDirectory->get_fileName() << endl;
 		}
@@ -272,9 +271,7 @@ void DirOperate::change_directory(string inputNewPath) {
 				flag = true;
 			}
 			curDir = tmp;
-			lastDir = curDir->get_curDir();//!!!!
-
-			
+			lastDir = curDir->get_curDir();//!!!!			
 		}
 		
 	}

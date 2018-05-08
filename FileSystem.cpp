@@ -1,5 +1,6 @@
 #include "other.h"
 #include<string>
+#include<cmath>
 #include<new>
 #include<cstdlib>
 #include<cstring>
@@ -31,6 +32,7 @@ void example(){
 				dirOp->list_directory(curDir);
 			}
 			else if(args[1]=="*"|| args[1] == "-a"){
+				cout << "."<<endl<<".." << endl;
 				dirOp->list_all_directory(curDir);
 			}
 			else {
@@ -91,13 +93,17 @@ void example(){
 					}
 				}
 				if (fileDir->get_type() == '1') {
-					cout << "Please input file content:";
-					//cin >> fileContent;
-					getline(cin, fileContent, '\n');
-					dirOp->write_file(fileDir->get_FCBptr(), diskOP, fileContent);
-					//cin.clear();
-					//cin.sync();
-					//写文件
+					if ( ! fileDir->is_authority(currentUser->get_username(), currentUser->get_group(), "w"))
+						cout << "Permission denied." << endl;
+					else{
+						cout << "Please input file content:";
+						//cin >> fileContent;
+						getline(cin, fileContent, '\n');
+						dirOp->write_file(fileDir->get_FCBptr(), diskOP, fileContent);
+						//cin.clear();
+						//cin.sync();
+						//写文件
+					}
 				}
 				else {
 					cout << "Error! Can't find the file." << endl;
@@ -123,7 +129,10 @@ void example(){
 				}
 
 				if (fileDir->get_type() == '1') {
-					cout << dirOp->cat_file(fileDir->get_FCBptr(), diskOP) << endl;
+					if (fileDir->is_authority(currentUser->get_username(), currentUser->get_group(), "r"))
+						cout << dirOp->cat_file(fileDir->get_FCBptr(), diskOP) << endl;
+					else
+						cout << "Permission denied." << endl;
 					//查看文件信息
 				}
 				else {
@@ -170,6 +179,61 @@ void example(){
 				cout << "Success" << endl;
 			else
 				cout << "Error" << endl;
+		}
+		else if (args[0] == "chmod"){
+			fileName = path_to_filename(args[2]);
+			Directory*fileDir = path_to_directory(args[2]);
+			if (fileDir == NULL) {
+				cout << "Error! Can't find the file." << endl;
+			}
+			else {
+				//fileName = args[1];
+				//Directory*fileDir = curDir;
+				for (int i = 0; i < fileDir->get_fileListNum(); i++) {
+					if (fileName == fileDir->get_fileList(i)->get_fileName()) {
+						fileDir = fileDir->get_fileList(i);
+						break;
+					}
+				}
+				int auth[3];
+				string authStr = args[1];
+				auth[0] = (atoi(authStr.c_str()) - atoi(authStr.c_str())%100)/100;
+				auth[1] = (atoi(authStr.c_str()) - auth[0]*100 - atoi(authStr.c_str())%10)/10;
+				auth[2] = atoi(authStr.c_str())%10;
+				fileDir->set_authority(auth);
+			}
+		}
+		else if (args[0] == "chown"){
+			fileName = path_to_filename(args[1]);
+			Directory*fileDir = path_to_directory(args[1]);
+			if (fileDir == NULL) {
+				cout << "Error! Can't find the file." << endl;
+			}
+			else {
+				for (int i = 0; i < fileDir->get_fileListNum(); i++) {
+					if (fileName == fileDir->get_fileList(i)->get_fileName()) {
+						fileDir = fileDir->get_fileList(i);
+						break;
+					}
+				}
+				fileDir->set_owner(args[2]);
+			}
+		}
+		else if (args[0] == "chgrp"){
+			fileName = path_to_filename(args[1]);
+			Directory*fileDir = path_to_directory(args[1]);
+			if (fileDir == NULL) {
+				cout << "Error! Can't find the file." << endl;
+			}
+			else {
+				for (int i = 0; i < fileDir->get_fileListNum(); i++) {
+					if (fileName == fileDir->get_fileList(i)->get_fileName()) {
+						fileDir = fileDir->get_fileList(i);
+						break;
+					}
+				}
+				fileDir->set_group(args[2]);
+			}
 		}
 		else {
 			cout << "unidentification!" << endl;
