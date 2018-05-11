@@ -98,8 +98,8 @@ void MainWindow::kernel(){
 
     //cmdPrint("1000ms CYCLE");
     //cmdPrint("---------------------------------------");
-    if(rand()%(pcbPool.size()+1)==0)
-        this->createProcess(rand()%10+1,rand()%5);
+    //if(rand()%(pcbPool.size()+1)==0)
+    //    this->createProcess(rand()%10+1,rand()%5);
 
     ProcessAlg alg=static_cast<ProcessAlg>(ui->processAlgComboBox->currentIndex());
     processDispatch(pcbPool,readyQueue,runningQueue,waitQueue,alg);//进程调度函数
