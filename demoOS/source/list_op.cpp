@@ -136,6 +136,7 @@ void processDispatch(QList<Process*> &pcbPool,
         for(int i=0;i<RR1.size();i++) RR1.at(i)->setPriority(0);
     }
     else if(alg!=MFQ&&boolMFQ){//MFQ算法退出
+        boolMFQ=false;
         readyQueue.append(RR1);
         readyQueue.append(RR2);
         readyQueue.append(FCFS);
