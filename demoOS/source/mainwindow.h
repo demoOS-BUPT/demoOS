@@ -40,6 +40,11 @@ private:
     QList<Process*> readyQueue;    //就绪队列
     QList<Process*> runningQueue;   //在运行
 
+    //多级反馈队列
+    QList<Process*> RR1;
+    QList<Process*> RR2;
+    QList<Process*> FCFS;
+
     std::mt19937 rand;//用 rand()得到随机数
 
     void cmdPrint(QString newLine);
@@ -55,6 +60,7 @@ private slots:
 
     void on_pushButton_clicked();
     void on_pauseButton_clicked();
+    void on_processAlgComboBox_currentIndexChanged(int index);
 };
 
 #endif // MAINWINDOW_H

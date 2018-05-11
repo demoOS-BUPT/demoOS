@@ -22,25 +22,27 @@ MainWindow::MainWindow(QWidget *parent) :
                                            <<"非抢占式优先级"
                                            <<"非抢占短作业优先"
                                            <<"短作业优先"
+                                           <<"多级反馈队列"
                                           );
     ui->cmd->setTextColor(QColor(80,0,0));
     ui->cmd->setText("DemoOS 正在启动\n");
 
-    ui->readyTable->setColumnCount(3);
-    ui->readyTable->setHorizontalHeaderLabels(QStringList()
-                                              <<"PID"
-                                              <<"CPU时间"
-                                              <<"优先级");
-    ui->runTable->setColumnCount(3);
-    ui->runTable->setHorizontalHeaderLabels(QStringList()
-                                              <<"PID"
-                                              <<"CPU时间"
-                                              <<"优先级");
+#define INIT_TABLE(TABLE_NAME) TABLE_NAME->setColumnCount(3);\
+    TABLE_NAME->setHorizontalHeaderLabels(QStringList()<<"PID"<<"CPU时间"<<"优先级")
+    INIT_TABLE(ui->runTable);
+    INIT_TABLE(ui->readyTable);
+    INIT_TABLE(ui->RR1T);
+    INIT_TABLE(ui->RR2T);
+    INIT_TABLE(ui->FCFST);
+    ui->RR1T->hide();
+    ui->RR2T->hide();
+    ui->FCFST->hide();
 
     this->pcbPool.clear();
     this->waitQueue.clear();
     this->readyQueue.clear();
     this->runningQueue.clear();//清空进程
+    RR1.clear();RR2.clear();FCFS.clear();
 
     FS_init();//磁盘子系统初始化
 
@@ -55,24 +57,20 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::printQueue(){
-    ui->readyTable->setRowCount(readyQueue.size());
-    for(int i=0;i<readyQueue.size();i++){
-        ui->readyTable->setItem(i,0
-           ,new QTableWidgetItem(QString::number(readyQueue.at(i)->getPid())));
-        ui->readyTable->setItem(i,1
-           ,new QTableWidgetItem(QString::number(readyQueue.at(i)->getCPUtime())));
-        ui->readyTable->setItem(i,2
-           ,new QTableWidgetItem(QString::number(readyQueue.at(i)->getPriority())));
+#define PRINT_QUEUE(TABLE,QUEUE)    TABLE->setRowCount(QUEUE.size());\
+    for(int i=0;i<QUEUE.size();i++){\
+        TABLE->setItem(i,0\
+           ,new QTableWidgetItem(QString::number(QUEUE.at(i)->getPid())));\
+        TABLE->setItem(i,1\
+           ,new QTableWidgetItem(QString::number(QUEUE.at(i)->getCPUtime())));\
+        TABLE->setItem(i,2\
+           ,new QTableWidgetItem(QString::number(QUEUE.at(i)->getPriority())));\
     }
-    ui->runTable->setRowCount(runningQueue.size());
-    for(int i=0;i<runningQueue.size();i++){
-        ui->runTable->setItem(i,0
-           ,new QTableWidgetItem(QString::number(runningQueue.at(i)->getPid())));
-        ui->runTable->setItem(i,1
-           ,new QTableWidgetItem(QString::number(runningQueue.at(i)->getCPUtime())));
-        ui->runTable->setItem(i,2
-           ,new QTableWidgetItem(QString::number(runningQueue.at(i)->getPriority())));
-    }
+    PRINT_QUEUE(ui->readyTable,readyQueue)
+    PRINT_QUEUE(ui->runTable,runningQueue)
+    PRINT_QUEUE(ui->RR1T,RR1)
+    PRINT_QUEUE(ui->RR2T,RR2)
+    PRINT_QUEUE(ui->FCFST,FCFS)
 }
 
 void MainWindow::createProcess(int cpuTime,int priority){
@@ -104,7 +102,8 @@ void MainWindow::kernel(){
     //    this->createProcess(rand()%10+1,rand()%5);
 
     ProcessAlg alg=static_cast<ProcessAlg>(ui->processAlgComboBox->currentIndex());
-    processDispatch(pcbPool,readyQueue,runningQueue,waitQueue,alg);//进程调度函数
+    processDispatch(pcbPool,readyQueue,runningQueue,
+                    waitQueue,RR1,RR2,FCFS,alg);//进程调度函数
     execute(pcbPool,runningQueue);//进程执行
 
     printQueue();
@@ -249,7 +248,8 @@ void MainWindow::on_pushButton_clicked()//用户指令
             cmdPrint("用法: kill [PID]");
             return;
         }
-        if(!termiProcess(this->pcbPool,this->readyQueue,this->waitQueue,this->runningQueue,args.at(1).toInt()))
+        if(!termiProcess(this->pcbPool,this->readyQueue,this->waitQueue,this->runningQueue,
+                         RR1,RR2,FCFS,args.at(1).toInt()))
         {
             cmdPrint("该进程不存在，请重新输入");
         }
@@ -368,5 +368,21 @@ void MainWindow::on_pauseButton_clicked()
         ui->timerIcon->setMovie(runGif);
         ui->pauseButton->setText("时停");
         timer.start(1000);
+    }
+}
+
+void MainWindow::on_processAlgComboBox_currentIndexChanged(int index)
+{
+    if(index==8){
+        ui->readyTable->hide();
+        ui->RR1T->show();
+        ui->RR2T->show();
+        ui->FCFST->show();
+    }
+    else{
+        ui->readyTable->show();
+        ui->RR1T->hide();
+        ui->RR2T->hide();
+        ui->FCFST->hide();
     }
 }

@@ -1,6 +1,9 @@
 #include "list_op.h"
 #include "demo_process.h"
 
+static bool boolMFQ=false;
+static int timer=0;
+
 //获取新PID,返回0表示失败
 unsigned long getNewPID(QList<Process*>& pcbPool)
 {
@@ -53,13 +56,17 @@ void moveProcess(QList<Process*>& s_list, QList<Process*>&d_list, unsigned long 
 int termiProcess(QList<Process*> &pcbPool,
                   QList<Process*> &readyQueue,
                   QList<Process*> &runningQueue,
-                  QList<Process*> &waitQueue, unsigned long PID)
+                  QList<Process*> &waitQueue,
+                 QList<Process*> &RR1,
+                 QList<Process*> &RR2,
+                 QList<Process*> &FCFS,
+                 unsigned long PID)
 {
     Process* p=nullptr;
     p=find(pcbPool,PID);
     if(p==nullptr)return 0;//进程不存在
 
-    //从所有队列删除 (用了宏 对不起！)
+    //从队列删除
     #define REMOVE_FROM_LIST(LISTNAME) do{\
         for(int j=0;j<LISTNAME.size();j++)\
             if(LISTNAME.at(j)->getPid()==PID){\
@@ -73,6 +80,9 @@ int termiProcess(QList<Process*> &pcbPool,
     REMOVE_FROM_LIST(readyQueue);
     REMOVE_FROM_LIST(runningQueue);
     REMOVE_FROM_LIST(waitQueue);
+    REMOVE_FROM_LIST(RR1);
+    REMOVE_FROM_LIST(RR2);
+    REMOVE_FROM_LIST(FCFS);
 
 
     delete p;//释放
@@ -104,6 +114,9 @@ void processDispatch(QList<Process*> &pcbPool,
                      QList<Process*> &readyQueue,
                      QList<Process*> &runningQueue,
                      QList<Process*> &waitQueue,
+                     QList<Process*> &RR1,
+                     QList<Process*> &RR2,
+                     QList<Process*> &FCFS,
                      ProcessAlg alg){
     //终结进程
     QList<Process*> killList;
@@ -113,7 +126,22 @@ void processDispatch(QList<Process*> &pcbPool,
     }
     for(int i=0;i<killList.size();i++){
         termiProcess(pcbPool,readyQueue,runningQueue,waitQueue,
-                     killList.at(i)->getPid());
+                     RR1,RR2,FCFS,killList.at(i)->getPid());
+    }
+
+    if(alg==MFQ&&boolMFQ==false){//MFQ算法首次进入，加载readyQueue到RR1
+        boolMFQ=true;
+        RR1=readyQueue;
+        readyQueue.clear();
+        for(int i=0;i<RR1.size();i++) RR1.at(i)->setPriority(0);
+    }
+    else if(alg!=MFQ&&boolMFQ){//MFQ算法退出
+        readyQueue.append(RR1);
+        readyQueue.append(RR2);
+        readyQueue.append(FCFS);
+        RR1.clear();
+        RR2.clear();
+        FCFS.clear();
     }
 
     //进程调度
@@ -260,7 +288,7 @@ void processDispatch(QList<Process*> &pcbPool,
                 }
                 break;
             }
-            case SJF:{
+        case SJF:{
                 int i;
                 int min=1000;
                 Process * in=nullptr, * out=nullptr;
@@ -279,7 +307,99 @@ void processDispatch(QList<Process*> &pcbPool,
                 }
                 break;
             }
-        case FCFS:
+        case MFQ:{//多级反馈队列：RR1s，RR2s，FCFS
+            if(!readyQueue.isEmpty()){//有新进程
+                RR1.append(readyQueue);
+                readyQueue.clear();
+                for(int i=0;i<RR1.size();i++) RR1.at(i)->setPriority(0);
+            }
+
+            Process *in=nullptr,*out=nullptr;
+
+            if(!RR1.isEmpty()){
+                in=RR1.at(0);
+            }
+            else if(!RR2.isEmpty()){
+                in=RR2.at(0);
+            }
+            else if(!FCFS.isEmpty()){
+                in=FCFS.at(0);
+            }
+            if(!runningQueue.isEmpty()) out=runningQueue.at(0);
+            else{
+                if(in==nullptr)break;
+                else{
+                    switch (in->getPriority()){
+                    case 0:
+                        moveProcess(RR1,runningQueue,in->getPid());
+                        break;
+                    case 1:
+                        moveProcess(RR2,runningQueue,in->getPid());
+                        timer=0;
+                        break;
+                    case 2:
+                    default:
+                        moveProcess(FCFS,runningQueue,in->getPid());
+                        break;
+                    }
+                    break;
+                }
+            }
+
+            if(out->getPriority()==1) timer++;//时间片计数器
+            if(in==nullptr)break;
+
+            if(in->getPriority()<out->getPriority()){//立即抢占
+                switch (out->getPriority()) {
+                case 0:
+                    out->setPriority(1);
+                    moveProcess(runningQueue,RR2,out->getPid());
+                    break;
+                case 1:
+                case 2:
+                default:
+                    out->setPriority(2);
+                    moveProcess(runningQueue,FCFS,out->getPid());
+                    break;
+                }
+                switch (in->getPriority()){
+                case 0:
+                    moveProcess(RR1,runningQueue,in->getPid());
+                    break;
+                case 1:
+                    moveProcess(RR2,runningQueue,in->getPid());
+                    timer=0;
+                    break;
+                case 2:
+                default:
+                    break;
+                }
+            }
+            else if(in->getPriority()>out->getPriority()){
+                ;//不能抢占更高级队列的进程
+            }
+            else if(in->getPriority()==out->getPriority()){
+                switch (out->getPriority()) {
+                case 0:
+                    out->setPriority(1);
+                    moveProcess(runningQueue,RR2,out->getPid());
+                    moveProcess(RR1,runningQueue,in->getPid());
+                    break;
+                case 1:
+                    if(timer>=2){
+                        out->setPriority(2);
+                        moveProcess(runningQueue,FCFS,out->getPid());
+                        moveProcess(RR2,runningQueue,in->getPid());
+                        timer=0;
+                    }
+                case 2:
+                default:
+                    break;
+                }
+            }
+            break;
+        }
+        case FCFSa:
         default:{
             if(runningQueue.isEmpty()&&
                     !readyQueue.isEmpty()){
@@ -289,7 +409,6 @@ void processDispatch(QList<Process*> &pcbPool,
             break;
         }
     }
-
 }
 
 //进程执行
