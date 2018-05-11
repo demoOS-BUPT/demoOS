@@ -24,6 +24,7 @@ private:
 	string changeTime;
 public:
 	Directory();
+	~Directory();
 	string get_fileName();
 	void set_fileName(string newFileName);
 	char get_type();
@@ -31,7 +32,7 @@ public:
 	FCB*get_FCBptr();
 	void set_FCBptr(FCB* newFCBptr);
 	Directory* get_fileList(int i);
-	void set_fileList(Directory*newFileList[],int i);
+	void set_fileList(Directory*newFileList,int i);
 	void set_all_fileList(Directory*newFileList[]);
 	int get_fileListNum();
 	void set_fileListNum(int newFileListNum);
@@ -44,11 +45,13 @@ public:
 	string get_owner();
 	string get_group();
 	string get_authority();
+	int *get_authority_value();
 	string get_change_time();
 
 	void set_owner(string owner);
 	void set_group(string group);
 	void set_change_time();
+	void set_change_time(string newtime);
 	void set_authority(int x[]);
 	bool is_authority(string userName, string group, string action);
 }Directory;

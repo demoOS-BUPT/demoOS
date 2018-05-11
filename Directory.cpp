@@ -1,7 +1,7 @@
 #include"Directory.h"
 #include <ctime>
 using namespace std;
-
+#pragma warning( disable : 4996 )
 Directory::Directory() {
 	fileName = "";
 	type = -1;
@@ -17,6 +17,9 @@ Directory::Directory() {
 	authority[0] = 7;
 	authority[1] = 4;
 	authority[2] = 4;
+}
+Directory::~Directory() {
+
 }
 
 string Directory::get_fileName() {
@@ -41,9 +44,9 @@ void Directory::set_FCBptr(FCB* newFCBptr) {
 Directory* Directory::get_fileList(int i) {
 	return fileList[i];
 }
-void Directory::set_fileList(Directory*newFileList[], int i) {
-	if (i < DIRECTORY_MAX&&i >= 0) {
-		fileList[i] = newFileList[i];
+void Directory::set_fileList(Directory*newFileList, int i) {
+	if (i < DIRECTORY_MAX&&i >=0) {
+		fileList[i] = newFileList;
 	}
 }
 void Directory::set_all_fileList(Directory*newFileList[]) {
@@ -115,6 +118,9 @@ string Directory::get_authority(){
 	}
 	return autho;
 }
+int *Directory::get_authority_value() {
+	return this->authority;
+}
 
 string Directory::get_change_time(){
 	time_t t;
@@ -135,6 +141,10 @@ void Directory::set_group(string group){
 void Directory::set_change_time(){
 	this->changeTime = time(NULL);
 }
+void Directory::set_change_time(string newTime) {
+	this->changeTime = newTime;
+}
+	
 
 void Directory::set_authority(int x[]){
 	for(int i=0;i<3;i++){

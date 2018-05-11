@@ -14,6 +14,9 @@ FCB::FCB() {
 	permission = 0;
 	recyleBin = 0;
 }
+FCB::~FCB() {
+
+}
 /*
 string FCB::get_expandName() {
 	return expandName;

@@ -69,6 +69,7 @@ FCB*get_new_FCB() {
 		current_FCB_block = newBlockNum;
 		//newBlockMap->set_currentBlock(newBlockNum);
 	}
+	//cout <<"FCB_add"<< root_fcb + FCB_count * sizeof(FCB) << endl;
 	FCB*newFCB =new( root_fcb + FCB_count * sizeof(FCB))FCB;
 	FCB_count++;
 	return newFCB;
@@ -331,5 +332,17 @@ string get_lastPath(string curPath) {
 	return newPath;
 }
 
+void adjust_array(Directory*dir) {
+	int count = 0;
+	for (int i = 0; i < DIRECTORY_MAX&&count != dir->get_fileListNum(); i++) {
+		if (dir->get_fileList(i) != NULL) {
+			count++;
+		}
+		else {
+			dir->set_fileList(dir->get_fileList(i + 1), i);
+			dir->set_fileList(NULL, i + 1);
+		}
 
+	}
+}
 

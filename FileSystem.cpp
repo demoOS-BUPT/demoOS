@@ -1,4 +1,5 @@
 #include "other.h"
+#include"instructionOp.h"
 #include<string>
 #include<cmath>
 #include<new>
@@ -26,36 +27,7 @@ void example(){
 		//		string args[] = op.split(" ");
 				//这里加多空格容错
 		if (args[0] == "ls") {
-			//列出目录
-			//  ll  || ls ||  ll /zxh/a
-			if (args.size() == 1) {
-				dirOp->list_directory(curDir);
-			}
-			else if(args[1]=="*"|| args[1] == "-a"){
-				cout << "."<<endl<<".." << endl;
-				dirOp->list_all_directory(curDir);
-			}
-			else {
-				fileName = path_to_filename(args[1]);
-				Directory*fileDir = path_to_directory(args[1]);
-				for (int i = 0; i < fileDir->get_fileListNum(); i++) {
-					if (fileName == fileDir->get_fileList(i)->get_fileName()) {
-						fileDir = fileDir->get_fileList(i);
-						break;
-					}
-				}
-				dirOp->list_directory(fileDir);
-			}
-
-			/*
-			if (args.size() == 1) {
-				dirOp->list_all_directory(root_directory);
-			}
-			else {
-				dirOp->change_directory(args[1]);
-				dirOp->list_all_directory(lastDir);
-			}
-			*/
+			ls_instruction(op);
 		}
 		else if (args[0] == "ll") {
 			if (args.size() == 1){
@@ -77,70 +49,10 @@ void example(){
 			}
 		}
         else if (args[0] == "vim") {
-            //fileName = args[1];
-			fileName = path_to_filename(args[1]);
-			Directory*fileDir;
-			//fileDir = curDir;
-			fileDir = path_to_directory(args[1]);
-			if (fileDir == NULL) {
-				cout << "Error! Can't find the file." << endl;
-			}
-			else {
-				for (int i = 0; i < fileDir->get_fileListNum(); i++) {
-					if (fileName == fileDir->get_fileList(i)->get_fileName()) {
-						fileDir = fileDir->get_fileList(i);
-						break;
-					}
-				}
-				if (fileDir->get_type() == '1') {
-					if ( ! fileDir->is_authority(currentUser->get_username(), currentUser->get_group(), "w"))
-						cout << "Permission denied." << endl;
-					else{
-						cout << "Please input file content:";
-						//cin >> fileContent;
-						getline(cin, fileContent, '\n');
-						dirOp->write_file(fileDir->get_FCBptr(), diskOP, fileContent);
-						//cin.clear();
-						//cin.sync();
-						//写文件
-					}
-				}
-				else {
-					cout << "Error! Can't find the file." << endl;
-				}
-				
-			}
-			
+			vim_instruction(op);
         }
 		else if (args[0] == "cat") {
-			fileName = path_to_filename(args[1]);
-			Directory*fileDir = path_to_directory(args[1]);
-			if (fileDir == NULL) {
-				cout << "Error! Can't find the file." << endl;
-			}
-			else {
-				//fileName = args[1];
-				//Directory*fileDir = curDir;
-				for (int i = 0; i < fileDir->get_fileListNum(); i++) {
-					if (fileName == fileDir->get_fileList(i)->get_fileName()) {
-						fileDir = fileDir->get_fileList(i);
-						break;
-					}
-				}
-
-				if (fileDir->get_type() == '1') {
-					if (fileDir->is_authority(currentUser->get_username(), currentUser->get_group(), "r"))
-						cout << dirOp->cat_file(fileDir->get_FCBptr(), diskOP) << endl;
-					else
-						cout << "Permission denied." << endl;
-					//查看文件信息
-				}
-				else {
-					cout << "Error! Can't find the file." << endl;
-				}
-				
-			}
-			
+			cat_instruction(op);
 		}
 		else if (args[0] == "cd") {
 			//cd /home/zxh
@@ -149,21 +61,20 @@ void example(){
 			//switch dir
 		}
 		else if (args[0] == "rm") {
-			fileName = path_to_filename(args[1]);
-			Directory*fileDir=NULL , *lastDir= path_to_directory(args[1]);
-			if (lastDir == NULL) {
-				cout << "Error! Can't find the file." << endl;
-			}
-			else {
-				for (int i = 0; i < lastDir->get_fileListNum(); i++) {
-					if (fileName == lastDir->get_fileList(i)->get_fileName()) {
-						fileDir = lastDir->get_fileList(i);
-						break;
-					}
-				}
-				dirOp->rm_directory(fileDir, lastDir);
-			}			
+			rm_instruction(op);
 		}
+		else if (args[0] == "ln") {
+			ln_instruction(op);
+		}
+		else if (args[0]=="cp") {
+			cp_instruction(op);
+			
+		}
+		else if (args[0]=="mv") {
+			mv_instruction(op);
+			
+		}
+
 		//User
 		else if (args[0] == "whoami") {
 			cout << currentUser->get_username() << endl;
@@ -172,9 +83,11 @@ void example(){
 			cout << currentUser->get_group() << endl;
 		}
 		else if (args[0] == "su") {
-			string username = args[1], password;
+			string username = args[1];
+			string password;
 			cout << "Password:";
-			cin >> password;
+			//cin >> password;
+			getline(cin, password, '\n');
 			if(currentUser->change_user(username, password))
 				cout << "Success" << endl;
 			else

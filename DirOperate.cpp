@@ -151,13 +151,27 @@ bool DirOperate::rm_file(Directory*fileDir,Directory*lastDir) {
 		for (int i = 0; i < fileDir->get_FCBptr()->get_fileSize()&&noCurBlock!=-1;i++) {
 			bitmap[noCurBlock] = 0;
 			BlockMap[noCurBlock] = -1;
-			delete[]blockAdd;
+			//删除磁盘内容
+			for (int i = 0; i < block_size; i++) {
+				blockAdd[i] = '\0';
+			}
+			//cout <<"noCurBlock"<< noCurBlock << endl;
+			//delete[]blockAdd;
 			noCurBlock = noNextBlock;
 			noNextBlock = BlockMap[noCurBlock];
 			blockAdd = noCurBlock * block_size + systemStartAddr;
 		}
 		//删除fcb
-		delete fileDir->get_FCBptr();
+		//cout << "FCB_add" << fileDir->get_FCBptr() << endl;
+		//void * buf = reinterpret_cast ();
+		//FCB*fcb_tmp = fileDir->get_FCBptr();
+		//cout << "fcb_tmp" << fcb_tmp << endl;
+		fileDir->get_FCBptr()->~FCB();
+		fileDir->set_FCBptr(NULL);
+		//char *add= get_FCBptr();
+		//FCB*newFCB = new(fcb_tmp)FCB;
+		//cout << newFCB << endl;
+		//delete []fileDir->get_FCBptr();
 		//删除dir
 		bool flag = false;
 		for (int i = 0; i < lastDir->get_fileListNum() && flag == false; i++) {
@@ -167,7 +181,10 @@ bool DirOperate::rm_file(Directory*fileDir,Directory*lastDir) {
 				lastDir->set_fileListNum(lastDir->get_fileListNum() - 1);
 			}
 		}
-		delete fileDir;
+		fileDir->~Directory();
+		fileDir = NULL;
+		adjust_array(lastDir);
+		//delete fileDir;
 	}
 	else {
 		fileDir->get_FCBptr()->set_link(link - 1);
@@ -179,7 +196,10 @@ bool DirOperate::rm_file(Directory*fileDir,Directory*lastDir) {
 				lastDir->set_fileListNum(lastDir->get_fileListNum() - 1);
 			}
 		}
-		delete fileDir;
+		fileDir->~Directory();
+		fileDir = NULL;
+		adjust_array(lastDir);
+		//delete fileDir;
 	}
 	return true;
 }
@@ -214,7 +234,12 @@ void DirOperate::ll_directory(Directory*directory) {
 		for (int i = 0; i < directory->get_fileListNum(); i++) {
 			Directory* tmpDirectory = directory->get_fileList(i);
 			cout << tmpDirectory->get_authority() << "  ";
-			cout << tmpDirectory->get_fileListNum() << " ";
+			if (tmpDirectory->get_FCBptr() == NULL) {
+				cout << tmpDirectory->get_fileListNum()<<" ";
+			}
+			else {
+				cout << tmpDirectory->get_FCBptr()->get_link() << " ";
+			}
 			cout << tmpDirectory->get_owner() << " ";
 			cout << tmpDirectory->get_group() << " ";
 			cout << 4096 << "  ";
@@ -229,7 +254,18 @@ void DirOperate::rm_directory(Directory*dir,Directory*lastDir) {
 		rm_file(dir, lastDir);
 	}
 	else if (dir->get_fileListNum() == 0) {
-		delete dir;
+		bool flag = false;
+		for (int i = 0; i < lastDir->get_fileListNum() && flag == false; i++) {
+			if (lastDir->get_fileList(i)->get_fileName() == dir->get_fileName()) {
+				flag = true;
+				lastDir->set_fileList(NULL, i);
+				lastDir->set_fileListNum(lastDir->get_fileListNum() - 1);
+			}
+		}
+		dir->~Directory();
+		dir = NULL;
+		adjust_array(lastDir);
+		//delete dir;
 	}
 	else {
 		for (int i = 0; i < dir->get_fileListNum(); i++) {
@@ -340,4 +376,77 @@ void DirOperate::change_directory(string inputNewPath) {
 		curDir = backUpDir;
 		lastDir = curDir->get_curDir();
 	}
+}
+
+void DirOperate::ln(Directory*sfiledir, Directory* tlastdir, string fileName) {
+	//在tlastdir下创建目录
+
+	if (tlastdir->get_fileListNum() >= DIRECTORY_MAX) {
+		cout << "Error! The current directory is full." << endl;
+		return;//当前目录下文件数已满
+	}
+	else {
+		Directory*newDirectory = get_new_Directory();
+		newDirectory->set_fileName(fileName);
+		newDirectory->set_type('1');
+
+		newDirectory->set_curDir(curDir);
+		newDirectory->set_lastDir(lastDir);
+
+		if (!tlastdir->add_fileDirectory(newDirectory)) {
+			return;
+		}
+		//建立连接
+		newDirectory->set_FCBptr(sfiledir->get_FCBptr());
+		sfiledir->get_FCBptr()->set_link(sfiledir->get_FCBptr()->get_link() + 1);
+		sfiledir->set_change_time();
+		newDirectory->set_change_time(sfiledir->get_change_time());
+		newDirectory->set_owner(sfiledir->get_owner());
+		newDirectory->set_group(sfiledir->get_group());
+		newDirectory->set_authority(sfiledir->get_authority_value());
+	}
+}
+
+void DirOperate::cp_file(Directory*sfiledir, Directory*tlastdir, string tfileName) {
+	//文件是否存在，存在则覆盖，不存在则复制
+	bool flag = false;
+	Directory*tfiledir=NULL;
+	string content;
+	int i = 0;
+	for ( i = 0; i < tlastdir->get_fileListNum() && flag == false; i++) {
+		if (tlastdir->get_fileList(i)->get_fileName() == tfileName) {
+			flag = true;
+		}
+	}
+	if (flag == true) {
+		//文件已经存在
+		tfiledir = tlastdir->get_fileList(i-1);
+	}
+	else {
+		//文件不存在
+		dirOp->create_file(tlastdir, tfileName, '1');
+		for (int i = 0; i < tlastdir->get_fileListNum() && flag == false; i++) {
+			if (tlastdir->get_fileList(i)->get_fileName() == tfileName) {
+				flag = true;
+				tfiledir = tlastdir->get_fileList(i);
+			}
+		}
+	}
+	//cout << tfiledir << endl;
+	content = dirOp->cat_file(sfiledir->get_FCBptr(), diskOP);
+	//cout << tfiledir << endl;
+	dirOp->write_file(tfiledir->get_FCBptr(), diskOP, content);
+}
+
+void DirOperate::mv_file(Directory*slastdir, Directory*sfiledir, Directory*tlastdir) {
+		bool flag = false;
+		for (int i = 0; i < slastdir->get_fileListNum() && flag == false; i++) {
+			if (slastdir->get_fileList(i)->get_fileName() ==sfiledir->get_fileName()) {
+				flag = true;
+				slastdir->set_fileList(NULL, i);
+				slastdir->set_fileListNum(slastdir->get_fileListNum() - 1);
+			}
+		}
+		adjust_array(slastdir);
+		tlastdir->add_fileDirectory(sfiledir);
 }

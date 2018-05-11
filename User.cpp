@@ -35,9 +35,11 @@ string User::get_group() {
 bool User::is_login(){
 	string userName, password;
 	cout << "Geek Linux login:";
-	cin >> userName;
+	getline(cin, userName, '\n');
+	//cin >> userName;
 	cout << "Password:";
-	cin >> password;
+	//cin >> password;
+	getline(cin, password, '\n');
 	for(int i=0;i<=5;i++){
 		if (userArr[i].get_username() == userName && userArr[i].get_password() == password){
 			currentUser->init(userArr[i].get_username(), userArr[i].get_password(), userArr[i].get_group());

@@ -74,6 +74,11 @@ void my_spilt(string s, char separator,string* segment);
 //用来分隔字符串
 
 vector<string> split(const string &s, const string &seperator);
+
+void adjust_array(Directory*dir);
+//对删除过文件的目录表进行重排
+
+
 /*
 typedef class BlockMap {
 private:
