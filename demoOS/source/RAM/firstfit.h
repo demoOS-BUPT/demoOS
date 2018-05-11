@@ -4,6 +4,7 @@
 #include <iostream>
 #include <assert.h>
 #include <stdlib.h>
+#include <QtCore>
 using namespace std;
 
 struct Pcb//进程单元
@@ -113,6 +114,19 @@ class Firstfit
 			cout << "NULL\n" << endl;
 		}
 
+        QList<int> PrintMemList_qt()//返回值每两个元素为一个空洞
+        {
+            QList<int> ret;
+            memList* cur = _memHead;
+            int i = 1;
+            while (cur)
+            {
+                ret<<cur->first<<cur->end;
+                cur = cur->next;
+            }
+            return ret;
+        }
+
 		void PrintPcbMem(int id)
 		{
 			Pcb* cur = _find(id);
@@ -124,6 +138,18 @@ class Firstfit
 			cur = cur->next;
 			cout << cur->pcbid << ":" << cur->begin << "~" << cur->end << endl;
 		}
+
+        QString PrintPcbMem_qt(int id)
+        {
+            Pcb* cur = _find(id);
+            if (cur == NULL)
+            {
+                cout << "This process doesn't exisit" << endl;
+                return;
+            }
+            cur = cur->next;
+            cout << cur->pcbid << ":" << cur->begin << "~" << cur->end << endl;
+        }
 
 	protected:
 		bool pcbEmpty()

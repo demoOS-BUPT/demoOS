@@ -20,6 +20,8 @@ MainWindow::MainWindow(QWidget *parent) :
                                            <<"动态优先级"
                                            <<"抢占式优先级"
                                            <<"非抢占式优先级"
+                                           <<"非抢占短作业优先"
+                                           <<"短作业优先"
                                           );
     ui->cmd->setTextColor(QColor(80,0,0));
     ui->cmd->setText("DemoOS 正在启动\n");
