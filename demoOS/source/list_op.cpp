@@ -1,6 +1,7 @@
 #include "list_op.h"
 #include "demo_process.h"
 
+
 static bool boolMFQ=false;
 static int timer=0;
 
@@ -60,6 +61,7 @@ int termiProcess(QList<Process*> &pcbPool,
                  QList<Process*> &RR1,
                  QList<Process*> &RR2,
                  QList<Process*> &FCFS,
+                 Firstfit &ram,
                  unsigned long PID)
 {
     Process* p=nullptr;
@@ -84,6 +86,7 @@ int termiProcess(QList<Process*> &pcbPool,
     REMOVE_FROM_LIST(RR2);
     REMOVE_FROM_LIST(FCFS);
 
+    ram.pop(PID);//释放内存
 
     delete p;//释放
     return 1;
@@ -117,6 +120,7 @@ void processDispatch(QList<Process*> &pcbPool,
                      QList<Process*> &RR1,
                      QList<Process*> &RR2,
                      QList<Process*> &FCFS,
+                     Firstfit &ram,
                      ProcessAlg alg){
     //终结进程
     QList<Process*> killList;
@@ -126,7 +130,7 @@ void processDispatch(QList<Process*> &pcbPool,
     }
     for(int i=0;i<killList.size();i++){
         termiProcess(pcbPool,readyQueue,runningQueue,waitQueue,
-                     RR1,RR2,FCFS,killList.at(i)->getPid());
+                     RR1,RR2,FCFS,ram,killList.at(i)->getPid());
     }
 
     if(alg==MFQ&&boolMFQ==false){//MFQ算法首次进入，加载readyQueue到RR1

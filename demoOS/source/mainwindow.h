@@ -9,7 +9,7 @@
 #include <QtGui>
 #include <QDebug>
 #include <random>
-
+#include "RAM/firstfit.h"
 #include "FS/other.h"
 #include<string>
 #include<new>
@@ -47,9 +47,12 @@ private:
 
     std::mt19937 rand;//用 rand()得到随机数
 
+    Firstfit ram;
+    const size_t ramSize=0x10000;//128KB
+
     void cmdPrint(QString newLine);
 
-    void createProcess(int cpuTime,int priority);//创建一个新进程，若成功放入就绪队列。
+    void createProcess(int cpuTime,int priority,int ramSize);//创建一个新进程，若成功放入就绪队列。
 
     void printQueue();
 

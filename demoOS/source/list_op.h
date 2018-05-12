@@ -1,6 +1,7 @@
 #ifndef LIST_OP_H
 #define LIST_OP_H
 #include "demo_process.h"
+#include "RAM/firstfit.h"
 
 enum ProcessAlg{
     RR=0,FCFSa=1,PRI_RR=2,
@@ -23,7 +24,8 @@ int termiProcess(QList<Process*> &pcbPool,
                   QList<Process*> &waitQueue,
                  QList<Process*> &RR1,
                  QList<Process*> &RR2,
-                 QList<Process*> &FCFS,unsigned long PID);
+                 QList<Process*> &FCFS,
+                 Firstfit &ram,unsigned long PID);
 
 //list中查找PID,若没有返回nullptr
 Process* find(QList<Process*> list, unsigned long PID);
@@ -39,6 +41,7 @@ void processDispatch(QList<Process*> &pcbPool,
                      QList<Process*> &RR1,
                      QList<Process*> &RR2,
                      QList<Process*> &FCFS,
+                     Firstfit &ram,
                      ProcessAlg alg);
 
 //进程执行

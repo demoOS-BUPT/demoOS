@@ -25,6 +25,12 @@ public:
 
     void setAge(int a){age=a;}
     int getAge(){return age;}
+
+    void setBase(int b){base=b;}
+    int getBase(){return base;}
+
+    void setSize(int s){size=s;}
+    int getSize(){return size;}
 private:
     unsigned long pid;
     PState state;
