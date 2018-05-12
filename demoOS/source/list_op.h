@@ -28,8 +28,7 @@ int termiProcess(QList<Process*> &pcbPool,
                  Firstfit &ram,unsigned long PID);
 
 void ioDispatch(QList<Process*> &readyQueue,
-                     QList<Process*> &waitQueue,
-                     );
+                     QList<Process*> &waitQueue);
 
 //list中查找PID,若没有返回nullptr
 Process* find(QList<Process*> list, unsigned long PID);
