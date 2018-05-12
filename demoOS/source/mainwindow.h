@@ -25,6 +25,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    const size_t ramSize=8192;//0x10000;//64KB
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
@@ -48,7 +49,6 @@ private:
     std::mt19937 rand;//用 rand()得到随机数
 
     Firstfit ram;
-    const size_t ramSize=8192;//0x10000;//64KB
 
     void cmdPrint(QString newLine);
 

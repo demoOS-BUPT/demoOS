@@ -101,7 +101,7 @@ void MainWindow::createProcess(int cpuTime,int priority,int ramSize){
         p->setBase(base);
         p->setSize(size);
         this->readyQueue.append(p);
-        cmdPrint(QString("新建进程：PID %1 CPU时间：%2 优先级：%3 内存：%4 B 内存基地址:%5")
+        cmdPrint(QString("新建进程成功：PID %1 CPU时间：%2 优先级：%3 内存：%4 B 内存基地址:%5")
                     .arg(p->getPid())
                     .arg(p->getCPUtime())
                     .arg(p->getPriority())
@@ -340,7 +340,6 @@ void MainWindow::on_pushButton_clicked()//用户指令
         if(prior<0)prior=7;
         if(size<0) size=4096;
         this->createProcess(cpu_time,prior,size);
-        cmdPrint("创建进程成功！");
     }
     else {
         cmdPrint(QString("%1 不是有效的命令。").arg(args.at(0)));

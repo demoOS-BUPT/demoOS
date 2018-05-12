@@ -38,14 +38,14 @@ struct memList	//空闲内存链表
 class Firstfit 
 {
 	private:
-		size_t		_memNum;			//总内存大小
+        size_t		_memNum;			//总内存大小
 		size_t		_blockNum;	    	//内存块数目
 		size_t		_pcbNum;			//进程数目
 		Pcb*			_pcbHead;		//进程链表
 		memList*		_memHead;		//内存链表
 	public:
 		Firstfit(size_t total) :_memNum(total), _blockNum(1), _pcbNum(0)
-		{
+        {
 			_pcbHead = new Pcb();
 			_memHead = new memList(0, total);	  //全部空闲
 		}
@@ -199,6 +199,7 @@ class Firstfit
         bool _distribute(Pcb* pcb, int size)
 		{
 			memList* cur = _memHead;
+            cout<<size<<" ? "<<_memNum;
 			if (size > _memNum)
 			{
 				cout << "Memory allocation failed1" << endl;
