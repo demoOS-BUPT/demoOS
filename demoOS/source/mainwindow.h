@@ -48,7 +48,7 @@ private:
     std::mt19937 rand;//用 rand()得到随机数
 
     Firstfit ram;
-    const size_t ramSize=0x10000;//128KB
+    const size_t ramSize=8192;//0x10000;//64KB
 
     void cmdPrint(QString newLine);
 

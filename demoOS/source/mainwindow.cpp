@@ -87,12 +87,13 @@ void MainWindow::createProcess(int cpuTime,int priority,int ramSize){
     if(p!=nullptr){//创建成功
         p->setCPUtime(cpuTime);
         p->setPriority(priority);
-
+        int base=-1,size=-1;
         //分配内存
-        ram.push(p->getPid(),ramSize,0);
-        int base=ram.PcbMem_base(p->getPid());
-        int size=ram.PcbMem_size(p->getPid());
-        if(base==-1||size==-1){
+        if(ram.push(p->getPid(),ramSize,0)){
+            base=ram.PcbMem_base(p->getPid());
+            size=ram.PcbMem_size(p->getPid());
+        }
+        else{
             cmdPrint(QString("创建进程失败：内存分配失败"));
             return;
         }

@@ -67,7 +67,7 @@ class Firstfit
 		
         bool push(int id, int mem, int flag)		//添加一个进程,id为进程id，mem为进程所需内存，flag=0为最先匹配，flag=1为最优匹配
 		{
-            bool ret;
+            bool ret=false;
 			Pcb* newPcb = new Pcb(id, mem);
 			newPcb->next = _pcbHead->next;
 			_pcbHead->next = newPcb;
@@ -212,7 +212,8 @@ class Firstfit
 			if (NULL == cur)
 			{
 				cout << "Memory allocation failed2" << endl;
-				exit(-1);
+                //exit(-1);
+                return false;
 			}
 
 			pcb->begin = cur->first;
@@ -240,7 +241,7 @@ class Firstfit
 		{
 			memList* cur = _memHead;
 			memList* best = NULL;
-			int cur_best = 9999;
+            int cur_best = 0x7fffffff;
 			if (size > _memNum)
 			{
 				cout << "Memory allocation failed" << endl;
@@ -259,7 +260,8 @@ class Firstfit
 			if (NULL == cur)
 			{
 				cout << "Memory allocation failed" << endl;
-				exit(-1);
+                //exit(-1);
+                return false;
 			}
 
 			pcb->begin = cur->first;
