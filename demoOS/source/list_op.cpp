@@ -289,34 +289,35 @@ void processDispatch(QList<Process*> &pcbPool,
                     }
                     break;
                 }
-                case SJF:{
-                    int i;
-                    int min=1000;
-                    Process * in=nullptr, * out=nullptr;
-                    out=runningQueue.at(0);
-                    if(readyQueue.isEmpty()) return ;
-                    else if(!readyQueue.isEmpty()){                      //找出就绪队列的最小运行时间
-                        for(i=0;i<readyQueue.size();i++){
-                            if(readyQueue.at(i)->getCPUtime()<min){
-                                in=readyQueue.at(i);
-                                min=readyQueue.at(i)->getCPUtime();
-                            }
-                        }
+    case SJF:{
+                        int i;
+                        int min=1000;
+                        Process * in=nullptr, * out=nullptr;
 
-                        if(!runningQueue.isEmpty()){
-                            if(min<runningQueue.at(0)->getCPUtime()){
-                                moveProcess(runningQueue,readyQueue,out->getPid());
+                        if(readyQueue.isEmpty()) return ;
+                        else if(!readyQueue.isEmpty()){                      //找出就绪队列的最小运行时间
+                            for(i=0;i<readyQueue.size();i++){
+                                if(readyQueue.at(i)->getCPUtime()<min){
+                                    in=readyQueue.at(i);
+                                    min=readyQueue.at(i)->getCPUtime();
+                                }
+                            }
+
+                            if(!runningQueue.isEmpty()){
+                                if(min<runningQueue.at(0)->getCPUtime()){
+                                    out=runningQueue.at(0);
+                                    moveProcess(runningQueue,readyQueue,out->getPid());
+                                    moveProcess(readyQueue,runningQueue,in->getPid());
+                                }
+                                else ;
+                            }
+                            else{
                                 moveProcess(readyQueue,runningQueue,in->getPid());
                             }
-                            else ;
-                        }
-                        else{
-                            moveProcess(readyQueue,runningQueue,in->getPid());
-                        }
 
+                        }
+                        break;
                     }
-                    break;
-                }
         case MFQ:{//多级反馈队列：RR1s，RR2s，FCFS
             if(!readyQueue.isEmpty()){//有新进程
                 RR1.append(readyQueue);
@@ -410,12 +411,17 @@ void processDispatch(QList<Process*> &pcbPool,
             break;
         }
     case HRRN:{
+
                 int i;
                 float R;
-                int max=1;
+                float max=1;
                 if(!runningQueue.isEmpty()) return;
                 Process * in=nullptr;
                 if(!readyQueue.isEmpty()){
+                    for(int i=0; i < readyQueue.size();i++){
+                        int A=readyQueue.at(i)->getAge()+1;
+                        readyQueue.at(i)->setAge(A);
+                    }
                     for(i=0;i<readyQueue.size();i++){
                         R=1+(readyQueue.at(i)->getAge())/(readyQueue.at(i)->getCPUtime())+(readyQueue.at(i)->getAge())%(readyQueue.at(i)->getCPUtime());
                         if(R>max){
