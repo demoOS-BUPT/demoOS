@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <QtCore>
+#include <cstring>
 //#include "source/mainwindow.h"
 using namespace std;
 
@@ -38,16 +39,19 @@ struct memList	//空闲内存链表
 class Firstfit 
 {
 	private:
-        size_t		_memNum;			//总内存大小
+		size_t		_memNum;			//总内存大小
 		size_t		_blockNum;	    	//内存块数目
 		size_t		_pcbNum;			//进程数目
 		Pcb*			_pcbHead;		//进程链表
 		memList*		_memHead;		//内存链表
+		char*			simmemory;		//模拟内存空间的字符串 
 	public:
 		Firstfit(size_t total) :_memNum(total), _blockNum(1), _pcbNum(0)
-        {
+		{
 			_pcbHead = new Pcb();
 			_memHead = new memList(0, total);	  //全部空闲
+			simmemory= new char[total];
+			for(int i=0;i<total;i++) simmemory[i]=' '; 
 		}
 
 		/*void push()  // 读取添加进程数量，及依次读取ID和内存大小
@@ -65,7 +69,7 @@ class Firstfit
 			}
 		}*/
 		
-        bool push(int id, int mem, int flag)		//添加一个进程,id为进程id，mem为进程所需内存，flag=0为最先匹配，flag=1为最优匹配
+        bool push(int id, int mem, int flag, char* message)		//添加一个进程,id为进程id，mem为进程所需内存，flag=0为最先匹配，flag=1为最优匹配
 		{
             bool ret=false;
 			Pcb* newPcb = new Pcb(id, mem);
@@ -74,10 +78,10 @@ class Firstfit
 			switch (flag)
 			{
 			case 0:
-                ret=_distribute(newPcb, mem);
+                ret=_distribute(newPcb, mem, message);
 				break;
 			case 1:
-                ret=_distribute_(newPcb, mem);
+                ret=_distribute_(newPcb, mem, message);
 				break;
 			}
 			
@@ -189,6 +193,16 @@ class Firstfit
             cur = cur->next;
             return cur->end-cur->begin;
         }
+        
+		char * read(int id)
+		{
+			Pcb* cur = _find(id);
+		    if (cur == NULL)
+		        return"This process doesn't exisit";
+		    char* retmessage=new char[PcbMem_size(cur)];
+		    memcpy(retmessage,simmemory+PcbMem_base(cur),(strlen(retmessage)));
+		    return retmessage;
+		}
 
 	protected:
 		bool pcbEmpty()
@@ -196,10 +210,9 @@ class Firstfit
 			return _pcbHead->next == NULL;
 		}
 
-        bool _distribute(Pcb* pcb, int size)
+        bool _distribute(Pcb* pcb, int size, char* message)
 		{
 			memList* cur = _memHead;
-            cout<<size<<" ? "<<_memNum;
 			if (size > _memNum)
 			{
 				cout << "Memory allocation failed1" << endl;
@@ -213,10 +226,10 @@ class Firstfit
 			if (NULL == cur)
 			{
 				cout << "Memory allocation failed2" << endl;
-                //exit(-1);
+				exit(-1);
                 return false;
 			}
-
+			memcpy(simmemory+cur->first,message,(strlen(message)));
 			pcb->begin = cur->first;
 			pcb->end = pcb->begin + size;
 			pcb->realMem = size;
@@ -238,11 +251,11 @@ class Firstfit
             return true;
 		}
 
-        bool _distribute_(Pcb* pcb, int size)
+        bool _distribute_(Pcb* pcb, int size, char* message)
 		{
 			memList* cur = _memHead;
 			memList* best = NULL;
-            int cur_best = 0x7fffffff;
+			int cur_best = 9999;
 			if (size > _memNum)
 			{
 				cout << "Memory allocation failed" << endl;
@@ -261,10 +274,10 @@ class Firstfit
 			if (NULL == cur)
 			{
 				cout << "Memory allocation failed" << endl;
-                //exit(-1);
+				exit(-1);
                 return false;
 			}
-
+			memcpy(simmemory+cur->first,message,(strlen(message)));
 			pcb->begin = cur->first;
 			pcb->end = pcb->begin + size;
 			pcb->realMem = size;
@@ -291,6 +304,7 @@ class Firstfit
 			size_t begin = pcbptr->begin;
 			size_t end = pcbptr->end;
 			size_t size = end - begin;
+			for(int j=begin; j < end; j++)	simmemory[j]=' ';
 			memList* prev = _memHead;
 			if (prev == NULL)
 			{
@@ -391,8 +405,9 @@ class Firstfit
 				return NULL;
 			return prev;  //找到，返回它的前一个节点
 		}
+		
 
-	};
+};
 
 
 
