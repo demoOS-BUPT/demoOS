@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
                                            <<"非抢占短作业优先"
                                            <<"短作业优先"
                                            <<"多级反馈队列"
+                                           <<"最高响应比"
                                           );
     ui->cmd->setTextColor(QColor(80,0,0));
     ui->cmd->setText("DemoOS 正在启动\n");

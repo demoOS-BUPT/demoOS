@@ -5,14 +5,10 @@
 enum ProcessAlg{
     RR=0,FCFSa=1,PRI_RR=2,
     DYNAMIC_PRI=3,PREEEM_PRI=4,NONPREEM_PRI=5,
-    NSJF=6,SJF=7,MFQ=8};
+    NSJF=6,SJF=7,MFQ=8,HRRN=9};
 
 //优先级0~lowest_pri
 #define lowest_pri 7
-
-void cmdCreatePro();//############################
-
-void cmdKillPro(int PID);
 
 //创建新进程(空的),并存放在pcbPool中,若失败返回nullptr
 Process* newProcess(QList<Process*> &pcbPool);

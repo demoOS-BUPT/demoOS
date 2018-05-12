@@ -22,6 +22,9 @@ public:
 
     void setPriority(int p) {this->priority=p;}
     int getPriority() {return this->priority;}
+
+    void setAge(int a){age=a;}
+    int getAge(){return age;}
 private:
     unsigned long pid;
     PState state;
@@ -31,6 +34,7 @@ private:
     unsigned long PC;       //程序计数器
     int priority;           //优先级 数小优先级高
     int CPUtime;            //运行时间（剩余）
+    int age;
 };
 
 
