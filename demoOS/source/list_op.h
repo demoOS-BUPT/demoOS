@@ -1,15 +1,15 @@
 #ifndef LIST_OP_H
 #define LIST_OP_H
 #include "demo_process.h"
+#include "RAM/firstfit.h"
 
-enum ProcessAlg{RR=0,FCFS=1,PRI_RR=2,DYNAMIC_PRI=3,PREEEM_PRI=4,NONPREEM_PRI=5};
+enum ProcessAlg{
+    RR=0,FCFSa=1,PRI_RR=2,
+    DYNAMIC_PRI=3,PREEEM_PRI=4,NONPREEM_PRI=5,
+    NSJF=6,SJF=7,MFQ=8,HRRN=9};
 
 //优先级0~lowest_pri
 #define lowest_pri 7
-
-void cmdCreatePro();//############################
-
-void cmdKillPro(int PID);
 
 //创建新进程(空的),并存放在pcbPool中,若失败返回nullptr
 Process* newProcess(QList<Process*> &pcbPool);
@@ -21,7 +21,15 @@ void moveProcess(QList<Process*>& s_list, QList<Process*>& d_list, unsigned long
 int termiProcess(QList<Process*> &pcbPool,
                   QList<Process*> &readyQueue,
                   QList<Process*> &runningQueue,
-                  QList<Process*> &waitQueue, unsigned long PID);
+                  QList<Process*> &waitQueue,
+                 QList<Process*> &RR1,
+                 QList<Process*> &RR2,
+                 QList<Process*> &FCFS,
+                 Firstfit &ram,unsigned long PID);
+
+void ioDispatch(QList<Process*> &readyQueue,
+                     QList<Process*> &waitQueue,
+                     );
 
 //list中查找PID,若没有返回nullptr
 Process* find(QList<Process*> list, unsigned long PID);
@@ -34,6 +42,10 @@ void processDispatch(QList<Process*> &pcbPool,
                      QList<Process*> &readyQueue,
                      QList<Process*> &runningQueue,
                      QList<Process*> &waitQueue,
+                     QList<Process*> &RR1,
+                     QList<Process*> &RR2,
+                     QList<Process*> &FCFS,
+                     Firstfit &ram,
                      ProcessAlg alg);
 
 //进程执行

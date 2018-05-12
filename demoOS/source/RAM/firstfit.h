@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <QtCore>
+//#include "source/mainwindow.h"
 using namespace std;
 
 struct Pcb//进程单元
@@ -37,14 +38,14 @@ struct memList	//空闲内存链表
 class Firstfit 
 {
 	private:
-		size_t		_memNum;			//总内存大小
+        size_t		_memNum;			//总内存大小
 		size_t		_blockNum;	    	//内存块数目
 		size_t		_pcbNum;			//进程数目
 		Pcb*			_pcbHead;		//进程链表
 		memList*		_memHead;		//内存链表
 	public:
 		Firstfit(size_t total) :_memNum(total), _blockNum(1), _pcbNum(0)
-		{
+        {
 			_pcbHead = new Pcb();
 			_memHead = new memList(0, total);	  //全部空闲
 		}
@@ -64,26 +65,27 @@ class Firstfit
 			}
 		}*/
 		
-		void push(int id, int mem, int flag)		//添加一个进程,id为进程id，mem为进程所需内存，flag=0为最先匹配，flag=1为最优匹配
+        bool push(int id, int mem, int flag)		//添加一个进程,id为进程id，mem为进程所需内存，flag=0为最先匹配，flag=1为最优匹配
 		{
-			
+            bool ret=false;
 			Pcb* newPcb = new Pcb(id, mem);
 			newPcb->next = _pcbHead->next;
 			_pcbHead->next = newPcb;
 			switch (flag)
 			{
 			case 0:
-				_distribute(newPcb, mem);
+                ret=_distribute(newPcb, mem);
 				break;
 			case 1:
-				_distribute_(newPcb, mem);
+                ret=_distribute_(newPcb, mem);
 				break;
 			}
 			
 			++_pcbNum;
+            return ret;
 		}
 
-		void pop(int id)   //删除一个进程
+        bool pop(int id)   //删除一个进程
 		{
 
 			//若删除第一个该怎么办
@@ -91,7 +93,7 @@ class Firstfit
 			if (NULL == prev)    //没有该进程
 			{
 				cout << "This process doesn't exisit" << endl;
-				return;
+                return false;
 			}
 			Pcb* cur = prev->next;
 			_memRecover(cur);	//分情况处理要回收的内存
@@ -99,7 +101,7 @@ class Firstfit
 			_memNum += cur->needMem;
 			delete cur;
 			
-			cout << "Success!" << endl;
+            return true;
 		}
 
 		void PrintMemList()
@@ -127,6 +129,22 @@ class Firstfit
             return ret;
         }
 
+        QString PrintMemList_qstr()
+        {
+            QString ret;
+            memList* cur = _memHead;
+            int i = 1;
+            while (cur)
+            {
+                ret += QString("Hole.%1 Address:"
+                               "%2~%3"
+                               "----> ").arg(i++).arg(cur->first).arg(cur->end);
+                cur = cur->next;
+            }
+            ret+="NULL\n";
+            return ret;
+        }
+
 		void PrintPcbMem(int id)
 		{
 			Pcb* cur = _find(id);
@@ -144,11 +162,32 @@ class Firstfit
             Pcb* cur = _find(id);
             if (cur == NULL)
             {
-                cout << "This process doesn't exisit" << endl;
-                return;
+                return"This process doesn't exisit";
             }
             cur = cur->next;
-            cout << cur->pcbid << ":" << cur->begin << "~" << cur->end << endl;
+            return QString("%1:%2~%3\n").arg(cur->pcbid).arg(cur->begin).arg(cur->end);
+        }
+
+        int PcbMem_base(int id)
+        {
+            Pcb* cur = _find(id);
+            if (cur == NULL)
+            {
+                return -1;
+            }
+            cur = cur->next;
+            return cur->begin;
+        }
+
+        int PcbMem_size(int id)
+        {
+            Pcb* cur = _find(id);
+            if (cur == NULL)
+            {
+                return -1;
+            }
+            cur = cur->next;
+            return cur->end-cur->begin;
         }
 
 	protected:
@@ -157,13 +196,14 @@ class Firstfit
 			return _pcbHead->next == NULL;
 		}
 
-		void _distribute(Pcb* pcb, int size)
+        bool _distribute(Pcb* pcb, int size)
 		{
 			memList* cur = _memHead;
+            cout<<size<<" ? "<<_memNum;
 			if (size > _memNum)
 			{
 				cout << "Memory allocation failed1" << endl;
-				return;
+                return false;
 			}
 			while (cur && cur->msize < size)
 			{
@@ -173,7 +213,8 @@ class Firstfit
 			if (NULL == cur)
 			{
 				cout << "Memory allocation failed2" << endl;
-				exit(-1);
+                //exit(-1);
+                return false;
 			}
 
 			pcb->begin = cur->first;
@@ -194,17 +235,18 @@ class Firstfit
 			}
 			_memNum -= size;
 			cout << "Success!" << endl;
+            return true;
 		}
 
-		void _distribute_(Pcb* pcb, int size)
+        bool _distribute_(Pcb* pcb, int size)
 		{
 			memList* cur = _memHead;
 			memList* best = NULL;
-			int cur_best = 9999;
+            int cur_best = 0x7fffffff;
 			if (size > _memNum)
 			{
 				cout << "Memory allocation failed" << endl;
-				return;
+                return false;
 			}
 			while (cur)
 			{
@@ -219,7 +261,8 @@ class Firstfit
 			if (NULL == cur)
 			{
 				cout << "Memory allocation failed" << endl;
-				exit(-1);
+                //exit(-1);
+                return false;
 			}
 
 			pcb->begin = cur->first;
@@ -240,6 +283,7 @@ class Firstfit
 			}
 			_memNum -= size;
 			cout << "Success!" << endl;
+            return true;
 		}
 
 		void _memRecover(Pcb* pcbptr)

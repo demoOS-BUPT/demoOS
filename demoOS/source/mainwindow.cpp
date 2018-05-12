@@ -8,7 +8,8 @@ using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    ram(ramSize)
 {
     ui->setupUi(this);
     runGif=new QMovie(":/run1.gif");
@@ -19,31 +20,43 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->processAlgComboBox->addItems(QStringList()
                                            <<"RR 时间片轮转"
                                            <<"FCFS 批处理"
-                                           <<"多级反馈队列"
+                                           <<"弱化版多级反馈队列"
                                            <<"动态优先级"
                                            <<"抢占式优先级"
                                            <<"非抢占式优先级"
+                                           <<"非抢占短作业优先"
+                                           <<"短作业优先"
+                                           <<"多级反馈队列"
+                                           <<"最高响应比"
                                           );
+    this->ui->ramAllocAlgComboBox->addItems(QStringList()
+                                            <<"首次适配"
+                                            <<"最佳适配"
+                                            );
     ui->cmd->setTextColor(QColor(80,0,0));
     ui->cmd->setText("DemoOS 正在启动\n");
 
-    ui->readyTable->setColumnCount(3);
-    ui->readyTable->setHorizontalHeaderLabels(QStringList()
-                                              <<"PID"
-                                              <<"CPU时间"
-                                              <<"优先级");
-    ui->runTable->setColumnCount(3);
-    ui->runTable->setHorizontalHeaderLabels(QStringList()
-                                              <<"PID"
-                                              <<"CPU时间"
-                                              <<"优先级");
+#define INIT_TABLE(TABLE_NAME) TABLE_NAME->setColumnCount(5);\
+    TABLE_NAME->setHorizontalHeaderLabels(QStringList()<<"PID"<<"CPU时间"<<"优先级"<<"内存基地址"<<"内存大小")
+    INIT_TABLE(ui->runTable);
+    INIT_TABLE(ui->readyTable);
+    INIT_TABLE(ui->RR1T);
+    INIT_TABLE(ui->RR2T);
+    INIT_TABLE(ui->FCFST);
+    ui->RR1T->hide();
+    ui->RR2T->hide();
+    ui->FCFST->hide();
 
     this->pcbPool.clear();
     this->waitQueue.clear();
     this->readyQueue.clear();
     this->runningQueue.clear();//清空进程
+    RR1.clear();RR2.clear();FCFS.clear();
+
+    cmdPrint(QString("内存大小：%1B").arg(ramSize));
 
     FS_init();//磁盘子系统初始化
+
 
     //connect(ui->pauseButton,SIGNAL(clicked()),this,SLOT(on_pauseButton_clicked()));
     connect(&timer,SIGNAL(timeout()),this,SLOT(kernel()));
@@ -57,41 +70,57 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::printQueue(){
-    ui->readyTable->setRowCount(readyQueue.size());
-    for(int i=0;i<readyQueue.size();i++){
-        ui->readyTable->setItem(i,0
-           ,new QTableWidgetItem(QString::number(readyQueue.at(i)->getPid())));
-        ui->readyTable->setItem(i,1
-           ,new QTableWidgetItem(QString::number(readyQueue.at(i)->getCPUtime())));
-        ui->readyTable->setItem(i,2
-           ,new QTableWidgetItem(QString::number(readyQueue.at(i)->getPriority())));
+#define PRINT_QUEUE(TABLE,QUEUE)    TABLE->setRowCount(QUEUE.size());\
+    for(int i=0;i<QUEUE.size();i++){\
+        TABLE->setItem(i,0\
+           ,new QTableWidgetItem(QString::number(QUEUE.at(i)->getPid())));\
+        TABLE->setItem(i,1\
+           ,new QTableWidgetItem(QString::number(QUEUE.at(i)->getCPUtime())));\
+        TABLE->setItem(i,2\
+           ,new QTableWidgetItem(QString::number(QUEUE.at(i)->getPriority())));\
+        TABLE->setItem(i,3\
+            ,new QTableWidgetItem(QString::number(QUEUE.at(i)->getBase())));\
+        TABLE->setItem(i,4\
+            ,new QTableWidgetItem(QString::number(QUEUE.at(i)->getSize())+" B"));\
     }
-    ui->runTable->setRowCount(runningQueue.size());
-    for(int i=0;i<runningQueue.size();i++){
-        ui->runTable->setItem(i,0
-           ,new QTableWidgetItem(QString::number(runningQueue.at(i)->getPid())));
-        ui->runTable->setItem(i,1
-           ,new QTableWidgetItem(QString::number(runningQueue.at(i)->getCPUtime())));
-        ui->runTable->setItem(i,2
-           ,new QTableWidgetItem(QString::number(runningQueue.at(i)->getPriority())));
-    }
+    PRINT_QUEUE(ui->readyTable,readyQueue)
+    PRINT_QUEUE(ui->runTable,runningQueue)
+    PRINT_QUEUE(ui->RR1T,RR1)
+    PRINT_QUEUE(ui->RR2T,RR2)
+    PRINT_QUEUE(ui->FCFST,FCFS)
 }
 
-void MainWindow::createProcess(int cpuTime,int priority){
+void MainWindow::createProcess(int cpuTime,int priority,int ramSize){
     Process* p=newProcess(this->pcbPool);
     if(p!=nullptr){//创建成功
         p->setCPUtime(cpuTime);
         p->setPriority(priority);
+        int base=-1,size=-1;
+        //分配内存
+        int alg=ui->ramAllocAlgComboBox->currentIndex();
+        if(ram.push(p->getPid(),ramSize,alg)){
+            base=ram.PcbMem_base(p->getPid());
+            size=ram.PcbMem_size(p->getPid());
+        }
+        else{
+            cmdPrint(QString("创建进程失败：内存分配失败"));
+            return;
+        }
+
+        p->setBase(base);
+        p->setSize(size);
         this->readyQueue.append(p);
-        cmdPrint(QString("新建进程：PID %1 CPU时间： %2 优先级：%3")
+        cmdPrint(QString("新建进程成功：PID %1 CPU时间：%2 优先级：%3 内存：%4 B 内存基地址:%5")
                     .arg(p->getPid())
                     .arg(p->getCPUtime())
                     .arg(p->getPriority())
+                    .arg(p->getSize())
+                    .arg(p->getBase())
                  );
         return;
     }
     else{
-        cmdPrint(QString("新建进程：无法新建进程"));
+        cmdPrint(QString("无法新建进程"));
         return;
     }
 }
@@ -103,11 +132,12 @@ void MainWindow::kernel(){
 
     //cmdPrint("1000ms CYCLE");
     //cmdPrint("---------------------------------------");
-    if(rand()%(pcbPool.size()+1)==0)
-        this->createProcess(rand()%10+1,rand()%5);
+    //if(rand()%(pcbPool.size()+1)==0)
+    //    this->createProcess(rand()%10+1,rand()%5);
 
     ProcessAlg alg=static_cast<ProcessAlg>(ui->processAlgComboBox->currentIndex());
-    processDispatch(pcbPool,readyQueue,runningQueue,waitQueue,alg);//进程调度函数
+    processDispatch(pcbPool,readyQueue,runningQueue,
+                    waitQueue,RR1,RR2,FCFS,ram,alg);//进程调度函数
     execute(pcbPool,runningQueue);//进程执行
 
     printQueue();
@@ -267,7 +297,8 @@ void MainWindow::on_pushButton_clicked()//用户指令
             cmdPrint("用法: kill [PID]");
             return;
         }
-        if(!termiProcess(this->pcbPool,this->readyQueue,this->waitQueue,this->runningQueue,args.at(1).toInt()))
+        if(!termiProcess(this->pcbPool,this->readyQueue,this->waitQueue,this->runningQueue,
+                         RR1,RR2,FCFS,ram,args.at(1).toInt()))
         {
             cmdPrint("该进程不存在，请重新输入");
         }
@@ -279,12 +310,13 @@ void MainWindow::on_pushButton_clicked()//用户指令
     else if (args.at(0) == "npro") {
         //create process
         if(argc >5){
-            cmdPrint("用法: npro [-t] (CPU时间 默认随机1~10) [-p] (优先级0-7 默认7)");
+            cmdPrint("用法: npro [-t]* (CPU时间 默认随机1~10) [-p]* (优先级0-7 默认7)");
             return;
         }
 
         int cpu_time = -1;
         int prior = -1;
+        int size=-1;
 
         int i = 1;
         while(i < argc)
@@ -313,16 +345,26 @@ void MainWindow::on_pushButton_clicked()//用户指令
                 }
                 i+=2;
             }
+            else if(args.at(i)== "-s"){
+                bool ok;
+                size=args.at(i+1).toInt(&ok);
+                if(!ok||size<0){
+                    cmdPrint(QString("参数 \"%1\"无效，内存大小为正整数")
+                             .arg(args.at(i+1)));
+                    return;
+                }
+                i+=2;
+            }
             else{
                 cmdPrint(QString("无法识别参数 \"%1\"").arg(args.at(i)));
-                cmdPrint("用法: npro [-t] (CPU时间 默认随机1~10) [-p] (优先级0-7 默认7)");
+                cmdPrint("用法: npro [-t]* (CPU时间 默认随机1~10) [-p]* (优先级0-7 默认7) [-s]* (内存大小 默认4KB)");
                 return;
             }
         }
         if(cpu_time<=0)cpu_time=this->rand()%10+1;
         if(prior<0)prior=7;
-        this->createProcess(cpu_time,prior);
-        cmdPrint("创建进程成功！");
+        if(size<0) size=4096;
+        this->createProcess(cpu_time,prior,size);
     }
     else {
         cmdPrint(QString("%1 不是有效的命令。").arg(args.at(0)));
@@ -386,5 +428,21 @@ void MainWindow::on_pauseButton_clicked()
         ui->timerIcon->setMovie(runGif);
         ui->pauseButton->setText("时停");
         timer.start(1000);
+    }
+}
+
+void MainWindow::on_processAlgComboBox_currentIndexChanged(int index)
+{
+    if(index==8){
+        ui->readyTable->hide();
+        ui->RR1T->show();
+        ui->RR2T->show();
+        ui->FCFST->show();
+    }
+    else{
+        ui->readyTable->show();
+        ui->RR1T->hide();
+        ui->RR2T->hide();
+        ui->FCFST->hide();
     }
 }

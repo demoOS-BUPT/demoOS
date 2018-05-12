@@ -9,7 +9,7 @@
 #include <QtGui>
 #include <QDebug>
 #include <random>
-
+#include "RAM/firstfit.h"
 #include "FS/other.h"
 #include<string>
 #include<new>
@@ -25,6 +25,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    const size_t ramSize=8192;//0x10000;//64KB
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
@@ -40,11 +41,18 @@ private:
     QList<Process*> readyQueue;    //就绪队列
     QList<Process*> runningQueue;   //在运行
 
+    //多级反馈队列
+    QList<Process*> RR1;
+    QList<Process*> RR2;
+    QList<Process*> FCFS;
+
     std::mt19937 rand;//用 rand()得到随机数
+
+    Firstfit ram;
 
     void cmdPrint(QString newLine);
 
-    void createProcess(int cpuTime,int priority);//创建一个新进程，若成功放入就绪队列。
+    void createProcess(int cpuTime,int priority,int ramSize);//创建一个新进程，若成功放入就绪队列。
 
     void printQueue();
 
@@ -55,6 +63,7 @@ private slots:
 
     void on_pushButton_clicked();
     void on_pauseButton_clicked();
+    void on_processAlgComboBox_currentIndexChanged(int index);
 };
 
 #endif // MAINWINDOW_H
