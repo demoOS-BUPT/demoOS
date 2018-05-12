@@ -26,6 +26,10 @@ MainWindow::MainWindow(QWidget *parent) :
                                            <<"多级反馈队列"
                                            <<"最高响应比"
                                           );
+    this->ui->ramAllocAlgComboBox->addItems(QStringList()
+                                            <<"首次适配"
+                                            <<"最佳适配"
+                                            );
     ui->cmd->setTextColor(QColor(80,0,0));
     ui->cmd->setText("DemoOS 正在启动\n");
 
@@ -89,7 +93,8 @@ void MainWindow::createProcess(int cpuTime,int priority,int ramSize){
         p->setPriority(priority);
         int base=-1,size=-1;
         //分配内存
-        if(ram.push(p->getPid(),ramSize,0)){
+        int alg=ui->ramAllocAlgComboBox->currentIndex();
+        if(ram.push(p->getPid(),ramSize,alg)){
             base=ram.PcbMem_base(p->getPid());
             size=ram.PcbMem_size(p->getPid());
         }
