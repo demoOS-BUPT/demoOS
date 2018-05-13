@@ -17,14 +17,12 @@ public:
 	string cat_file(FCB*FCBptr, DiskOperate*diskOperate); //return content of file
 	void write_file(FCB*FCBptr, DiskOperate*diskOperate, string content);//
 	void change_directory(string inputNewPath);
-	bool rm_file(Directory*fileDir,Directory*lastDir); //remove a file, just change the recycleFlag   形参指针是否要改成目录的指针？？	
-					//int change_file(); we need it?or just remove&create
+	bool rm_file(Directory*fileDir,Directory*lastDir); //remove a file, just change the recycleFlag  
 	void list_directory(Directory*directory);//列出当前目录下的文件或文件夹-1层
 	void list_all_directory(Directory*directory);//列出当前目录下所有文件或者文件夹
 	void ln(Directory*sfiledir, Directory* tlastdir, string fileName);
 	void cp_file(Directory*sfiledir, Directory*tlastdir, string tfileName);
 	void mv_file ( Directory*slastdir,Directory*sfiledir, Directory*tlastdir);
-	void mv_dir(Directory*slastdir, Directory*sdir, Directory*tlastdir);
 	void ll_directory(Directory*directory);
 	//void touch_directory();//创建目录-------创建文件或者文件夹时自动创建目录了 该函数没有实现
 	void rm_directory(Directory*dir,Directory*lastdir);

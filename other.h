@@ -70,9 +70,6 @@ void init_system();
 void init_blockMap();
 //初始化区块表
 
-void my_spilt(string s, char separator,string* segment);
-//用来分隔字符串
-
 vector<string> split(const string &s, const string &seperator);
 
 void adjust_array(Directory*dir);

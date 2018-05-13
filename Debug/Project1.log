@@ -1,3 +1,12 @@
-﻿  instructionOP.cpp
+﻿  DirOperate.cpp
+d:\os_filesystem\project1\project1\diroperate.cpp(72): warning C4101: “nowtime”: 未引用的局部变量
+d:\os_filesystem\project1\project1\diroperate.cpp(124): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+  正在生成代码...
+  正在跳过...(未检测到相关更改)
+  other.cpp
+  instructionOP.cpp
+  User.cpp
+  FileSystem.cpp
+  DiskOperate.cpp
   Project1.vcxproj -> D:\os_filesystem\Project1\Debug\Project1.exe
   Project1.vcxproj -> D:\os_filesystem\Project1\Debug\Project1.pdb (Partial PDB)

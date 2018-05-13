@@ -271,6 +271,17 @@ void DirOperate::rm_directory(Directory*dir,Directory*lastDir) {
 		for (int i = 0; i < dir->get_fileListNum(); i++) {
 			rm_directory(dir->get_fileList(i),dir);
 		}
+		bool flag = false;
+		for (int i = 0; i < lastDir->get_fileListNum() && flag == false; i++) {
+			if (lastDir->get_fileList(i)->get_fileName() == dir->get_fileName()) {
+				flag = true;
+				lastDir->set_fileList(NULL, i);
+				lastDir->set_fileListNum(lastDir->get_fileListNum() - 1);
+			}
+		}
+		dir->~Directory();
+		dir = NULL;
+		adjust_array(lastDir);
 	}
 }
 
@@ -304,7 +315,7 @@ void DirOperate::change_directory(string inputNewPath) {
 				currentDir = newPath;
 			}
 			if (v.size() == 1) {
-				flag = true;
+				//flag = true;
 			}
 			curDir = tmp;
 			lastDir = curDir->get_curDir();//!!!!			
@@ -355,7 +366,7 @@ void DirOperate::change_directory(string inputNewPath) {
 			
 		}
 		if (v.size() == 1) {
-			flag = true;
+			//flag = true;
 		}
 		currentDir = newPath;
 		curDir = tmp;

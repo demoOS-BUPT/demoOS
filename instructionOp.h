@@ -13,6 +13,10 @@
 
 using namespace std;
 
+void mkdir_instruction(string op);
+
+void touch_instruction(string op);
+
 void cp_instruction(string op);
 
 void mv_instruction(string op);
@@ -26,6 +30,14 @@ void cat_instruction(string op);
 void vim_instruction(string op);
 
 void ls_instruction(string op);
+
+void su_instruction(string op);
+
+void chmod_instruction(string op);
+
+void chown_instruction(string op);
+
+void chgrp_instruction(string op);
 
 
 #endif // 
