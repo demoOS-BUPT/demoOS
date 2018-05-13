@@ -7,15 +7,18 @@
 #include "list_op.h"
 #include <QtCore>
 #include <QtGui>
+#include <QMessageBox>
 #include <QDebug>
 #include <random>
 #include "RAM/firstfit.h"
 #include "FS/other.h"
+//#include "FS/instructionOp.h"
+#include<cmath>
 #include<string>
 #include<new>
 #include<cstdlib>
 #include<cstring>
-
+using namespace  std;
 namespace Ui {
 class MainWindow;
 }
@@ -50,13 +53,41 @@ private:
 
     Firstfit ram;
 
-    void cmdPrint(QString newLine);
+    void cmdPrint(QString newLine);//输出新行
+    void cmdPrint_noLn(QString s);//输出
 
     void createProcess(int cpuTime,int priority,int ramSize,Directory *fileDir);//创建一个新进程，若成功放入就绪队列。
 
     void printQueue();
 
     void FS_init();//FS子系统初始化
+
+    void mkdir_instruction(string op);
+
+    void touch_instruction(string op);
+
+    void cp_instruction(string op);
+
+    void mv_instruction(string op);
+
+    void ln_instruction(string op);
+
+    void rm_instruction(string op);
+
+    void cat_instruction(string op);
+
+    void vim_instruction(string op);
+
+    void ls_instruction(string op);
+
+    void su_instruction(string op);
+
+    void chmod_instruction(string op);
+
+    void chown_instruction(string op);
+
+    void chgrp_instruction(string op);
+
     //获取文件内容
     QString getFileContent(QString fileName);
     QString getFileContent(Directory *fileDir);

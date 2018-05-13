@@ -1,77 +1,50 @@
 #include "other.h"
+#include"instructionOp.h"
 #include<string>
+#include<cmath>
 #include<new>
 #include<cstdlib>
 #include<cstring>
 using namespace std;
 
 void example(){
-	//-----------------------currentDir怎么修改-------------------------------
-	init_system();
 	string op,dirName,fileName, fileContent;
+
+	bool isLogin = false;
+	while (! isLogin){
+		isLogin = currentUser->is_login();
+	}
+
 	//这里是命令行，在这里进行初始化，循环，交互
 	while (1) {
 		op = "";
-		cout << "[root@localhost " + currentDir + "]";
+		cout << ""+currentUser->get_username() +"@geek_linux:"+currentDir+"# ";
+
 		fflush(stdin);
 		getline(cin,op, '\n');
 		fflush(stdin);
 		vector<string> args = split(op, " ");
 		//		string args[] = op.split(" ");
 				//这里加多空格容错
-		if (args[0] == "ls" || args[0] == "ll") {
-			//列出目录
-			//  ll  || ls ||  ll /zxh/a
-			if (args.size() == 1) {
-				dirOp->list_all_directory(root_directory);
+		if (args[0] == "ls") {
+			ls_instruction(op);
+		}
+		else if (args[0] == "ll") {
+			if (args.size() == 1){
+				dirOp->ll_directory(curDir);
 			}
-			else {
-				dirOp->change_directory(args[1]);
-				dirOp->list_all_directory(lastDir);
-			}
-			
 		}
 		else if (args[0] == "mkdir") {
-			dirName = path_to_filename(args[1]);
-	        //创建的文件是文件
-            if (-1 == dirOp->create_file(path_to_directory(args[1]),dirName,'0')) {
-                cout << "Failed in creating files." << endl;
-            }
+			mkdir_instruction(op);
 		}
 		else if (args[0] == "touch") {
-			//创建file
-			fileName = path_to_filename(args[1]);
-			if (-1 == dirOp->create_file(path_to_directory(args[1]), fileName, '1')) {
-				cout << "Failed in creating files." << endl;
-			}
+			touch_instruction(op);
 		}
         else if (args[0] == "vim") {
-            
-            fileName = args[1];
-            cout << "Please input file content:";
-            cin >> fileContent;
-			Directory*fileDir=lastDir;
-			
-			for (int i = 0; i < lastDir->get_fileListNum(); i++) {
-				if (fileName == lastDir->get_fileList(i)->get_fileName()) {
-					fileDir = lastDir->get_fileList(i);
-					break;
-				}
-			}
-            dirOp->write_file(fileDir->get_FCBptr(), diskOP, fileContent);
-            //写文件
+			vim_instruction(op);
         }
 		else if (args[0] == "cat") {
-			fileName = args[1];
-			Directory*fileDir = lastDir;
-			for (int i = 0; i < lastDir->get_fileListNum(); i++) {
-				if (fileName == lastDir->get_fileList(i)->get_fileName()) {
-					fileDir = lastDir->get_fileList(i);
-					break;
-				}
-			}
-			cout << dirOp->cat_file(fileDir->get_FCBptr(), diskOP) << endl;
-			//查看文件信息
+			cat_instruction(op);
 		}
 		else if (args[0] == "cd") {
 			//cd /home/zxh
@@ -79,43 +52,55 @@ void example(){
 			dirOp->change_directory(args[1]);
 			//switch dir
 		}
+		else if (args[0] == "rm") {
+			rm_instruction(op);
+		}
+		else if (args[0] == "ln") {
+			ln_instruction(op);
+		}
+		else if (args[0]=="cp") {
+			cp_instruction(op);
+			
+		}
+		else if (args[0]=="mv") {
+			mv_instruction(op);
+			
+		}
+		//User
+		else if (args[0] == "whoami") {
+			cout << currentUser->get_username() << endl;
+		}
+		else if (args[0] == "whichgroup") {
+			cout << currentUser->get_group() << endl;
+		}
+		else if (args[0] == "su") {
+			su_instruction(op);
+		}
+		else if (args[0] == "chmod"){
+			chmod_instruction(op);
+		}
+		else if (args[0] == "chown"){
+			chown_instruction(op);
+		}
+		else if (args[0] == "chgrp"){
+			chgrp_instruction(op);
+		}
 		else {
 			cout << "unidentification!" << endl;
 		}
 	}
-		/*
-
-			case 'ls':
-
-			case "ll":
-				
-				break;
-			case "mkdir":
-				dirName = args[1];
-				//检查是否存在此目录，不存在则创建
-				break;
-            case "touch":
-                fileName = args[1];
-                //创建file
-                break;
-			case "cat":
-				fileName = args[1];
-				//查看文件信息
-				break;
-            case "cd":
-                dirName = args[1];
-                //switch dir
-                break;
-			default:
-                cout << "未识别" << endl;
-                continue;
-
-				*/
 		
-	}
+}
 
 
 void init_system() {
+	string username = "root";
+	string password = "toor";
+	currentUser = new User();
+	userArr = new User[20];
+	currentUser->init(username, password, username);
+	userArr[0].init(username, password, username);
+
 	dirOp = new DirOperate();
 	diskOP=new DiskOperate();
 	systemStartAddr = (char*)malloc(system_size * sizeof(char));  
@@ -139,30 +124,38 @@ void init_system() {
 	directory_count++;
 	root_directory->set_fileName("/");
 	root_directory->set_type('0');
-	lastDir = root_directory;
-	//currentDir = "/";
+	curDir = root_directory;
+	lastDir = NULL;
+	currentDir = "/";
 	//cout << root_directory << endl;
 	//root_fcb = (FCB*)systemStartAddr + block_size * init_FCB_block_num;
 	root_fcb = new(systemStartAddr + block_size * init_FCB_block_num)FCB;
 	FCB_count++;
     BlockMap = new(systemStartAddr + block_size * init_blockMap_block_num)int[block_count+1];
+	bitmap[init_blockMap_block_num] = 1;
 	//root_directory = new Directory();//不知道物理地址会不会变
 	//cout << root_directory << endl;
 	init_blockMap();
 	//directory FCB物理上顺序存储 逻辑上链式存储
-    //创建目录 /home
-    //创建目录 /home/www
-    //创建文件 /home/www/in.c
-    //创建文件 /home/out.c
+	//
+
+	dirOp->create_file(path_to_directory("/tmp"),path_to_filename("/tmp"),'0');
+	dirOp->create_file(path_to_directory("/root"),path_to_filename("/root"),'0');
+	dirOp->create_file(path_to_directory("/home"),path_to_filename("/home"),'0');
+	dirOp->create_file(path_to_directory("/home/a.c"), path_to_filename("/home/a.c"), '1');
+
 }
 
 void test_unit(){
 	//这里调试
+	//-----------------------未完成------------------
 	//注册时间格式没有分秒
 	//创建的时候当前目录重名问题
+	//读写的时候没有判断是否已经创建
 }
 
 int main(){
+	init_system();
 	example();
 
 	return 0;

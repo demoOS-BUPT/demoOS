@@ -3,8 +3,6 @@
 
 #define CYCLE 1000
 #include <QInputDialog>
-using namespace std;
-
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -216,11 +214,27 @@ void MainWindow::cmdPrint(QString newLine){
     ui->cmd->moveCursor(QTextCursor::End);
 }
 
+void MainWindow::cmdPrint_noLn(QString s){
+    QString text=ui->cmd->document()->toPlainText();
+    QStringList lines=text.split('\n');
+    while(lines.size()>255){
+        lines.removeFirst();
+    }
+    text=lines.join('\n');
+    //text+="\n";
+    text+=s;
+    ui->cmd->setText(text);
+    ui->cmd->moveCursor(QTextCursor::End);
+}
+
+#define DIR_ECHO cmdPrint((QStringList()<<""<<QString::fromStdString(currentUser->get_username())\
+            <<"@geek_linux:"<<QString::fromStdString(currentDir)<<"# ").join(""))
 void MainWindow::on_pushButton_clicked()//用户指令
 {
     QString op=ui->input->toPlainText();
+    std::string op1=op.toStdString();
 
-    cmdPrint(">"+op);//回显
+    cmdPrint_noLn(op);//回显
     ui->input->clear();
     //磁盘交互
     QStringList args =op.split(QRegularExpression("\\s+"),QString::SkipEmptyParts);
@@ -233,7 +247,7 @@ void MainWindow::on_pushButton_clicked()//用户指令
         cmdPrint(args.at(i));
     }
     cmdPrint("------------------------");*/
-    if(argc==0)return;
+    if(argc==0){DIR_ECHO;return;}
     if(args.at(0)=="?" || args.at(0)=="help"){
         cmdPrint("帮助：\n"
                  "\t表示说明：[参数] [可选参数]*\n"
@@ -247,9 +261,9 @@ void MainWindow::on_pushButton_clicked()//用户指令
                  "\tcd: cd [路径] 进入目录\n"
                  "\tnpro: npro [-e] (文件名) [-p]* (优先级0-7 默认7) [-s]* (内存大小默认4KB) 创建进程\n"
                  "\tkill: kill [pid] 杀死进程\n");
-        return;
+        DIR_ECHO;return;
     }
-    if (args.at(0) == "ls" || args.at(0) == "ll") {
+    /*if (args.at(0) == "ls" || args.at(0) == "ll") {
         //列出目录
         //  ll  || ls ||  ll /zxh/a
         if (argc == 1) {
@@ -332,12 +346,71 @@ void MainWindow::on_pushButton_clicked()//用户指令
         }
        dirOp->change_directory(args.at(1).toStdString());
         //switch dir
+    }*/
+    if (args[0] == "ls") {
+                ls_instruction(op1);
+    }
+    else if (args[0] == "ll") {
+        if (args.size() == 1){
+            dirOp->ll_directory(curDir);
+        }
+    }
+    else if (args[0] == "mkdir") {
+        mkdir_instruction(op1);
+    }
+    else if (args[0] == "touch") {
+        touch_instruction(op1);
+    }
+    else if (args[0] == "vim") {
+        vim_instruction(op1);
+    }
+    else if (args[0] == "cat") {
+        cat_instruction(op1);
+    }
+    else if (args[0] == "cd") {
+        //cd /home/zxh
+        //dirName = args[1];
+        dirOp->change_directory(args.at(1).toStdString());
+        //switch dir
+    }
+    else if (args[0] == "rm") {
+        rm_instruction(op1);
+    }
+    else if (args[0] == "ln") {
+        ln_instruction(op1);
+    }
+    else if (args[0]=="cp") {
+        cp_instruction(op1);
+
+    }
+    else if (args[0]=="mv") {
+        mv_instruction(op1);
+
+    }
+    //User
+    else if (args[0] == "whoami") {
+        cout << currentUser->get_username() << endl;
+    }
+    else if (args[0] == "whichgroup") {
+        cout << currentUser->get_group() << endl;
+    }
+    else if (args[0] == "su") {
+        su_instruction(op1);
+    }
+    else if (args[0] == "chmod"){
+        chmod_instruction(op1);
+    }
+    else if (args[0] == "chown"){
+        chown_instruction(op1);
+    }
+    else if (args[0] == "chgrp"){
+        chgrp_instruction(op1);
     }
     else if (args.at(0) == "kill") {
         //kill PID
         if(argc != 2){
             cmdPrint("用法: kill [PID]");
-            return;
+            DIR_ECHO;return;
         }
         if(!termiProcess(this->pcbPool,this->readyQueue,this->waitQueue,this->runningQueue,
                          RR1,RR2,FCFS,ram,args.at(1).toInt()))
@@ -353,7 +426,7 @@ void MainWindow::on_pushButton_clicked()//用户指令
         //create process
         if(argc >7){
             cmdPrint("用法: npro [-e] (文件名) [-p]* (优先级0-7 默认7) [-s]* (内存大小默认4KB)");
-            return;
+            DIR_ECHO;return;
         }
 
         int cpu_time = -1;
@@ -398,7 +471,7 @@ void MainWindow::on_pushButton_clicked()//用户指令
                 {
                     cmdPrint(QString("参数 \"%1\"无效，优先级为0~7的整数")
                              .arg(args.at(i+1)));
-                    return;
+                    DIR_ECHO;return;
                 }
                 i+=2;
             }
@@ -408,14 +481,14 @@ void MainWindow::on_pushButton_clicked()//用户指令
                 if(!ok||size<0){
                     cmdPrint(QString("参数 \"%1\"无效，内存大小为正整数")
                              .arg(args.at(i+1)));
-                    return;
+                    DIR_ECHO;return;
                 }
                 i+=2;
             }
             else{
                 cmdPrint(QString("无法识别参数 \"%1\"").arg(args.at(i)));
                 cmdPrint("用法: npro [-e] (文件名称) [-p]* (优先级0-7 默认7) [-s]* (内存大小 默认4KB)");
-                return;
+                DIR_ECHO;return;
             }
         }
         if(cpu_time<=0)cpu_time=this->rand()%10+1;
@@ -433,49 +506,74 @@ void MainWindow::on_pushButton_clicked()//用户指令
     else {
         cmdPrint(QString("%1 不是有效的命令。").arg(args.at(0)));
     }
-
+    DIR_ECHO;
 }
 
 
 void MainWindow::FS_init() {
-    dirOp = new DirOperate();
-    diskOP=new DiskOperate();
-    systemStartAddr = (char*)malloc(system_size * sizeof(char));
-    cmdPrint(QString("磁盘容量:%1 B").arg(system_size));
-    cmdPrint(QString("块尺寸:%1 B").arg(block_size));
-    cmdPrint(QString("块数目:%1 块").arg(block_count));
-    //初始化盘块的位示图
-    memset(systemStartAddr, 0, system_size * sizeof(char));
-    //前三块分别是 bit图，目录项，fcb
-    bitmap = systemStartAddr;
-    for(int i=0;i<init_blockMap_block_num+5;i++)
-        bitmap[i] = 1;
-    //void*buf= systemStartAddr + block_size * init_directory_block_num;
-    //cout <<( systemStartAddr + block_size * init_directory_block_num )<< endl;
-    //cout << buf << endl;
-    //root_directory = new(systemStartAddr + block_size * init_directory_block_num)Directory;
-    directory_count = 0;
-    FCB_count = 0;
-    //root_directory = (Directory *)systemStartAddr + block_size * init_directory_block_num;
-    root_directory = new(systemStartAddr + block_size * init_directory_block_num)Directory;
-    directory_count++;
-    root_directory->set_fileName("/");
-    root_directory->set_type('0');
-    lastDir = root_directory;
-    //currentDir = "/";
-    //cout << root_directory << endl;
-    //root_fcb = (FCB*)systemStartAddr + block_size * init_FCB_block_num;
-    root_fcb = new(systemStartAddr + block_size * init_FCB_block_num)FCB;
-    FCB_count++;
-    BlockMap = new(systemStartAddr + block_size * init_blockMap_block_num)int[block_count+1];
-    //root_directory = new Directory();//不知道物理地址会不会变
-    //cout << root_directory << endl;
-    init_blockMap();
-    //directory FCB物理上顺序存储 逻辑上链式存储
-    //创建目录 /home
-    //创建目录 /home/www
-    //创建文件 /home/www/in.c
-    //创建文件 /home/out.c
+    string username = "root";
+        string password = "toor";
+        currentUser = new User();
+        userArr = new User[20];
+        currentUser->init(username, password, username);
+        userArr[0].init(username, password, username);
+
+        dirOp = new DirOperate();
+        diskOP=new DiskOperate();
+        systemStartAddr = (char*)malloc(system_size * sizeof(char));
+        cmdPrint(QString("磁盘大小：%1").arg(system_size));
+        //cout << "system size:" << system_size << endl;
+        cmdPrint(QString("磁盘块大小：%1").arg(block_size));
+        //cout << "block size:" << block_size << endl;
+        cmdPrint(QString("磁盘块数目：%1").arg(block_count));
+        //cout << "block count:" << block_count << endl;
+        //初始化盘块的位示图
+        memset(systemStartAddr, 0, system_size * sizeof(char));
+        //前三块分别是 bit图，目录项，fcb
+        bitmap = systemStartAddr;
+        for(int i=0;i<init_blockMap_block_num+5;i++)
+            bitmap[i] = 1;
+        //void*buf= systemStartAddr + block_size * init_directory_block_num;
+        //cout <<( systemStartAddr + block_size * init_directory_block_num )<< endl;
+        //cout << buf << endl;
+        //root_directory = new(systemStartAddr + block_size * init_directory_block_num)Directory;
+        directory_count = 0;
+        FCB_count = 0;
+        //root_directory = (Directory *)systemStartAddr + block_size * init_directory_block_num;
+        root_directory = new(systemStartAddr + block_size * init_directory_block_num)Directory;
+        directory_count++;
+        root_directory->set_fileName("/");
+        root_directory->set_type('0');
+        curDir = root_directory;
+        lastDir = NULL;
+        currentDir = "/";
+        //cout << root_directory << endl;
+        //root_fcb = (FCB*)systemStartAddr + block_size * init_FCB_block_num;
+        root_fcb = new(systemStartAddr + block_size * init_FCB_block_num)FCB;
+        FCB_count++;
+        BlockMap = new(systemStartAddr + block_size * init_blockMap_block_num)int[block_count+1];
+        bitmap[init_blockMap_block_num] = 1;
+        //root_directory = new Directory();//不知道物理地址会不会变
+        //cout << root_directory << endl;
+        init_blockMap();
+        //directory FCB物理上顺序存储 逻辑上链式存储
+        //
+
+        dirOp->create_file(path_to_directory("/tmp"),path_to_filename("/tmp"),'0');
+        dirOp->create_file(path_to_directory("/root"),path_to_filename("/root"),'0');
+        dirOp->create_file(path_to_directory("/home"),path_to_filename("/home"),'0');
+        dirOp->create_file(path_to_directory("/home/a.c"), path_to_filename("/home/a.c"), '1');
+
+
+
+        LoginResult re=currentUser->is_login_q();
+        while(re!=Granted){
+            if(re==Aborted) QCoreApplication::quit();
+            else re=currentUser->is_login_q();
+        }
+        QMessageBox::information(this,"Access Granted","User access granted.");
+        cmdPrint((QStringList()<<""<<QString::fromStdString(currentUser->get_username())
+                      <<"@geek_linux:"<<QString::fromStdString(currentDir)<<"# ").join(""));
 }
 
 void MainWindow::on_pauseButton_clicked()
@@ -526,3 +624,590 @@ QString MainWindow::getFileContent(QString fileName){
 QString MainWindow::getFileContent(Directory *fileDir){
      return QString::fromStdString(dirOp->cat_file(fileDir->get_FCBptr(), diskOP));
 }
+
+void MainWindow::mkdir_instruction(string op) {
+    vector<string> args = split(op, " ");
+    string dirName = path_to_filename(args[1]);
+    //创建的文件是文件
+    Directory*lastDir = path_to_directory(args[1]);
+    if (lastDir == NULL) {
+        cmdPrint("Error! Can't find the path.");
+        DIR_ECHO;return;
+    }
+    if (-1 == dirOp->create_file(lastDir, dirName, '0')) {
+        cmdPrint("Failed in creating files.");
+    }
+}
+
+void MainWindow::touch_instruction(string op) {
+    //创建file
+    vector<string> args = split(op, " ");
+    Directory*lastDir = path_to_directory(args[1]);
+    if (lastDir == NULL) {
+        cmdPrint("Error! Can't find the path.");
+        DIR_ECHO;return;
+    }
+    string fileName = path_to_filename(args[1]);
+    if (-1 == dirOp->create_file(lastDir, fileName, '1')) {
+       cmdPrint("Failed in creating files.");
+    }
+}
+
+void MainWindow::cat_instruction(string op) {
+    vector<string> args = split(op, " ");
+    string fileContent;
+    string fileName = path_to_filename(args[1]);
+    Directory*fileDir = path_to_directory(args[1]);
+    if (fileDir == NULL) {
+        cmdPrint("Error! Can't find the file.");
+        DIR_ECHO;return;
+    }
+    else {
+        //fileName = args[1];
+        //Directory*fileDir = curDir;
+        for (int i = 0; i < fileDir->get_fileListNum(); i++) {
+            if (fileName == fileDir->get_fileList(i)->get_fileName()) {
+                fileDir = fileDir->get_fileList(i);
+                break;
+            }
+        }
+
+        if (fileDir->get_type() == '1') {
+            if (fileDir->is_authority(currentUser->get_username(), currentUser->get_group(), "r"))
+                cmdPrint(QString::fromStdString(
+                             dirOp->cat_file(fileDir->get_FCBptr(), diskOP)));
+            else {
+                //查看文件信息
+                cmdPrint("Permission denied.");
+                DIR_ECHO;return;
+            }
+        }
+        else {
+            cmdPrint("Error! Can't find the file.");
+            DIR_ECHO;return;
+        }
+
+    }
+}
+
+void MainWindow::vim_instruction(string op) {
+    vector<string> args = split(op, " ");
+    string fileContent;
+    //fileName = args[1];
+    string fileName = path_to_filename(args[1]);
+    Directory*fileDir;
+    //fileDir = curDir;
+    fileDir = path_to_directory(args[1]);
+    if (fileDir == NULL) {
+        cmdPrint("Error! Can't find the file.");
+        DIR_ECHO;return;
+    }
+    else {
+        for (int i = 0; i < fileDir->get_fileListNum(); i++) {
+            if (fileName == fileDir->get_fileList(i)->get_fileName()) {
+                fileDir = fileDir->get_fileList(i);
+                break;
+            }
+        }
+        if (fileDir->get_type() == '1') {
+            if (!fileDir->is_authority(currentUser->get_username(), currentUser->get_group(), "w"))
+                cmdPrint("Permission denied." );
+            else {
+                QString fileContent_q;
+                fileContent=dirOp->cat_file(fileDir->get_FCBptr(), diskOP);
+                fileContent_q=QString::fromStdString(fileContent);
+                cmdPrint("Please input file content:");
+                //cin >> fileContent;
+                bool ok;
+                fileContent_q=QInputDialog::getMultiLineText(this,
+                              "Please input file content:","",fileContent_q,&ok);
+                if(!ok){DIR_ECHO;return;}
+                //getline(cin, fileContent, '\n');
+                dirOp->write_file(fileDir->get_FCBptr(), diskOP, fileContent_q.toStdString());
+                //写文件
+            }
+        }
+        else {
+            cmdPrint("Error! Can't find the file.");
+        }
+    }
+}
+
+void MainWindow::ls_instruction(string op) {
+    vector<string> args = split(op, " ");
+
+    //列出目录
+    //  ll  || ls ||  ll /zxh/a
+    if (args.size() == 1) {
+        //ls
+        cmdPrint(dirOp->list_directory_q(curDir));
+    }
+    else if (args[1] == "/"){
+        //ls /
+        cmdPrint(dirOp->list_directory_q(root_directory));
+    }
+    else if (args[1] == "*" ) {
+        // ls *
+        //cout << "." << endl << ".." << endl;
+        cmdPrint(dirOp->list_all_directory_q(curDir));
+    }
+    else if (args[1] == "-a") {
+        //ls -a
+        cmdPrint(QString(".\n..\n"));
+        cmdPrint(dirOp->list_directory_q(curDir));
+    }
+    else if (args[1] == "-l") {
+        //ls -l
+        dirOp->ll_directory(curDir);
+    }
+    else {
+        string fileName = path_to_filename(args[1]);
+        Directory*fileDir = path_to_directory(args[1]);
+        if (fileDir == NULL) {
+            cmdPrint("Error! Can't find the file or directory.");
+            DIR_ECHO;return;
+        }
+        for (int i = 0; i < fileDir->get_fileListNum(); i++) {
+            if (fileName == fileDir->get_fileList(i)->get_fileName()) {
+                fileDir = fileDir->get_fileList(i);
+                break;
+            }
+        }
+        if (fileDir == NULL) {
+            cmdPrint("Error! Can't find the file or directory.");
+        }
+        else {
+            if (fileDir->get_type() == '1') {
+                cmdPrint(QString::fromStdString(fileDir->get_fileName()));
+            }
+            else
+            {
+                if (args.size() == 2) {
+                    cmdPrint(dirOp->list_directory_q(fileDir));
+                }
+                else {
+                    if (args[2] == "*") {
+                        cmdPrint(dirOp->list_all_directory_q(fileDir));
+                    }
+                    cmdPrint("unidentification!");
+                }
+            }
+        }
+    }
+}
+
+void MainWindow::cp_instruction(string op) {
+    vector<string> args = split(op, " ");
+
+    if (args.size() == 3) {
+        //cp file1 file2
+        //cp file1 dir
+        string sFileName, tFileName;
+        sFileName = path_to_filename(args[1]);
+        tFileName = path_to_filename(args[2]);
+        Directory*sfileDir = NULL, *tfileDir = NULL;
+        Directory*slastDir = path_to_directory(args[1]);
+        Directory*tlastDir = path_to_directory(args[2]);
+        if (slastDir == NULL || tlastDir == NULL) {
+            cmdPrint("Error! Can't find the source path.");
+            DIR_ECHO;return;
+        }
+        else {
+            for (int i = 0; i < slastDir->get_fileListNum(); i++) {
+                if (sFileName == slastDir->get_fileList(i)->get_fileName()) {
+                    sfileDir = slastDir->get_fileList(i);
+                    break;
+                }
+            }
+            if (sfileDir == NULL) {
+                cmdPrint("Error! Can't find the source file.");
+                DIR_ECHO;return;
+            }
+            if (sfileDir->get_type() == '0') {
+                cmdPrint("Don't allow copying directory.");
+            }
+            else {
+                bool flag = false;
+                for (int i = 0; i < tlastDir->get_fileListNum() && flag == false; i++) {
+                    if (tFileName == tlastDir->get_fileList(i)->get_fileName()) {
+                        tfileDir = tlastDir->get_fileList(i);
+                        flag = true;
+                        break;
+                    }
+                }
+                if (flag == true) {
+                    if (tfileDir->get_type() == '0') {
+                        //cp file dir
+                        dirOp->cp_file(sfileDir, tfileDir, sFileName);
+                    }
+                    else {
+                        //cp file1 file2 file2已经存在
+                        dirOp->cp_file(sfileDir, tlastDir, tFileName);
+                    }
+                }
+                else {
+                    //cp file1 file2  file2 不存在
+                    dirOp->cp_file(sfileDir, tlastDir, tFileName);
+                }
+            }
+        }
+    }
+    else
+    {
+        //cp file1 file2…filen dir
+        string sFileName, tDirName;
+        int fileNum = args.size() - 2;
+        tDirName = path_to_filename(args[args.size() - 1]);
+        Directory*tlastDir = path_to_directory(args[2]);
+        Directory*sfileDir = NULL, *tDir = NULL, *slastDir = NULL;
+        if (tlastDir == NULL) {
+            cmdPrint("Error! Can't find the objective directory.");
+            DIR_ECHO;return;
+        }
+        bool flag = false;
+        for (int i = 0; i < tlastDir->get_fileListNum() && flag == false; i++) {
+            if (tDirName == tlastDir->get_fileList(i)->get_fileName()) {
+                tDir = tlastDir->get_fileList(i);
+                flag = true;
+                break;
+            }
+        }
+        if (flag == false) {
+            cmdPrint("Error! Can't find the objective directory. ");
+            DIR_ECHO;return;
+        }
+        else {
+            sFileName = path_to_filename(args[1]);
+            slastDir = path_to_directory(args[1]);
+            if (slastDir == NULL) {
+                cmdPrint("Error! Can't find the source path.");
+                DIR_ECHO;return;
+            }
+            for (int i = 1; i <= fileNum; i++) {
+                sfileDir = NULL;
+                bool flag = false;
+                for (int i = 0; i < slastDir->get_fileListNum() && flag == false; i++) {
+                    if (sFileName == slastDir->get_fileList(i)->get_fileName()) {
+                        sfileDir = slastDir->get_fileList(i);
+                        flag = true;
+                        break;
+                    }
+                }
+                if (flag == false) {
+                    cmdPrint(QString("Error! Can't find the file "
+                                     +QString::fromStdString(sFileName)));
+                }
+                else {
+                    if (sfileDir->get_type() == '0') {
+                        cmdPrint("Don't allow copying directory.");
+                    }
+                    else {
+                        dirOp->cp_file(sfileDir, tDir, sFileName);
+                    }
+
+                }
+                sFileName = path_to_filename(args[i + 1]);
+                slastDir = path_to_directory(args[i + 1]);
+                if (slastDir == NULL) {
+                    cmdPrint("Error! Can't find the source path.");
+                    DIR_ECHO;return;
+                }
+            }
+        }
+    }
+}
+
+void MainWindow::mv_instruction(string op) {
+    vector<string> args = split(op, " ");
+    if (args.size() == 3) {
+        //mv file file2
+        //mv file dir
+        string sFileName, tFileName;
+        sFileName = path_to_filename(args[1]);
+        tFileName = path_to_filename(args[2]);
+        Directory*sfileDir = NULL, *tfileDir = NULL;
+        Directory*slastDir = path_to_directory(args[1]);
+        Directory*tlastDir = path_to_directory(args[2]);
+        if (slastDir == NULL || tlastDir == NULL) {
+            cmdPrint("Error! Can't find the source path.");
+        }
+        else {
+            for (int i = 0; i < slastDir->get_fileListNum(); i++) {
+                if (sFileName == slastDir->get_fileList(i)->get_fileName()) {
+                    sfileDir = slastDir->get_fileList(i);
+                    break;
+                }
+            }
+            if (sfileDir == NULL) {
+                cmdPrint("Error! Can't find the source file.");
+                DIR_ECHO;return;
+            }
+            if (sfileDir->get_type() == '0') {
+                //mv dir1 dir2
+                //dirOp->mv_dir(slastDir, sfileDir, tlastDir);
+                bool flag = false;
+                for (int i = 0; i < tlastDir->get_fileListNum() && flag == false; i++) {
+                    if (tFileName == tlastDir->get_fileList(i)->get_fileName()) {
+                        tfileDir = tlastDir->get_fileList(i);
+                        flag = true;
+                        break;
+                    }
+                }
+                if (flag == true) {
+                    if (tfileDir->get_type() == '0') {
+                        //mv dir dir
+                        dirOp->mv_file(slastDir, sfileDir, tfileDir);
+                    }
+                    else {
+                        //mv file1 file2 file2已经存在
+                        cmdPrint( "Error! The instruction format is wrong.");
+                    }
+                }
+                else {
+                    cmdPrint("Error! Can' t find the objective directory.");
+                }
+            }
+            else {
+                bool flag = false;
+                for (int i = 0; i < tlastDir->get_fileListNum() && flag == false; i++) {
+                    if (tFileName == tlastDir->get_fileList(i)->get_fileName()) {
+                        tfileDir = tlastDir->get_fileList(i);
+                        flag = true;
+                        break;
+                    }
+                }
+                if (flag == true) {
+                    if (tfileDir->get_type() == '0') {
+                        //mv file dir
+                        dirOp->mv_file(slastDir, sfileDir, tfileDir);
+                    }
+                    else {
+                        //mv file1 file2 file2已经存在
+                        dirOp->rm_directory(tfileDir, tlastDir);
+                        sfileDir->set_fileName(tFileName);
+                        dirOp->mv_file(slastDir, sfileDir, tlastDir);
+                    }
+                }
+                else {
+                    //mv file1 file2  file2 不存在
+                    dirOp->mv_file(slastDir, sfileDir, tlastDir);
+                    sfileDir->set_fileName(tFileName);
+                }
+            }
+        }
+    }
+    else
+    {
+        //mv file1 file2…filen dir
+        string sFileName, tDirName;
+        int fileNum = args.size() - 2;
+        tDirName = path_to_filename(args[args.size() - 1]);
+        Directory*tlastDir = path_to_directory(args[2]);
+        Directory*sfileDir = NULL, *tDir = NULL, *slastDir = NULL;
+        if (tlastDir == NULL) {
+            cmdPrint("Error! Can't find the objective path.");
+            DIR_ECHO;return;
+        }
+        bool flag = false;
+        for (int i = 0; i < tlastDir->get_fileListNum() && flag == false; i++) {
+            if (tDirName == tlastDir->get_fileList(i)->get_fileName()) {
+                tDir = tlastDir->get_fileList(i);
+                flag = true;
+                break;
+            }
+        }
+        if (flag == false) {
+            cmdPrint("Error! Can't find the objective directory. ");
+        }
+        else {
+            sFileName = path_to_filename(args[1]);
+            slastDir = path_to_directory(args[1]);
+            if (slastDir == NULL) {
+                cmdPrint("Error! Can't find the source file.");
+                DIR_ECHO;return;
+            }
+            for (int i = 1; i <= fileNum; i++) {
+                sfileDir = NULL;
+                bool flag = false;
+                for (int i = 0; i < slastDir->get_fileListNum() && flag == false; i++) {
+                    if (sFileName == slastDir->get_fileList(i)->get_fileName()) {
+                        sfileDir = slastDir->get_fileList(i);
+                        flag = true;
+                        break;
+                    }
+                }
+                if (flag == false) {
+                    cmdPrint("Error! Can't find the file "+QString::fromStdString(sFileName));
+                }
+                else {
+                    if (sfileDir->get_type() == '0') {
+                        cmdPrint("Don't allow copying directory.");
+                    }
+                    else {
+                        dirOp->mv_file(slastDir, sfileDir, tDir);
+                    }
+
+                }
+                sFileName = path_to_filename(args[i + 1]);
+                slastDir = path_to_directory(args[i + 1]);
+                if (slastDir == NULL) {
+                    cmdPrint("Error! Can't find the source path.");
+                    DIR_ECHO;return;
+                }
+            }
+        }
+    }
+}
+
+void MainWindow::rm_instruction(string op) {
+    vector<string> args = split(op, " ");
+    string fileName = path_to_filename(args[1]);
+    Directory*fileDir = NULL, *lastDir = path_to_directory(args[1]);
+    if (lastDir == NULL) {
+        cmdPrint("Error! Can't find the file.");
+    }
+    else {
+        for (int i = 0; i < lastDir->get_fileListNum(); i++) {
+            if (fileName == lastDir->get_fileList(i)->get_fileName()) {
+                fileDir = lastDir->get_fileList(i);
+                break;
+            }
+        }
+        if (fileDir == NULL) {
+            cmdPrint("Error! Can't find the file.");
+            DIR_ECHO;return;
+        }
+        dirOp->rm_directory(fileDir, lastDir);
+
+    }
+}
+
+void MainWindow::ln_instruction(string op) {
+    vector<string> args = split(op, " ");
+    string sFileName, tFileName;
+    sFileName = path_to_filename(args[1]);
+    tFileName = path_to_filename(args[2]);
+    Directory*sfileDir = NULL;
+    Directory*slastDir = path_to_directory(args[1]);
+    Directory*tlastDir = path_to_directory(args[2]);
+    if (slastDir == NULL) {
+        cmdPrint("Error! Can't find the source path.");
+    }
+    else if (tlastDir == NULL)
+    {
+        cmdPrint("Error! Can't find the objective path.");
+    }
+    else {
+        for (int i = 0; i < slastDir->get_fileListNum(); i++) {
+            if (sFileName == slastDir->get_fileList(i)->get_fileName()) {
+                sfileDir = slastDir->get_fileList(i);
+                break;
+            }
+        }
+        if (sfileDir == NULL) {
+            cmdPrint("Error! Can't find the source file.");
+            DIR_ECHO;return;
+        }
+        if (sfileDir->get_type() == '0') {
+            cmdPrint("Don't allow making hard link to directory.");
+        }
+        else {
+            cmdPrint(dirOp->ln_q(sfileDir, tlastDir, tFileName));
+        }
+
+    }
+}
+
+void MainWindow::su_instruction(string op) {
+    vector<string> args = split(op, " ");
+    string username = args[1];
+    string password;
+    cmdPrint("Password:");
+    //cin >> password;
+    bool ok;
+    QString pw=QInputDialog::getText(this,"Input password",
+                                     "Password:",QLineEdit::Password,"",&ok);
+    if(!ok){
+        cmdPrint("Canceled");
+        DIR_ECHO;return;
+    }
+    password=pw.toStdString();
+    //getline(cin, password, '\n');
+    if (currentUser->change_user(username, password))
+        cmdPrint("Success");
+    else
+        cmdPrint("Error");
+}
+
+void MainWindow::chmod_instruction(string op) {
+    vector<string> args = split(op, " ");
+    string fileName = path_to_filename(args[2]);
+    Directory*fileDir = path_to_directory(args[2]);
+    if (fileDir == NULL) {
+        cmdPrint("Error! Can't find the file.");
+    }
+    else {
+        //fileName = args[1];
+        //Directory*fileDir = curDir;
+        for (int i = 0; i < fileDir->get_fileListNum(); i++) {
+            if (fileName == fileDir->get_fileList(i)->get_fileName()) {
+                fileDir = fileDir->get_fileList(i);
+                break;
+            }
+        }
+        if (fileDir == NULL) {
+            cmdPrint("Error! Can't find the file.");
+        }
+        int auth[3];
+        string authStr = args[1];
+        auth[0] = (atoi(authStr.c_str()) - atoi(authStr.c_str()) % 100) / 100;
+        auth[1] = (atoi(authStr.c_str()) - auth[0] * 100 - atoi(authStr.c_str()) % 10) / 10;
+        auth[2] = atoi(authStr.c_str()) % 10;
+        fileDir->set_authority(auth);
+    }
+}
+
+void MainWindow::chown_instruction(string op) {
+    vector<string> args = split(op, " ");
+    string fileName = path_to_filename(args[1]);
+    Directory*fileDir = path_to_directory(args[1]);
+    if (fileDir == NULL) {
+        cmdPrint("Error! Can't find the file.");
+    }
+    else {
+        for (int i = 0; i < fileDir->get_fileListNum(); i++) {
+            if (fileName == fileDir->get_fileList(i)->get_fileName()) {
+                fileDir = fileDir->get_fileList(i);
+                break;
+            }
+        }
+        if (fileDir == NULL) {
+            cmdPrint("Error! Can't find the file.");
+            DIR_ECHO;return;
+        }
+        fileDir->set_owner(args[2]);
+    }
+}
+
+void MainWindow::chgrp_instruction(string op) {
+    vector<string> args = split(op, " ");
+    string fileName = path_to_filename(args[1]);
+    Directory*fileDir = path_to_directory(args[1]);
+    if (fileDir == NULL) {
+        cmdPrint("Error! Can't find the file.");
+    }
+    else {
+        for (int i = 0; i < fileDir->get_fileListNum(); i++) {
+            if (fileName == fileDir->get_fileList(i)->get_fileName()) {
+                fileDir = fileDir->get_fileList(i);
+                break;
+            }
+        }
+        if (fileDir == NULL) {
+            cmdPrint("Error! Can't find the file.");
+            DIR_ECHO;return;
+        }
+        fileDir->set_group(args[2]);
+    }
+}
+

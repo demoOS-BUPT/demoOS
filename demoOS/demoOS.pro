@@ -33,6 +33,10 @@ SOURCES += source/main.cpp\
     source/FS/DiskOperate.cpp \
     source/FS/FCB.cpp \
     source/FS/other.cpp \
+    source/RAM/FIFO.cpp \
+    source/FS/instructionOP.cpp \
+    source/FS/User.cpp \
+    logindialog.cpp
 
 HEADERS  += source/mainwindow.h \
    source/demo_process.h \
@@ -42,9 +46,13 @@ HEADERS  += source/mainwindow.h \
     source/FS/DirOperate.h \
     source/FS/DiskOperate.h \
     source/FS/FCB.h \
-    source/FS/other.h
+    source/FS/other.h \
+    source/FS/instructionOp.h \
+    source/FS/User.h \
+    logindialog.h
 
-FORMS    += source/mainwindow.ui
+FORMS    += source/mainwindow.ui \
+    logindialog.ui
 
 RESOURCES += \
     resource/res.qrc

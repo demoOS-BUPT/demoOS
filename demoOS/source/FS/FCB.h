@@ -20,6 +20,7 @@ private:
 	bool recyleBin;//文件是否放入回收站 0不在回收站 1在回收站
 public:
 	FCB();
+	~FCB();
 	//string get_expandName();
 	string get_time();
 	int get_blockStarNum();
