@@ -56,7 +56,8 @@ private:
     void cmdPrint(QString newLine);//输出新行
     void cmdPrint_noLn(QString s);//输出
 
-    void createProcess(int cpuTime,int priority,int ramSize,Directory *fileDir);//创建一个新进程，若成功放入就绪队列。
+    void createProcess(int cpuTime,int priority,int ramSize,
+                       Directory *fileDir);//创建一个新进程，若成功放入就绪队列。
 
     void printQueue();
 

@@ -34,8 +34,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->cmd->setTextColor(QColor(80,0,0));
     ui->cmd->setText("DemoOS 正在启动\n");
 
-#define INIT_TABLE(TABLE_NAME) TABLE_NAME->setColumnCount(5);\
-    TABLE_NAME->setHorizontalHeaderLabels(QStringList()<<"PID"<<"父进程PID"<<"CPU时间"<<"优先级"<<"内存基地址"<<"内存大小")
+#define INIT_TABLE(TABLE_NAME) TABLE_NAME->setColumnCount(7);\
+    TABLE_NAME->setHorizontalHeaderLabels(QStringList()<<"PID"<<"父进程PID"<<"CPU时间"<<"优先级"<<"内存基地址"<<"内存大小"<<"程序文件路径")
     INIT_TABLE(ui->runTable);
     INIT_TABLE(ui->readyTable);
     INIT_TABLE(ui->RR1T);
@@ -84,6 +84,8 @@ void MainWindow::printQueue(){
             ,new QTableWidgetItem(QString::number(QUEUE.at(i)->getBase())));\
         TABLE->setItem(i,5\
             ,new QTableWidgetItem(QString::number(QUEUE.at(i)->getSize())+" B"));\
+        TABLE->setItem(i,6\
+            ,new QTableWidgetItem(QUEUE.at(i)->getPath()));\
     }
     PRINT_QUEUE(ui->readyTable,readyQueue)
     PRINT_QUEUE(ui->runTable,runningQueue)
@@ -118,11 +120,13 @@ void MainWindow::createProcess(int cpuTime,int priority,int ramSize,Directory *f
         QString content;
         if(fileDir!=NULL)
         {
-            content = getFileContent(fileDir);
+            content = QString::fromStdString(
+                        dirOp->cat_file(fileDir->get_FCBptr(), diskOP));
             p->setPath(QString::fromStdString(fileDir->get_fileName()));
         }
+        else return;
 
-        if(fileDir == NULL || content.split(',').size() == 0)
+        /*if(fileDir == NULL || content.split(',').size() == 0)
         {
             content = "c,i|5,f,c,c,c";//从文件读出来的字符串们 【指令以,间隔 参数以|间隔
             qDebug()<<"默认程序哈哈："<<content;
@@ -250,10 +254,9 @@ void MainWindow::on_pushButton_clicked()//用户指令
     if(argc==0){DIR_ECHO;return;}
     if(args.at(0)=="?" || args.at(0)=="help"){
         cmdPrint("帮助：\n"
-                 "\t表示说明：[参数] [可选参数]*\n"
                  "\t指令帮助：\n"
                  "\thelp 或 ?: 打印帮助\n"
-                 "\tls 或 ll: ls [路径]* 列出当前路径或指定路径下目录树\n"
+                 "\tls: ls [路径]* 列出当前路径或指定路径下目录树\n"
                  "\tmkdir: mkdir [路径] 创建目录\n"
                  "\ttouch: touch [文件] 创建文件\n"
                  "\tvim: vim [文件] 编辑文件\n"
@@ -445,23 +448,34 @@ void MainWindow::on_pushButton_clicked()//用户指令
                 bool ok;
                 //cpu_time=args.at(i+1).toInt(&ok);
 
-               fileName = args.at(i+1).toStdString();
-               fileDir= lastDir;
-               int j = 0;
-               for (; j < lastDir->get_fileListNum(); j++) {
-                    if (fileName == lastDir->get_fileList(j)->get_fileName()) {
-                        fileDir = lastDir->get_fileList(j);
-                        break;
-                    }
-                }
-               //fileContent=QString::fromStdString(dirOp->cat_file(fileDir->get_FCBptr(), diskOP));
-                /*if(j ==  lastDir->get_fileListNum())
-                {
-                    cmdPrint(QString("参数 \"%1\"程序名无效，请输入正确的文件名")
-                             .arg(args.at(i+1)));
-                    return;
-                }*/
-                i+=2;
+               fileName = path_to_filename(args.at(i+1).toStdString());
+               fileDir= path_to_directory(args.at(i+1).toStdString());
+               if (fileDir == NULL) {
+                   cmdPrint(QString("Error! Can't find file %1")
+                            .arg(args.at(i+1)));
+                   DIR_ECHO;return;
+               }
+               else{
+                   for (int i = 0; i < fileDir->get_fileListNum(); i++) {
+                       if (fileName == fileDir->get_fileList(i)->get_fileName()) {
+                           fileDir = fileDir->get_fileList(i);
+                           break;
+                       }
+                   }
+               }
+               if (fileDir->get_type() == '1') {
+                   if (!fileDir->is_authority(currentUser->get_username(),
+                                              currentUser->get_group(),
+                                              "r")) {
+                       cmdPrint("Permission denied.");
+                       DIR_ECHO;return;
+                   }
+               }
+               else {
+                   cmdPrint("Error! Can't find the file.");
+                   DIR_ECHO;return;
+               }
+               i+=2;
             }
             else if(args.at(i) == "-p")
             {
@@ -495,11 +509,9 @@ void MainWindow::on_pushButton_clicked()//用户指令
         if(prior<0)prior=7;
         if(size<0) size=4096;
         if(fileDir==NULL){
-            if(fileName=="")
-                cmdPrint("无法创建进程:没有指定文件");
-            else
-                cmdPrint(QString("无法创建进程：无法找到文件 ")
+            cmdPrint(QString("无法创建进程：没有指定程序文件 ")
                      +QString::fromStdString(fileName));//没有获取到文件
+            DIR_ECHO;return;
         }
         this->createProcess(cpu_time,prior,size,fileDir);
     }
