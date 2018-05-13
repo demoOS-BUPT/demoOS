@@ -1,6 +1,7 @@
 #include "list_op.h"
 #include "demo_process.h"
-
+#include "mainwindow.h"
+#include <string>
 
 static bool boolMFQ=false;
 static int timer=0;
@@ -13,9 +14,9 @@ unsigned long getNewPID(QList<Process*>& pcbPool)
     for(int i=0;i<pcbPool.size();i++){
         unsigned long thisPID=pcbPool.at(i)->getPid();
         if(thisPID>max) max=thisPID;
+
     }
     max=max+1;
-
     if(max!=0) return max;
 
     //max上溢到0,pid可能满了
@@ -454,12 +455,13 @@ void processDispatch(QList<Process*> &pcbPool,
 
 //等待i/o资源的进程运行
 void ioDispatch(QList<Process*> &readyQueue,
-                     QList<Process*> &waitQueue,
+                     QList<Process*> &waitQueue
                      ){
         if(!waitQueue.isEmpty())
         {
                 Process* IOing=waitQueue.at(0);
                 IOing->setIo( IOing->getIo()-1);
+                qDebug()<<"您好，我是"<<IOing->getPid()<<"我还需要io资源"<<IOing->getIo()<<"时间";
                 if(IOing->getIo() == 0)
                 {
                     moveProcess(waitQueue,readyQueue,IOing->getPid());
@@ -468,10 +470,95 @@ void ioDispatch(QList<Process*> &readyQueue,
         }
 }
 
+void fork(Process *p,int alg,QList<Process*> &pcbPool,QList<Process*> &readyQueue,Firstfit &ram)
+{
+    Process* kid=newProcess(pcbPool);
+    if(kid!=nullptr){//创建成功
+        kid->setCPUtime(p->getCPUtime());
+        kid->setPriority(p->getPriority());
+        kid->setPc(p->getPc());
+        //copy CPUTime 优先级，PC
+        kid->setPpid(p->getPid());
+
+
+        //分配内存############################差一点
+        int alg=0;
+
+        int base=-1,size=-1;//分配内存
+        //不同的地址空间 同样的内容
+        //#######################我要一个获得内存大小的函数
+        int ramSize = 4096;//copy 父进程啊！
+
+        if(ram.push(kid->getPid(),ramSize,alg, ram.read(p->getPid()))){
+            base=ram.PcbMem_base(kid->getPid());
+            size=ram.PcbMem_size(kid->getPid());
+        }
+        else{
+            qDebug()<<(QString("创建子进程失败：内存分配失败"));
+            return;
+        }
+
+        kid->setBase(base);
+        kid->setSize(size);
+        readyQueue.append(kid);
+        qDebug()<<(QString("新建子进程成功：PID %1 CPU时间：%2 优先级：%3 内存：%4 B 内存基地址:%5")
+                    .arg(kid->getPid())
+                    .arg(kid->getCPUtime())
+                    .arg(kid->getPriority())
+                    .arg(kid->getSize())
+                    .arg(kid->getBase())
+                 );
+        return;
+    }
+    else{
+        qDebug()<<(QString("无法子进程"));
+        return;
+    }
+}
+
 //进程执行
-void execute(QList<Process*> &pcbPool,QList<Process*> &runningQueue){
+void execute(QList<Process*> &pcbPool,QList<Process*> &runningQueue,QList<Process*> &readyQueue,QList<Process*> &waitQueue,Firstfit &ram){
     for(int i=0;i<runningQueue.size();i++){
         Process* p=runningQueue.at(i);
         p->setCPUtime(p->getCPUtime()-1);
+
+        QString content= QString( QLatin1String( ram.read(p->getPid()) ));
+        qDebug()<<p->getPid()<<"在运行中:";
+
+        QStringList all_i =content.split(',');//命令间以,间隔
+        if(all_i.size() < p->getPc())//传的内容哪出错了
+        {
+            return;
+        }
+
+        QString cur_i = all_i.at(p->getPc());//当前执行指令
+        p->setPc(p->getPc()+1);//指向下一条指令索引
+
+        QStringList args = cur_i.split('|');//参数以|间隔
+        if(args.size()>0)
+        {
+            if(args.at(0) == 'i')//io
+            {
+                    qDebug()<<"我有一条io指令 时间"<<args.at(1);
+                    p->setIo(args.at(1).toInt());
+                    moveProcess(runningQueue,waitQueue,p->getPid());
+            }
+            else if(args.at(0)[0] == 'c')//cpu
+            {
+                    qDebug()<<"我是一条CPU指令，但是我什么也不做";
+            }
+            else if(args.at(0)[0] == 'f')//fork
+            {
+                    qDebug()<<"我是一条fork指令";
+                    fork(p,0,pcbPool,readyQueue,ram);
+            }
+            else
+            {
+                qDebug()<<"我不认识"<<args.at(0)<<"和"<<args.at(0)[0];
+            }
+
+        }
+
     }
+
 }

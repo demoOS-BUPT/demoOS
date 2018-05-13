@@ -3,6 +3,7 @@
 #include "demo_process.h"
 #include "RAM/firstfit.h"
 
+
 enum ProcessAlg{
     RR=0,FCFSa=1,PRI_RR=2,
     DYNAMIC_PRI=3,PREEEM_PRI=4,NONPREEM_PRI=5,
@@ -49,6 +50,9 @@ void processDispatch(QList<Process*> &pcbPool,
 
 //进程执行
 void execute(QList<Process*> &pcbPool,
-             QList<Process*> &runningQueue);
+             QList<Process*> &runningQueue,
+             QList<Process*> &readyQueue,
+             QList<Process*> &waitQueue,
+             Firstfit &ram);
 
 #endif // LIST_OP_H

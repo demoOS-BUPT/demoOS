@@ -198,10 +198,11 @@ class Firstfit
 		{
 			Pcb* cur = _find(id);
 		    if (cur == NULL)
-		        return"This process doesn't exisit";
-		    char* retmessage=new char[PcbMem_size(cur)];
-		    memcpy(retmessage,simmemory+PcbMem_base(cur),(strlen(retmessage)));
-		    return retmessage;
+                return "This process doesn't exisit";
+            int len = 15;//cur->needMem???
+            char* retmessage=new char[len];
+            memcpy(retmessage,simmemory+cur->begin,len);
+            return retmessage;
 		}
 
 	protected:
@@ -225,12 +226,12 @@ class Firstfit
 
 			if (NULL == cur)
 			{
-				cout << "Memory allocation failed2" << endl;
+                qDebug()  << "Memory allocation failed2" << endl;
 				exit(-1);
                 return false;
 			}
 			memcpy(simmemory+cur->first,message,(strlen(message)));
-			pcb->begin = cur->first;
+            pcb->begin = cur->first;
 			pcb->end = pcb->begin + size;
 			pcb->realMem = size;
 			cur->first += size;
@@ -247,7 +248,7 @@ class Firstfit
 				delete(cur);
 			}
 			_memNum -= size;
-			cout << "Success!" << endl;
+            qDebug() << "Success!" << endl;
             return true;
 		}
 
@@ -257,8 +258,8 @@ class Firstfit
 			memList* best = NULL;
 			int cur_best = 9999;
 			if (size > _memNum)
-			{
-				cout << "Memory allocation failed" << endl;
+            {   qDebug()<<"too big!!";
+                cout << "Memory allocation failed" << endl;
                 return false;
 			}
 			while (cur)
@@ -272,7 +273,7 @@ class Firstfit
 			}
 			cur = best;
 			if (NULL == cur)
-			{
+            {   qDebug()<<"no best";
 				cout << "Memory allocation failed" << endl;
 				exit(-1);
                 return false;

@@ -11,13 +11,12 @@ Process::Process(unsigned long PID)
 {
     this->state=UNLOAD;
     this->pid=PID;
+    this->PC = 0; //
     /*
     age=0;
     /*
-    unsigned long base;     //页表基地址
-    unsigned long size;     //内存大小
     QString path;           //程序路径
-    unsigned long PC;       //程序计数器
+    unsigned long PC;
     */
 }
 

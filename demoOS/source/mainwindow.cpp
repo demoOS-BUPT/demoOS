@@ -93,12 +93,19 @@ void MainWindow::printQueue(){
 void MainWindow::createProcess(int cpuTime,int priority,int ramSize){
     Process* p=newProcess(this->pcbPool);
     if(p!=nullptr){//创建成功
-        p->setCPUtime(cpuTime);
+        //p->setCPUtime(cpuTime);
         p->setPriority(priority);
         int base=-1,size=-1;
         //分配内存
         int alg=ui->ramAllocAlgComboBox->currentIndex();
-        if(ram.push(p->getPid(),ramSize,alg)){
+
+
+        QString content = "c,i|5,c,i|2,c,c";//从文件读出来的字符串们 【指令以,间隔 参数以|间隔
+        /*CPUTIME的设置*/
+        QStringList ins =content.split(',');//命令间以,间隔
+        p->setCPUtime(ins.size());
+
+        if(ram.push(p->getPid(),ramSize,alg,content.toLatin1().data())){
             base=ram.PcbMem_base(p->getPid());
             size=ram.PcbMem_size(p->getPid());
         }
@@ -126,8 +133,10 @@ void MainWindow::createProcess(int cpuTime,int priority,int ramSize){
 }
 
 
+
+
 void MainWindow::kernel(){
-    qDebug()<<"kernel";
+    //qDebug()<<"kernel";
     timer.stop();
 
     //cmdPrint("1000ms CYCLE");
@@ -138,13 +147,15 @@ void MainWindow::kernel(){
     ProcessAlg alg=static_cast<ProcessAlg>(ui->processAlgComboBox->currentIndex());
     processDispatch(pcbPool,readyQueue,runningQueue,
                     waitQueue,RR1,RR2,FCFS,ram,alg);//进程调度函数
-    execute(pcbPool,runningQueue);//进程执行
+    execute(pcbPool,runningQueue,readyQueue,waitQueue,this->ram);//进程执行
+    ioDispatch(readyQueue,waitQueue);//使用I/0资源
 
     printQueue();
 
     timer.start(CYCLE);
 
 }
+
 int strIsDigit(QString str)
 {
     QByteArray t = str.toLatin1();
@@ -355,6 +366,15 @@ void MainWindow::on_pushButton_clicked()//用户指令
                 }
                 i+=2;
             }
+            /*文件名参数
+           string fileName = args.at(1).toStdString();
+           Directory*fileDir = lastDir;
+           for (int i = 0; i < lastDir->get_fileListNum(); i++) {
+                if (fileName == lastDir->get_fileList(i)->get_fileName()) {
+                    fileDir = lastDir->get_fileList(i);
+                    break;
+                }
+            }*/
             else{
                 cmdPrint(QString("无法识别参数 \"%1\"").arg(args.at(i)));
                 cmdPrint("用法: npro [-t]* (CPU时间 默认随机1~10) [-p]* (优先级0-7 默认7) [-s]* (内存大小 默认4KB)");

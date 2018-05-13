@@ -34,6 +34,13 @@ public:
 
     void setIo(int t){io=t;}
     int getIo(){return io;}
+
+    void setPc(int p){PC=p;}
+    int getPc(){return PC;}
+
+
+    void setPpid(int p){ppid=pid;}
+    int getPpid(){return ppid;}
 private:
     unsigned long pid;
     PState state;
@@ -44,8 +51,11 @@ private:
     int priority;           //优先级 数小优先级高
     int CPUtime;            //运行时间（剩余）
     int age;
-    int io;
+    int io;                 //io时间
+    unsigned long ppid;      //父进程id
 };
 
 
+
 #endif // PROCESS_H
+
