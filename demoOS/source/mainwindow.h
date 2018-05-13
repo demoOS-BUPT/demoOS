@@ -52,7 +52,7 @@ private:
 
     void cmdPrint(QString newLine);
 
-    void createProcess(int cpuTime,int priority,int ramSize);//创建一个新进程，若成功放入就绪队列。
+    void createProcess(int cpuTime,int priority,int ramSize,Directory *fileDir);//创建一个新进程，若成功放入就绪队列。
 
     void printQueue();
 

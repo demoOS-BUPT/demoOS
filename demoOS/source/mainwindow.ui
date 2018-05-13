@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>981</width>
-    <height>699</height>
+    <width>1103</width>
+    <height>797</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -269,6 +269,16 @@
             <number>25</number>
            </attribute>
           </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_7">
+           <property name="text">
+            <string>等待：</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTableWidget" name="waitTable"/>
          </item>
          <item>
           <widget class="QLabel" name="label_2">

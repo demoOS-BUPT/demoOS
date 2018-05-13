@@ -43,6 +43,8 @@ MainWindow::MainWindow(QWidget *parent) :
     INIT_TABLE(ui->RR1T);
     INIT_TABLE(ui->RR2T);
     INIT_TABLE(ui->FCFST);
+    ui->waitTable->setColumnCount(5);
+    ui->waitTable->setHorizontalHeaderLabels(QStringList()<<"PID"<<"CPU时间"<<"I/O时间"<<"内存基地址"<<"内存大小");
     ui->RR1T->hide();
     ui->RR2T->hide();
     ui->FCFST->hide();
@@ -88,9 +90,23 @@ void MainWindow::printQueue(){
     PRINT_QUEUE(ui->RR1T,RR1)
     PRINT_QUEUE(ui->RR2T,RR2)
     PRINT_QUEUE(ui->FCFST,FCFS)
+
+    ui->waitTable->setRowCount(waitQueue.size());
+    for(int i=0;i<waitQueue.size();i++){
+            ui->waitTable->setItem(i,0
+               ,new QTableWidgetItem(QString::number(waitQueue.at(i)->getPid())));
+            ui->waitTable->setItem(i,1
+               ,new QTableWidgetItem(QString::number(waitQueue.at(i)->getCPUtime())));
+            ui->waitTable->setItem(i,2
+               ,new QTableWidgetItem(QString::number(waitQueue.at(i)->getIo())));
+            ui->waitTable->setItem(i,3
+                ,new QTableWidgetItem(QString::number(waitQueue.at(i)->getBase())));
+            ui->waitTable->setItem(i,4
+                ,new QTableWidgetItem(QString::number(waitQueue.at(i)->getSize())+" B"));
+    }
 }
 
-void MainWindow::createProcess(int cpuTime,int priority,int ramSize){
+void MainWindow::createProcess(int cpuTime,int priority,int ramSize,Directory *fileDir){
     Process* p=newProcess(this->pcbPool);
     if(p!=nullptr){//创建成功
         //p->setCPUtime(cpuTime);
@@ -99,9 +115,20 @@ void MainWindow::createProcess(int cpuTime,int priority,int ramSize){
         //分配内存
         int alg=ui->ramAllocAlgComboBox->currentIndex();
 
+        QString content;
+        if(fileDir!=NULL)
+        {
+            content = QString::fromStdString(
+                        dirOp->cat_file(fileDir->get_FCBptr(), diskOP));
+        }
 
-        QString content = "c,i|5,c,i|2,c,c";//从文件读出来的字符串们 【指令以,间隔 参数以|间隔
-        /*CPUTIME的设置*/
+        if(fileDir == NULL || content.split(',').size() == 0)
+        {
+            content = "c,i|5,c,c,c";//从文件读出来的字符串们 【指令以,间隔 参数以|间隔
+            qDebug()<<"默认程序哈哈："<<content;
+        }
+
+         /*CPUTIME的设置*/
         QStringList ins =content.split(',');//命令间以,间隔
         p->setCPUtime(ins.size());
 
@@ -320,25 +347,38 @@ void MainWindow::on_pushButton_clicked()//用户指令
     }
     else if (args.at(0) == "npro") {
         //create process
-        if(argc >5){
-            cmdPrint("用法: npro [-t]* (CPU时间 默认随机1~10) [-p]* (优先级0-7 默认7)");
+        if(argc >7){
+            cmdPrint("用法: npro [-e]* (文件名) [-p]* (优先级0-7 默认7) [-s] （内存大小默认4KB）");
             return;
         }
 
         int cpu_time = -1;
         int prior = -1;
         int size=-1;
+        string fileName ="";
+        Directory*fileDir =NULL;
 
         int i = 1;
+
         while(i < argc)
         {
-            if(args.at(i) == "-t")
+            if(args.at(i) == "-e")
             {
                 bool ok;
-                cpu_time=args.at(i+1).toInt(&ok);
-                if(!ok||cpu_time<=0)
+                //cpu_time=args.at(i+1).toInt(&ok);
+
+               fileName = args.at(i+1).toStdString();
+               fileDir= lastDir;
+               int j = 0;
+               for (; j < lastDir->get_fileListNum(); j++) {
+                    if (fileName == lastDir->get_fileList(j)->get_fileName()) {
+                        fileDir = lastDir->get_fileList(j);
+                        break;
+                    }
+                }
+                if(j ==  lastDir->get_fileListNum())
                 {
-                    cmdPrint(QString("参数 \"%1\"无效，cpu时间需为正整数")
+                    cmdPrint(QString("参数 \"%1\"程序名无效，请输入正确的文件名")
                              .arg(args.at(i+1)));
                     return;
                 }
@@ -366,25 +406,17 @@ void MainWindow::on_pushButton_clicked()//用户指令
                 }
                 i+=2;
             }
-            /*文件名参数
-           string fileName = args.at(1).toStdString();
-           Directory*fileDir = lastDir;
-           for (int i = 0; i < lastDir->get_fileListNum(); i++) {
-                if (fileName == lastDir->get_fileList(i)->get_fileName()) {
-                    fileDir = lastDir->get_fileList(i);
-                    break;
-                }
-            }*/
             else{
                 cmdPrint(QString("无法识别参数 \"%1\"").arg(args.at(i)));
-                cmdPrint("用法: npro [-t]* (CPU时间 默认随机1~10) [-p]* (优先级0-7 默认7) [-s]* (内存大小 默认4KB)");
+                cmdPrint("用法: npro [-e]* (文件名称) [-p]* (优先级0-7 默认7) [-s]* (内存大小 默认4KB)");
                 return;
             }
         }
         if(cpu_time<=0)cpu_time=this->rand()%10+1;
         if(prior<0)prior=7;
         if(size<0) size=4096;
-        this->createProcess(cpu_time,prior,size);
+        if(fileDir==NULL) ;//默认文件##############################################
+        this->createProcess(cpu_time,prior,size,fileDir);
     }
     else {
         cmdPrint(QString("%1 不是有效的命令。").arg(args.at(0)));
