@@ -57,7 +57,9 @@ private:
     void printQueue();
 
     void FS_init();//FS子系统初始化
-
+    //获取文件内容
+    QString getFileContent(QString fileName);
+    QString getFileContent(Directory *fileDir);
 private slots:
     void kernel();
 

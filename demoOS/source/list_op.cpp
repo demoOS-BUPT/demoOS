@@ -6,7 +6,7 @@
 static bool boolMFQ=false;
 static int timer=0;
 
-//获取新PID,返回0表示失败
+//获取新PID,返回0表示失败 0不是合法PID
 unsigned long getNewPID(QList<Process*>& pcbPool)
 {
     if (pcbPool.isEmpty()) return 1;
@@ -482,7 +482,6 @@ void fork(Process *p,int alg,QList<Process*> &pcbPool,QList<Process*> &readyQueu
 
         int base=-1,size=-1;//分配内存
         //不同的地址空间 同样的内容
-        //#######################我要一个获得内存大小的函数
         int ramSize = p->getSize();//copy 父进程啊！
 
         if(ram.push(kid->getPid(),ramSize,ramAllocAlg, ram.read(p->getPid()))){

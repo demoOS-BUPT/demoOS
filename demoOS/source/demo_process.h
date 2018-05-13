@@ -38,9 +38,11 @@ public:
     void setPc(int p){PC=p;}
     int getPc(){return PC;}
 
-
-    void setPpid(int p){ppid=pid;}
+    void setPpid(int p){ppid=p;}
     int getPpid(){return ppid;}
+
+    void setPath(QString p){path=p;}
+    QString getPath(){return path;}
 private:
     unsigned long pid;
     PState state;
