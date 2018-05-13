@@ -124,7 +124,7 @@ void MainWindow::createProcess(int cpuTime,int priority,int ramSize,Directory *f
 
         if(fileDir == NULL || content.split(',').size() == 0)
         {
-            content = "c,i|5,c,c,c";//从文件读出来的字符串们 【指令以,间隔 参数以|间隔
+            content = "c,i|5,f,c,c,c";//从文件读出来的字符串们 【指令以,间隔 参数以|间隔
             qDebug()<<"默认程序哈哈："<<content;
         }
 
@@ -159,9 +159,6 @@ void MainWindow::createProcess(int cpuTime,int priority,int ramSize,Directory *f
     }
 }
 
-
-
-
 void MainWindow::kernel(){
     //qDebug()<<"kernel";
     timer.stop();
@@ -174,7 +171,8 @@ void MainWindow::kernel(){
     ProcessAlg alg=static_cast<ProcessAlg>(ui->processAlgComboBox->currentIndex());
     processDispatch(pcbPool,readyQueue,runningQueue,
                     waitQueue,RR1,RR2,FCFS,ram,alg);//进程调度函数
-    execute(pcbPool,runningQueue,readyQueue,waitQueue,this->ram);//进程执行
+    execute(pcbPool,runningQueue,readyQueue,waitQueue,this->ram,
+            ui->ramAllocAlgComboBox->currentIndex());//进程执行
     ioDispatch(readyQueue,waitQueue);//使用I/0资源
 
     printQueue();

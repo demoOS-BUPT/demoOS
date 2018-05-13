@@ -470,7 +470,7 @@ void ioDispatch(QList<Process*> &readyQueue,
         }
 }
 
-void fork(Process *p,int alg,QList<Process*> &pcbPool,QList<Process*> &readyQueue,Firstfit &ram)
+void fork(Process *p,int alg,QList<Process*> &pcbPool,QList<Process*> &readyQueue,Firstfit &ram,int ramAllocAlg)
 {
     Process* kid=newProcess(pcbPool);
     if(kid!=nullptr){//创建成功
@@ -480,16 +480,12 @@ void fork(Process *p,int alg,QList<Process*> &pcbPool,QList<Process*> &readyQueu
         //copy CPUTime 优先级，PC
         kid->setPpid(p->getPid());
 
-
-        //分配内存############################差一点
-        int alg=0;
-
         int base=-1,size=-1;//分配内存
         //不同的地址空间 同样的内容
         //#######################我要一个获得内存大小的函数
-        int ramSize = 4096;//copy 父进程啊！
+        int ramSize = p->getSize();//copy 父进程啊！
 
-        if(ram.push(kid->getPid(),ramSize,alg, ram.read(p->getPid()))){
+        if(ram.push(kid->getPid(),ramSize,ramAllocAlg, ram.read(p->getPid()))){
             base=ram.PcbMem_base(kid->getPid());
             size=ram.PcbMem_size(kid->getPid());
         }
@@ -501,8 +497,9 @@ void fork(Process *p,int alg,QList<Process*> &pcbPool,QList<Process*> &readyQueu
         kid->setBase(base);
         kid->setSize(size);
         readyQueue.append(kid);
-        qDebug()<<(QString("新建子进程成功：PID %1 CPU时间：%2 优先级：%3 内存：%4 B 内存基地址:%5")
+        qDebug()<<(QString("新建子进程成功：PID %1 父进程PID：%2 CPU时间：%3 优先级：%4 内存：%5 B 内存基地址:%6")
                     .arg(kid->getPid())
+                    .arg(kid->getPpid())
                     .arg(kid->getCPUtime())
                     .arg(kid->getPriority())
                     .arg(kid->getSize())
@@ -511,13 +508,13 @@ void fork(Process *p,int alg,QList<Process*> &pcbPool,QList<Process*> &readyQueu
         return;
     }
     else{
-        qDebug()<<(QString("无法子进程"));
+        qDebug()<<(QString("无法创建子进程"));
         return;
     }
 }
 
 //进程执行
-void execute(QList<Process*> &pcbPool,QList<Process*> &runningQueue,QList<Process*> &readyQueue,QList<Process*> &waitQueue,Firstfit &ram){
+void execute(QList<Process*> &pcbPool,QList<Process*> &runningQueue,QList<Process*> &readyQueue,QList<Process*> &waitQueue,Firstfit &ram,int ramAllocAlg){
     for(int i=0;i<runningQueue.size();i++){
         Process* p=runningQueue.at(i);
         p->setCPUtime(p->getCPUtime()-1);
@@ -550,7 +547,7 @@ void execute(QList<Process*> &pcbPool,QList<Process*> &runningQueue,QList<Proces
             else if(args.at(0)[0] == 'f')//fork
             {
                     qDebug()<<"我是一条fork指令";
-                    fork(p,0,pcbPool,readyQueue,ram);
+                    fork(p,0,pcbPool,readyQueue,ram,ramAllocAlg);
             }
             else
             {
