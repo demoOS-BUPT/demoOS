@@ -577,3 +577,8 @@ void chgrp_instruction(string op) {
 		fileDir->set_group(args[2]);
 	}
 }
+
+void whoami_instruction(string op) {
+	vector<string> args = split(op, " ");
+	cout << currentUser->get_username() << endl;
+}

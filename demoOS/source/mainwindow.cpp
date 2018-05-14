@@ -403,11 +403,11 @@ void MainWindow::on_pushButton_clicked()//用户指令
         //switch dir
     }*/
     if (args[0] == "ls") {
-                ls_instruction(op1);
+        ls_instruction(op1);
     }
     else if (args[0] == "ll") {
         if (args.size() == 1){
-            dirOp->ll_directory(curDir);
+            cmdPrint(dirOp->ll_directory_q(curDir));
         }
     }
     else if (args[0] == "mkdir") {
@@ -440,14 +440,13 @@ void MainWindow::on_pushButton_clicked()//用户指令
     }
     else if (args[0]=="mv") {
         mv_instruction(op1);
-
     }
     //User
     else if (args[0] == "whoami") {
-        cout << currentUser->get_username() << endl;
+        whoami_instruction(op1);
     }
     else if (args[0] == "whichgroup") {
-        cout << currentUser->get_group() << endl;
+        whichgroup_instruction(op1);
     }
     else if (args[0] == "su") {
         su_instruction(op1);
@@ -460,6 +459,9 @@ void MainWindow::on_pushButton_clicked()//用户指令
     }
     else if (args[0] == "chgrp"){
         chgrp_instruction(op1);
+    }
+    else if (args[0] == "pwd"){
+        cmdPrint(QString::fromStdString(currentDir));
     }
     else if (args.at(0) == "kill") {
         //kill PID
@@ -822,7 +824,7 @@ void MainWindow::vim_instruction(string op) {
                 QString fileContent_q;
                 fileContent=dirOp->cat_file(fileDir->get_FCBptr(), diskOP);
                 fileContent_q=QString::fromStdString(fileContent);
-                cmdPrint("Please input file content:");
+                //cmdPrint("Please input file content:");
                 //cin >> fileContent;
                 bool ok;
                 fileContent_q=QInputDialog::getMultiLineText(this,
@@ -1317,3 +1319,10 @@ void MainWindow::chgrp_instruction(string op) {
     }
 }
 
+void MainWindow::whichgroup_instruction(string op) {
+    cmdPrint(QString::fromStdString(currentUser->get_group()));
+}
+
+void MainWindow::whoami_instruction(string op) {
+    cmdPrint(QString::fromStdString(currentUser->get_username()));
+}

@@ -68,7 +68,7 @@ void example(){
 		}
 		//User
 		else if (args[0] == "whoami") {
-			cout << currentUser->get_username() << endl;
+			whoami_instruction(op);
 		}
 		else if (args[0] == "whichgroup") {
 			cout << currentUser->get_group() << endl;

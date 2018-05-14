@@ -47,8 +47,8 @@ int DirOperate::create_file(Directory*lastDirectory,string fileName,char type) {
 			lastDir = newDirectory;
 		}
 		*/
-		newDirectory->set_curDir(curDir);
-	newDirectory->set_lastDir(lastDir);
+        newDirectory->set_curDir(lastDirectory);
+        newDirectory->set_lastDir(lastDirectory->get_curDir());
 		
 		if (!lastDirectory->add_fileDirectory(newDirectory)) {
 			return -1;
@@ -280,7 +280,7 @@ QString DirOperate::ll_directory_q(Directory*directory) {
     QString ret;
     if ('1' == directory->get_type()) {
         //cout << directory->get_fileName()<<endl;
-        return QString();
+        return QString::fromStdString("Not a directory");
     }
     else {
     //drwxr-xr-x  2 root root 4096 Feb  2 09:40 Videos
