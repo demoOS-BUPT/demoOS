@@ -428,27 +428,30 @@ void processDispatch(QList<Process*> &pcbPool,
         }
     case HRRN:{
 
-                int i;
-                float R;
-                float max=1;
-                if(!runningQueue.isEmpty()) return;
-                Process * in=nullptr;
-                if(!readyQueue.isEmpty()){
-                    for(int i=0; i < readyQueue.size();i++){
-                        int A=readyQueue.at(i)->getAge()+1;
-                        readyQueue.at(i)->setAge(A);
-                    }
-                    for(i=0;i<readyQueue.size();i++){
-                        R=1+(readyQueue.at(i)->getAge())/(readyQueue.at(i)->getCPUtime())+(readyQueue.at(i)->getAge())%(readyQueue.at(i)->getCPUtime());
-                        if(R>max){
-                            in=readyQueue.at(i);
-                            max=R;
+                    int i;
+                    float R;
+                    float max=1;
+                    float B,C;
+                    if(!runningQueue.isEmpty()) return;
+                    Process * in=nullptr;
+                    if(!readyQueue.isEmpty()){
+                        for(int i=0; i < readyQueue.size();i++){
+                            int A=readyQueue.at(i)->getAge()+1;
+                            readyQueue.at(i)->setAge(A);
                         }
+                        for(i=0;i<readyQueue.size();i++){
+                            B=readyQueue.at(i)->getAge();
+                            C=readyQueue.at(i)->getCPUtime();
+                            R=1+B/C;
+                            if(R>max){
+                                in=readyQueue.at(i);
+                                max=R;
+                            }
+                        }
+                        moveProcess(readyQueue,runningQueue,in->getPid());
                     }
-                    moveProcess(readyQueue,runningQueue,in->getPid());
+                    break;
                 }
-                break;
-            }
         case FCFSa:
         default:{
             if(runningQueue.isEmpty()&&
