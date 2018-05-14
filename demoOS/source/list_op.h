@@ -48,12 +48,10 @@ void processDispatch(QList<Process*> &pcbPool,
                      Firstfit &ram,
                      ProcessAlg alg);
 
-//进程执行
-void execute(QList<Process*> &pcbPool,
-             QList<Process*> &runningQueue,
-             QList<Process*> &readyQueue,
-             QList<Process*> &waitQueue,
-             Firstfit &ram,
-             int ramAllocAlg);
+void fork(Process *p,
+          QList<Process*> &pcbPool,
+          QList<Process*> &readyQueue,
+          Firstfit &ram,
+          int ramAllocAlg);
 
 #endif // LIST_OP_H

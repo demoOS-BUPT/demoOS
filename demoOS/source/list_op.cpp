@@ -470,13 +470,14 @@ void ioDispatch(QList<Process*> &readyQueue,
         }
 }
 
-void fork(Process *p,int alg,QList<Process*> &pcbPool,QList<Process*> &readyQueue,Firstfit &ram,int ramAllocAlg)
+void fork(Process *p,QList<Process*> &pcbPool,QList<Process*> &readyQueue,Firstfit &ram,int ramAllocAlg)
 {
     Process* kid=newProcess(pcbPool);
     if(kid!=nullptr){//创建成功
         kid->setCPUtime(p->getCPUtime());
         kid->setPriority(p->getPriority());
         kid->setPc(p->getPc());
+        kid->setPath(p->getPath());
         //copy CPUTime 优先级，PC
         kid->setPpid(p->getPid());
 
@@ -512,52 +513,4 @@ void fork(Process *p,int alg,QList<Process*> &pcbPool,QList<Process*> &readyQueu
     }
 }
 
-//进程执行
-void execute(QList<Process*> &pcbPool,QList<Process*> &runningQueue,
-             QList<Process*> &readyQueue,QList<Process*> &waitQueue,
-             Firstfit &ram,int ramAllocAlg){
-    for(int i=0;i<runningQueue.size();i++){
-        Process* p=runningQueue.at(i);
 
-        QString content= QString::fromStdString(ram.read(p->getPid()));
-        qDebug()<<p->getPid()<<"在运行中:"<<content<<p->getPc();
-
-        QStringList all_i =content.split(',');//命令间以,间隔
-        if(all_i.size() <= p->getPc())//pc超界了 程序运行完了
-        {
-            p->setCPUtime(0);
-            return;
-        }
-
-        QString cur_i = all_i.at(p->getPc());//当前执行指令
-        p->setPc(p->getPc()+1);//指向下一条指令索引
-        p->setCPUtime(all_i.size()-p->getPc());
-
-        QStringList args = cur_i.split('|');//参数以|间隔
-        if(args.size()>0)
-        {
-            if(args.at(0) == 'i')//io
-            {
-                    qDebug()<<"我有一条io指令 时间"<<args.at(1);
-                    p->setIo(args.at(1).toInt());
-                    moveProcess(runningQueue,waitQueue,p->getPid());
-            }
-            else if(args.at(0).at(0) == 'c')//cpu
-            {
-                    qDebug()<<"我是一条CPU指令，但是我什么也不做";
-            }
-            else if(args.at(0).at(0) == 'f')//fork
-            {
-                    qDebug()<<"我是一条fork指令";
-                    fork(p,0,pcbPool,readyQueue,ram,ramAllocAlg);
-            }
-            else
-            {
-                qDebug()<<"我不认识"<<args.at(0)<<"和"<<args.at(0).at(0);
-            }
-
-        }
-
-    }
-
-}

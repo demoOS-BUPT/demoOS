@@ -61,6 +61,9 @@ private:
 
     void printQueue();
 
+    //进程执行
+    void execute();
+
     void FS_init();//FS子系统初始化
 
     void mkdir_instruction(string op);

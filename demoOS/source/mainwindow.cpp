@@ -35,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->cmd->setText("DemoOS 正在启动\n");
 
 #define INIT_TABLE(TABLE_NAME) TABLE_NAME->setColumnCount(7);\
-    TABLE_NAME->setHorizontalHeaderLabels(QStringList()<<"PID"<<"父进程PID"<<"CPU时间"<<"优先级"<<"内存基地址"<<"内存大小"<<"程序文件路径")
+    TABLE_NAME->setHorizontalHeaderLabels(QStringList()<<"PID"<<"父进程PID"<<"CPU时间"<<"优先级"<<"内存基地址"<<"内存大小"<<"程序文件")
     INIT_TABLE(ui->runTable);
     INIT_TABLE(ui->readyTable);
     INIT_TABLE(ui->RR1T);
@@ -135,7 +135,7 @@ void MainWindow::createProcess(int cpuTime,int priority,int ramSize,Directory *f
          /*CPUTIME的设置*/
         QStringList ins =content.split(',');//命令间以,间隔
         p->setCPUtime(ins.size());
-
+        qDebug()<<content;
         if(ram.push(p->getPid(),ramSize,alg,content.toLatin1().data())){
             base=ram.PcbMem_base(p->getPid());
             size=ram.PcbMem_size(p->getPid());
@@ -179,13 +179,65 @@ void MainWindow::kernel(){
     ProcessAlg alg=static_cast<ProcessAlg>(ui->processAlgComboBox->currentIndex());
     processDispatch(pcbPool,readyQueue,runningQueue,
                     waitQueue,RR1,RR2,FCFS,ram,alg);//进程调度函数
-    execute(pcbPool,runningQueue,readyQueue,waitQueue,this->ram,
-            ui->ramAllocAlgComboBox->currentIndex());//进程执行
+    execute();//进程执行
     ioDispatch(readyQueue,waitQueue);//使用I/0资源
 
     printQueue();
 
     timer.start(CYCLE);
+
+}
+
+//进程执行
+void MainWindow::execute(){
+    int ramAllocAlg=ui->ramAllocAlgComboBox->currentIndex();
+    for(int i=0;i<runningQueue.size();i++){
+        Process* p=runningQueue.at(i);
+
+        char* s=ram.read(p->getPid());
+        QString content= QString::fromLatin1(s,strlen(s));
+        qDebug()<<p->getPid()<<"在运行中:"<<content<<p->getPc();
+
+        QStringList all_i =content.split(',');//命令间以,间隔
+        if(all_i.size() <= p->getPc())//pc超界了 程序运行完了
+        {
+            p->setCPUtime(0);
+            return;
+        }
+
+        QString cur_i = all_i.at(p->getPc());//当前执行指令
+        p->setPc(p->getPc()+1);//指向下一条指令索引
+        p->setCPUtime(all_i.size()-p->getPc());
+
+        QStringList args = cur_i.split('|');//参数以|间隔
+        if(args.size()>0)
+        {
+            if(args.at(0) == 'i')//io
+            {
+                    qDebug()<<"我有一条io指令 时间"<<args.at(1);
+                    p->setIo(args.at(1).toInt());
+                    moveProcess(runningQueue,waitQueue,p->getPid());
+            }
+            else if(args.at(0).at(0) == 'c')//cpu
+            {
+                    qDebug()<<"我是一条CPU指令，但是我什么也不做";
+            }
+            else if(args.at(0).at(0) == 'f')//fork
+            {
+                    qDebug()<<"我是一条fork指令";
+                    fork(p,pcbPool,readyQueue,ram,ramAllocAlg);
+            }
+            else
+            {
+                cmdPrint(QString("程序解释器：无法识别 %1 位于文件 %2 第%3条 进程 %4 停止运行")
+                         .arg(args.at(0)).arg(p->getPath()).arg(p->getPc())
+                         .arg(p->getPid()));
+                p->setCPUtime(0);
+            }
+
+        }
+
+    }
 
 }
 
@@ -263,7 +315,7 @@ void MainWindow::on_pushButton_clicked()//用户指令
                  "\tcat: cat [文件] 显示文件内容\n"
                  "\tcd: cd [路径] 进入目录\n"
                  "\tnpro: npro [-e] (文件名) [-p]* (优先级0-7 默认7) [-s]* (内存大小默认4KB) 创建进程\n"
-                 "\tkill: kill [pid] 杀死进程\n");
+                 "\tkill: kill [-r]* [pid] 杀死进程,-r杀死进程树\n");
         DIR_ECHO;return;
     }
     /*if (args.at(0) == "ls" || args.at(0) == "ll") {
@@ -411,18 +463,60 @@ void MainWindow::on_pushButton_clicked()//用户指令
     }
     else if (args.at(0) == "kill") {
         //kill PID
-        if(argc != 2){
+        if(argc == 1){
             cmdPrint("用法: kill [PID]");
             DIR_ECHO;return;
         }
-        if(!termiProcess(this->pcbPool,this->readyQueue,this->waitQueue,this->runningQueue,
-                         RR1,RR2,FCFS,ram,args.at(1).toInt()))
-        {
-            cmdPrint("该进程不存在，请重新输入");
+        else if(argc==2){
+            if(!termiProcess(this->pcbPool,this->readyQueue,this->waitQueue,this->runningQueue,
+                             RR1,RR2,FCFS,ram,args.at(1).toInt()))
+            {
+                cmdPrint("该进程不存在，请重新输入");
+            }
+            else
+            {
+                cmdPrint("终止进程成功！");
+            }
         }
-        else
-        {
-            cmdPrint("终止进程成功！");
+        else if(argc==3){
+            int pid=0;
+            bool ok;
+            if(args.at(1)=="-r"){
+                pid=args.at(2).toInt(&ok);
+                if(!ok){
+                    cmdPrint("无法识别的参数 "+args.at(2));
+                    DIR_ECHO;return;
+                }
+            }
+            else{
+                pid=args.at(1).toInt(&ok);
+                if(!ok){
+                    cmdPrint("无法识别的参数 "+args.at(1));
+                    DIR_ECHO;return;
+                }
+                if(args.at(2)!="-r"){
+                    cmdPrint("无法识别的参数 "+args.at(2));
+                    DIR_ECHO;return;
+                }
+            }
+            if(pid==0){
+                cmdPrint("0 不是一个合法的PID");
+                DIR_ECHO;return;
+            }
+
+            //杀进程树
+            QList<int> killList;
+            killList.append(pid);
+            while(!killList.isEmpty()){
+                for(int i=1;i<pcbPool.size();i++){
+                    if(pcbPool.at(i)->getPpid()==killList.at(0))
+                        killList.append(pcbPool.at(i)->getPid());
+                }
+                termiProcess(pcbPool,readyQueue,runningQueue,waitQueue,
+                             RR1,RR2,FCFS,ram,killList.at(0));
+                killList.removeFirst();
+            }
+
         }
     }
     else if (args.at(0) == "npro") {

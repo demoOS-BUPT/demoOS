@@ -200,8 +200,12 @@ class Firstfit
 		    if (cur == NULL)
 		        return"This process doesn't exisit";
             cur=cur->next;
-            char* retmessage=new char[PcbMem_size(id)];
-            memcpy(retmessage,simmemory+PcbMem_base(id),(strlen(retmessage)));
+            cout<<cur->pcbid<<endl;
+            char* retmessage=new char[cur->needMem];
+            for(int i=0;i<cur->needMem;i++){
+                retmessage[i]=0;
+            }
+            memcpy(retmessage,simmemory+cur->begin,cur->needMem);
 		    return retmessage;
 		}
 
@@ -230,7 +234,7 @@ class Firstfit
 				exit(-1);
                 return false;
 			}
-			memcpy(simmemory+cur->first,message,(strlen(message)));
+            memcpy(simmemory+cur->first,message,(strlen(message)+1));
 			pcb->begin = cur->first;
 			pcb->end = pcb->begin + size;
 			pcb->realMem = size;
@@ -278,7 +282,7 @@ class Firstfit
 				exit(-1);
                 return false;
 			}
-			memcpy(simmemory+cur->first,message,(strlen(message)));
+            memcpy(simmemory+cur->first,message,(strlen(message)+1));
 			pcb->begin = cur->first;
 			pcb->end = pcb->begin + size;
 			pcb->realMem = size;
