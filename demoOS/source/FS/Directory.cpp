@@ -97,7 +97,7 @@ string Directory::get_group(){
 
 string Directory::get_authority(){
 	string autho = "";
-	if (this->type == 0)
+    if (this->get_type() == '0')
 		autho = "d";
 	else
 		autho = "-";
