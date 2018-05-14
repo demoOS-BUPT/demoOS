@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->runningQueue.clear();//清空进程
     RR1.clear();RR2.clear();FCFS.clear();
 
-    cmdPrint(QString("内存大小：%1B").arg(ramSize));
+    cmdPrint(QString("内存大小：64KB"));
 
     FS_init();//磁盘子系统初始化
 
