@@ -431,6 +431,7 @@ void processDispatch(QList<Process*> &pcbPool,
                 int i;
                 float R;
                 float max=1;
+                float B,C;
                 if(!runningQueue.isEmpty()) return;
                 Process * in=nullptr;
                 if(!readyQueue.isEmpty()){
@@ -439,7 +440,9 @@ void processDispatch(QList<Process*> &pcbPool,
                         readyQueue.at(i)->setAge(A);
                     }
                     for(i=0;i<readyQueue.size();i++){
-                        R=1+(readyQueue.at(i)->getAge())/(readyQueue.at(i)->getCPUtime())+(readyQueue.at(i)->getAge())%(readyQueue.at(i)->getCPUtime());
+                        B=readyQueue.at(i)->getAge();
+                        C=readyQueue.at(i)->getCPUtime();
+                        R=1+B/C;
                         if(R>max){
                             in=readyQueue.at(i);
                             max=R;
