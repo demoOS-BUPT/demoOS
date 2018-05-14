@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->processAlgComboBox->addItems(QStringList()
                                            <<"RR 时间片轮转"
                                            <<"FCFS 批处理"
-                                           <<"弱化版多级反馈队列"
+                                           <<"优先级结合RR"
                                            <<"动态优先级"
                                            <<"抢占式优先级"
                                            <<"非抢占式优先级"

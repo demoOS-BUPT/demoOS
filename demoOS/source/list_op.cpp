@@ -182,6 +182,8 @@ void processDispatch(QList<Process*> &pcbPool,
                    }
                 }
             }
+            else
+                return;
 
             if(!runningQueue.isEmpty())
                 out=runningQueue.at(0);//下一个了
@@ -211,6 +213,9 @@ void processDispatch(QList<Process*> &pcbPool,
                    }
                 }
             }
+            else
+                return;
+
             if(!runningQueue.isEmpty())
                 out=runningQueue.at(0);//下一个了
             if(out!=nullptr&& in != nullptr){
@@ -242,6 +247,9 @@ void processDispatch(QList<Process*> &pcbPool,
                     }
                 }
             }
+            else
+                return;
+
             if(!runningQueue.isEmpty())
             {   //比较需不需要抢占
                 out=runningQueue.at(0);//多个运行队列的话还要挑一个最差的…………待补充
