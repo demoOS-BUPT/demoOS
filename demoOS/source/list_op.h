@@ -1,7 +1,7 @@
 #ifndef LIST_OP_H
 #define LIST_OP_H
 #include "demo_process.h"
-#include "RAM/firstfit.h"
+#include "RAM/FIFO.hpp"
 
 
 enum ProcessAlg{
@@ -26,7 +26,7 @@ int termiProcess(QList<Process*> &pcbPool,
                  QList<Process*> &RR1,
                  QList<Process*> &RR2,
                  QList<Process*> &FCFS,
-                 Firstfit &ram,unsigned long PID);
+                 paging &ram,unsigned long PID);
 
 void ioDispatch(QList<Process*> &readyQueue,
                      QList<Process*> &waitQueue);
@@ -45,13 +45,13 @@ void processDispatch(QList<Process*> &pcbPool,
                      QList<Process*> &RR1,
                      QList<Process*> &RR2,
                      QList<Process*> &FCFS,
-                     Firstfit &ram,
+                     paging &ram,
                      ProcessAlg alg);
 
 void fork(Process *p,
           QList<Process*> &pcbPool,
           QList<Process*> &readyQueue,
-          Firstfit &ram,
+          paging &ram,
           int ramAllocAlg);
 
 #endif // LIST_OP_H

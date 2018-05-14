@@ -1,3 +1,5 @@
+#ifndef FIFO
+#define FIFO
 #include <iostream>
 
 #include <stdlib.h>
@@ -86,6 +88,12 @@ class paging
 		char* read(int id)
 		{
 			pcb* prev=findp(id);
+            if(prev==NULL){
+                char* ret=new char[2];
+                ret[0]='x';
+                ret[1]=0;
+                return ret;
+            }
 			pcb* cur=prev->next;
 			char*retmessage=new char[cur->needsize];
 			for(int i=0;simmemory[cur->pagetable[i]*pagesize]!=' ';i++)
@@ -94,6 +102,27 @@ class paging
 			}
 			return retmessage;
 		}
+        int PcbMem_base(int id)
+        {
+            pcb* cur = findp(id);
+            if (cur == NULL)
+            {
+                return -1;
+            }
+            cur = cur->next;
+            return cur->pagetable[0];
+        }
+
+        int PcbMem_size(int id)
+        {
+            pcb* cur = findp(id);
+            if (cur == NULL)
+            {
+                return -1;
+            }
+            cur = cur->next;
+            return cur->needsize;
+        }
 	protected:
 		bool distribute(pcb* _pcb, int flag, char* message)
 		{
@@ -188,3 +217,6 @@ cout<< PGESIM->read(88);
 PGESIM->printinfo();*/
 	
 //}
+
+#else
+#endif

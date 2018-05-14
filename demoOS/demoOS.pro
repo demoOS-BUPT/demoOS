@@ -33,7 +33,6 @@ SOURCES += source/main.cpp\
     source/FS/DiskOperate.cpp \
     source/FS/FCB.cpp \
     source/FS/other.cpp \
-    source/RAM/FIFO.cpp \
     source/FS/instructionOP.cpp \
     source/FS/User.cpp \
     logindialog.cpp
@@ -49,7 +48,8 @@ HEADERS  += source/mainwindow.h \
     source/FS/other.h \
     source/FS/instructionOp.h \
     source/FS/User.h \
-    logindialog.h
+    logindialog.h \
+    source/RAM/FIFO.hpp
 
 FORMS    += source/mainwindow.ui \
     logindialog.ui

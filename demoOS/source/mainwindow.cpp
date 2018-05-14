@@ -7,7 +7,7 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    ram(ramSize)
+    ram()
 {
     ui->setupUi(this);
     runGif=new QMovie(":/run1.gif");
@@ -196,6 +196,14 @@ void MainWindow::execute(){
 
         char* s=ram.read(p->getPid());
         QString content= QString::fromLatin1(s,strlen(s));
+
+        if(content=="x"){
+            cmdPrint(QString("程序解释器：进程 %4 页丢失 停止运行")
+                     .arg(p->getPid()));
+            p->setCPUtime(0);
+            return;
+        }
+
         qDebug()<<p->getPid()<<"在运行中:"<<content<<p->getPc();
 
         QStringList all_i =content.split(',');//命令间以,间隔

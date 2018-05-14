@@ -10,7 +10,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <random>
-#include "RAM/firstfit.h"
+#include "RAM/FIFO.hpp"
 #include "FS/other.h"
 //#include "FS/instructionOp.h"
 #include<cmath>
@@ -51,7 +51,7 @@ private:
 
     std::mt19937 rand;//用 rand()得到随机数
 
-    Firstfit ram;
+    paging ram;
 
     void cmdPrint(QString newLine);//输出新行
     void cmdPrint_noLn(QString s);//输出

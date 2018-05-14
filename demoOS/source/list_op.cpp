@@ -62,7 +62,7 @@ int termiProcess(QList<Process*> &pcbPool,
                  QList<Process*> &RR1,
                  QList<Process*> &RR2,
                  QList<Process*> &FCFS,
-                 Firstfit &ram,
+                 paging &ram,
                  unsigned long PID)
 {
     Process* p=nullptr;
@@ -121,7 +121,7 @@ void processDispatch(QList<Process*> &pcbPool,
                      QList<Process*> &RR1,
                      QList<Process*> &RR2,
                      QList<Process*> &FCFS,
-                     Firstfit &ram,
+                     paging &ram,
                      ProcessAlg alg){
     //终结进程
     QList<Process*> killList;
@@ -478,7 +478,7 @@ void ioDispatch(QList<Process*> &readyQueue,
         }
 }
 
-void fork(Process *p,QList<Process*> &pcbPool,QList<Process*> &readyQueue,Firstfit &ram,int ramAllocAlg)
+void fork(Process *p,QList<Process*> &pcbPool,QList<Process*> &readyQueue,paging &ram,int ramAllocAlg)
 {
     Process* kid=newProcess(pcbPool);
     if(kid!=nullptr){//创建成功
