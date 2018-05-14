@@ -869,7 +869,7 @@ void MainWindow::ls_instruction(string op) {
     }
     else if (args[1] == "-l") {
         //ls -l
-        dirOp->ll_directory_q(curDir);
+        cmdPrint(dirOp->ll_directory_q(curDir));
     }
     else {
         string fileName = path_to_filename(args[1]);
@@ -1224,7 +1224,10 @@ void MainWindow::ln_instruction(string op) {
             cmdPrint("Don't allow making hard link to directory.");
         }
         else {
-            cmdPrint(dirOp->ln_q(sfileDir, tlastDir, tFileName));
+            QString tmpQString="";
+            tmpQString = dirOp->ln_q(sfileDir, tlastDir, tFileName);
+            if (tmpQString != "")
+                cmdPrint(tmpQString);
         }
 
     }

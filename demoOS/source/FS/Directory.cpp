@@ -166,7 +166,7 @@ bool Directory::is_authority(string userName, string group, string action){
 				return true;
 		}
 	}
-	if (group == this->group){
+    else if (group == this->group){
 		if ("r" == action){
 			if (this->authority[1] >= 4)
 				return true;
@@ -178,7 +178,7 @@ bool Directory::is_authority(string userName, string group, string action){
 				return true;
 		}
 	}
-	if (group == this->group){
+    else{
 		if ("r" == action){
 			if (this->authority[2] >= 4)
 				return true;
