@@ -218,6 +218,22 @@ void MainWindow::execute(){
                     p->setIo(args.at(1).toInt());
                     moveProcess(runningQueue,waitQueue,p->getPid());
             }
+            else  if(args.at(0) == 'm')//访存
+            {
+                    qDebug()<<"我有一条访存指令 地址"<<args.at(1);
+                    int rc = ram.visit(p->getPid(),args.at(1).toInt());
+                    switch (rc){
+                        case -1:
+                            qDebug()<<"sorry啦 进程在内存里没地位了";
+                            break;
+                        case -2:
+                            qDebug()<<"不行的，你这地址越界了";
+                            break;
+                        default:
+                            qDebug()<<"访问内存操作成功 物理地址为："<<rc;
+                            break;
+                    }
+            }
             else if(args.at(0).at(0) == 'c')//cpu
             {
                     qDebug()<<"我是一条CPU指令，但是我什么也不做";

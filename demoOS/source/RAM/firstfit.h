@@ -208,6 +208,18 @@ class Firstfit
             memcpy(retmessage,simmemory+cur->begin,cur->needMem);
 		    return retmessage;
 		}
+        int visit(int id, int address)
+        {
+            Pcb* cur = _find(id);
+
+            if (cur == NULL)
+                return -1; //该进程不存在
+            cur = cur->next;
+            if (address > cur->needMem)
+                return -2; //逻辑地址溢出
+            return cur->begin + address;
+        }
+
 
 	protected:
 		bool pcbEmpty()
