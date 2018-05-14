@@ -35,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->cmd->setText("DemoOS 正在启动\n");
 
 #define INIT_TABLE(TABLE_NAME) TABLE_NAME->setColumnCount(7);\
-    TABLE_NAME->setHorizontalHeaderLabels(QStringList()<<"PID"<<"父进程PID"<<"CPU时间"<<"优先级"<<"内存基地址"<<"内存大小"<<"程序文件")
+    TABLE_NAME->setHorizontalHeaderLabels(QStringList()<<"PID"<<"父进程PID"<<"CPU时间"<<"优先级"<<"内存首页号"<<"内存大小"<<"程序文件")
     INIT_TABLE(ui->runTable);
     INIT_TABLE(ui->readyTable);
     INIT_TABLE(ui->RR1T);
@@ -197,6 +197,7 @@ void MainWindow::execute(){
         qDebug()<<"load code:";
         char* s=ram.read(p->getPid());
         QString content= QString::fromLatin1(s,strlen(s));
+        delete s;
         qDebug()<<"loaded:"<<content;
         if(content=="x"){
             cmdPrint(QString("程序解释器：进程 %4 页丢失 停止运行")

@@ -46,6 +46,12 @@ class paging
 			simmemory= new char[msize];
 			for(i=0;i<msize;i++) simmemory[i]=' '; 
 		}
+        ~paging(){
+            delete pcbheader;
+            delete usage;
+            delete simmemory;
+        }
+
 		bool push(int id, int mem, int flag, char* message)	//添加进程，传参id、大小、置换策略及内容 
 		{
 			bool ret = false;
@@ -95,8 +101,8 @@ class paging
                 return ret;
             }
 			pcb* cur=prev->next;
-			char*retmessage=new char[cur->needsize];
-			for(int i=0;simmemory[cur->pagetable[i]*pagesize]!=' ';i++)
+			char*retmessage=new char[cur->needsize];                     
+            for(int i=0;i<cur->needpage&&simmemory[cur->pagetable[i]*pagesize]!=' ';i++)
 			{
 				memcpy(retmessage+i*pagesize,simmemory+cur->pagetable[i]*pagesize,pagesize);
 			}
