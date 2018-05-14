@@ -216,8 +216,9 @@ QString DirOperate::list_directory_q(Directory*directory) {
     //cout << directory->get_fileName() <<endl<< endl;
     QString ret;
     for (int i = 0; i < directory->get_fileListNum(); i++) {
-        ret+=QString::fromStdString(directory->get_fileList(i)->get_fileName())
-                +"\n";
+        ret+=QString::fromStdString(directory->get_fileList(i)->get_fileName());
+        if (i != directory->get_fileListNum()-1)
+            ret += "\n";
     }
     return ret;
 }
@@ -284,6 +285,8 @@ QString DirOperate::ll_directory_q(Directory*directory) {
     }
     else {
     //drwxr-xr-x  2 root root 4096 Feb  2 09:40 Videos
+        ret += "drwxr-xr-x  0 root root   512  May 12 15:36 .\n";
+        ret += "drwxr-xr-x  0 root root   512  May 11 12:40 ..\n";
         for (int i = 0; i < directory->get_fileListNum(); i++) {
             Directory* tmpDirectory = directory->get_fileList(i);
             ret+=QString::fromStdString(tmpDirectory->get_authority())

@@ -861,12 +861,12 @@ void MainWindow::ls_instruction(string op) {
     }
     else if (args[1] == "-a") {
         //ls -a
-        cmdPrint(QString(".\n..\n"));
+        cmdPrint(QString(".\n.."));
         cmdPrint(dirOp->list_directory_q(curDir));
     }
     else if (args[1] == "-l") {
         //ls -l
-        dirOp->ll_directory(curDir);
+        dirOp->ll_directory_q(curDir);
     }
     else {
         string fileName = path_to_filename(args[1]);
@@ -897,7 +897,8 @@ void MainWindow::ls_instruction(string op) {
                     if (args[2] == "*") {
                         cmdPrint(dirOp->list_all_directory_q(fileDir));
                     }
-                    cmdPrint("unidentification!");
+                    else
+                        cmdPrint("unidentification!");
                 }
             }
         }
