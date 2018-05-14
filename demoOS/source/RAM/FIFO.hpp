@@ -139,6 +139,7 @@ class paging
 						break;
 					case 1:
 					//	lru(pagedef);
+                        return false;
 						break;
 				}
 			}

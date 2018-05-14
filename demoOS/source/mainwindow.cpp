@@ -28,8 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
                                            <<"最高响应比"
                                           );
     this->ui->ramAllocAlgComboBox->addItems(QStringList()
-                                            <<"首次适配"
-                                            <<"最佳适配"
+                                            <<"FIFO置换"
+                                            <<"不进行置换"
                                             );
     ui->cmd->setTextColor(QColor(80,0,0));
     ui->cmd->setText("DemoOS 正在启动\n");
