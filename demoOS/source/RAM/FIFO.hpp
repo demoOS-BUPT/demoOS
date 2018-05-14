@@ -102,6 +102,20 @@ class paging
 			}
 			return retmessage;
 		}
+        int visit(int id, int address)
+        {
+            pcb* cur = findp(id);
+
+            if (cur == NULL)
+                return -1; //该进程不存在
+            cur = cur->next;
+            if (address > cur->needsize)
+                return -2; //逻辑地址溢出
+            int pagenum=address/pagesize;
+            address=address%pagesize;
+            qDebug()<<"m normal\n";
+            return cur->pagetable[pagenum]*pagesize+address;
+        }
         int PcbMem_base(int id)
         {
             pcb* cur = findp(id);

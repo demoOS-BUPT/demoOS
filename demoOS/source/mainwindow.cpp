@@ -135,7 +135,7 @@ void MainWindow::createProcess(int cpuTime,int priority,int ramSize,Directory *f
          /*CPUTIME的设置*/
         QStringList ins =content.split(',');//命令间以,间隔
         p->setCPUtime(ins.size());
-        qDebug()<<content;
+        qDebug()<<"code from file:"<<content;
         if(ram.push(p->getPid(),ramSize,alg,content.toLatin1().data())){
             base=ram.PcbMem_base(p->getPid());
             size=ram.PcbMem_size(p->getPid());
@@ -158,7 +158,7 @@ void MainWindow::createProcess(int cpuTime,int priority,int ramSize,Directory *f
                     .arg(p->getSize())
                     .arg(p->getBase())
                  );
-        qDebug()<<p->getPpid();
+        qDebug()<<"new process:"<<p->getPid();
         return;
     }
     else{
@@ -194,9 +194,10 @@ void MainWindow::execute(){
     for(int i=0;i<runningQueue.size();i++){
         Process* p=runningQueue.at(i);
 
+        qDebug()<<"load code:";
         char* s=ram.read(p->getPid());
         QString content= QString::fromLatin1(s,strlen(s));
-
+        qDebug()<<"loaded:"<<content;
         if(content=="x"){
             cmdPrint(QString("程序解释器：进程 %4 页丢失 停止运行")
                      .arg(p->getPid()));
@@ -225,6 +226,23 @@ void MainWindow::execute(){
                     qDebug()<<"我有一条io指令 时间"<<args.at(1);
                     p->setIo(args.at(1).toInt());
                     moveProcess(runningQueue,waitQueue,p->getPid());
+            }
+            else  if(args.at(0) == 'm')//访存
+            {
+                qDebug()<<"我有一条访存指令 地址"<<args.at(1);
+                int rc = ram.visit(p->getPid(),args.at(1).toInt());
+                switch (rc){
+                case -1:
+                    qDebug()<<"sorry啦 进程在内存里没地位了";
+                    break;
+                case -2:
+                    cmdPrint(QString("进程 %1 访存操作越界 停止运行").arg(p->getPid()));
+                    p->setCPUtime(0);
+                    break;
+                default:
+                    cmdPrint("访问内存操作成功 物理地址为："+QString::number(rc));
+                    break;
+                }
             }
             else if(args.at(0).at(0) == 'c')//cpu
             {
