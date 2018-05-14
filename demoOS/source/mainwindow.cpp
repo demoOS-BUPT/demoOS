@@ -425,7 +425,9 @@ void MainWindow::on_pushButton_clicked()//用户指令
     else if (args[0] == "cd") {
         //cd /home/zxh
         //dirName = args[1];
-        dirOp->change_directory(args.at(1).toStdString());
+        QString tmpQString = dirOp->change_directory(args.at(1).toStdString());
+        if(tmpQString != "")
+            cmdPrint(tmpQString);
         //switch dir
     }
     else if (args[0] == "rm") {
@@ -671,6 +673,7 @@ void MainWindow::FS_init() {
         dirOp->create_file(path_to_directory("/root"),path_to_filename("/root"),'0');
         dirOp->create_file(path_to_directory("/home"),path_to_filename("/home"),'0');
         dirOp->create_file(path_to_directory("/home/a.c"), path_to_filename("/home/a.c"), '1');
+        dirOp->create_file(path_to_directory("/home/readme.md"), path_to_filename("/home/readme.md"), '1');
 
 
 

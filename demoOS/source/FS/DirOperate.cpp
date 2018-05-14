@@ -350,9 +350,10 @@ void DirOperate::rm_directory(Directory*dir,Directory*lastDir) {
 	}
 }
 
-void DirOperate::change_directory(string inputNewPath) {
+QString DirOperate::change_directory(string inputNewPath) {
 	bool flag = true;
 	string backUpPath = currentDir;
+    QString ret = "";
 	Directory*backUpDir = curDir;
 	Directory*tmp;
 	if (inputNewPath[0] == '/') {
@@ -447,11 +448,12 @@ void DirOperate::change_directory(string inputNewPath) {
 	//找到要转换的文件夹目录
 	//更改当前目录以及最新记录指针
 	if (curDir->get_type() == '1'||flag==false) {
-		cout << "Error! Please input valid path." << endl;
+        ret = "Error! Please input valid path.";
 		currentDir = backUpPath;
 		curDir = backUpDir;
 		lastDir = curDir->get_curDir();
 	}
+    return ret;
 }
 
 void DirOperate::ln(Directory*sfiledir, Directory* tlastdir, string fileName) {
