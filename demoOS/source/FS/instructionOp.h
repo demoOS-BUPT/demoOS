@@ -39,5 +39,6 @@ void chown_instruction(string op);
 
 void chgrp_instruction(string op);
 
+void whoami_instruction(string op);
 
 #endif // 

@@ -92,6 +92,10 @@ private:
 
     void chgrp_instruction(string op);
 
+    void whichgroup_instruction(string op);
+
+    void whoami_instruction(string op);
+
     //获取文件内容
     QString getFileContent(QString fileName);
     QString getFileContent(Directory *fileDir);

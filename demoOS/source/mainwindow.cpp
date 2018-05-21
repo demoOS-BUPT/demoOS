@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->processAlgComboBox->addItems(QStringList()
                                            <<"RR 时间片轮转"
                                            <<"FCFS 批处理"
-                                           <<"弱化版多级反馈队列"
+                                           <<"优先级结合RR"
                                            <<"动态优先级"
                                            <<"抢占式优先级"
                                            <<"非抢占式优先级"
@@ -218,6 +218,23 @@ void MainWindow::execute(){
                     p->setIo(args.at(1).toInt());
                     moveProcess(runningQueue,waitQueue,p->getPid());
             }
+            else  if(args.at(0) == 'm')//访存
+            {
+                qDebug()<<"我有一条访存指令 地址"<<args.at(1);
+                int rc = ram.visit(p->getPid(),args.at(1).toInt());
+                switch (rc){
+                case -1:
+                    qDebug()<<"sorry啦 进程在内存里没地位了";
+                    break;
+                case -2:
+                    cmdPrint(QString("进程 %1 访存操作越界 停止运行").arg(p->getPid()));
+                    p->setCPUtime(0);
+                    break;
+                default:
+                    cmdPrint("访问内存操作成功 物理地址为："+QString::number(rc));
+                    break;
+                }
+            }
             else if(args.at(0).at(0) == 'c')//cpu
             {
                     qDebug()<<"我是一条CPU指令，但是我什么也不做";
@@ -403,11 +420,11 @@ void MainWindow::on_pushButton_clicked()//用户指令
         //switch dir
     }*/
     if (args[0] == "ls") {
-                ls_instruction(op1);
+        ls_instruction(op1);
     }
     else if (args[0] == "ll") {
         if (args.size() == 1){
-            dirOp->ll_directory(curDir);
+            cmdPrint(dirOp->ll_directory_q(curDir));
         }
     }
     else if (args[0] == "mkdir") {
@@ -425,7 +442,9 @@ void MainWindow::on_pushButton_clicked()//用户指令
     else if (args[0] == "cd") {
         //cd /home/zxh
         //dirName = args[1];
-        dirOp->change_directory(args.at(1).toStdString());
+        QString tmpQString = dirOp->change_directory(args.at(1).toStdString());
+        if(tmpQString != "")
+            cmdPrint(tmpQString);
         //switch dir
     }
     else if (args[0] == "rm") {
@@ -440,14 +459,13 @@ void MainWindow::on_pushButton_clicked()//用户指令
     }
     else if (args[0]=="mv") {
         mv_instruction(op1);
-
     }
     //User
     else if (args[0] == "whoami") {
-        cout << currentUser->get_username() << endl;
+        whoami_instruction(op1);
     }
     else if (args[0] == "whichgroup") {
-        cout << currentUser->get_group() << endl;
+        whichgroup_instruction(op1);
     }
     else if (args[0] == "su") {
         su_instruction(op1);
@@ -460,6 +478,9 @@ void MainWindow::on_pushButton_clicked()//用户指令
     }
     else if (args[0] == "chgrp"){
         chgrp_instruction(op1);
+    }
+    else if (args[0] == "pwd"){
+        cmdPrint(QString::fromStdString(currentDir));
     }
     else if (args.at(0) == "kill") {
         //kill PID
@@ -669,6 +690,7 @@ void MainWindow::FS_init() {
         dirOp->create_file(path_to_directory("/root"),path_to_filename("/root"),'0');
         dirOp->create_file(path_to_directory("/home"),path_to_filename("/home"),'0');
         dirOp->create_file(path_to_directory("/home/a.c"), path_to_filename("/home/a.c"), '1');
+        dirOp->create_file(path_to_directory("/home/readme.md"), path_to_filename("/home/readme.md"), '1');
 
 
 
@@ -822,7 +844,7 @@ void MainWindow::vim_instruction(string op) {
                 QString fileContent_q;
                 fileContent=dirOp->cat_file(fileDir->get_FCBptr(), diskOP);
                 fileContent_q=QString::fromStdString(fileContent);
-                cmdPrint("Please input file content:");
+                //cmdPrint("Please input file content:");
                 //cin >> fileContent;
                 bool ok;
                 fileContent_q=QInputDialog::getMultiLineText(this,
@@ -859,12 +881,12 @@ void MainWindow::ls_instruction(string op) {
     }
     else if (args[1] == "-a") {
         //ls -a
-        cmdPrint(QString(".\n..\n"));
+        cmdPrint(QString(".\n.."));
         cmdPrint(dirOp->list_directory_q(curDir));
     }
     else if (args[1] == "-l") {
         //ls -l
-        dirOp->ll_directory(curDir);
+        cmdPrint(dirOp->ll_directory_q(curDir));
     }
     else {
         string fileName = path_to_filename(args[1]);
@@ -895,7 +917,8 @@ void MainWindow::ls_instruction(string op) {
                     if (args[2] == "*") {
                         cmdPrint(dirOp->list_all_directory_q(fileDir));
                     }
-                    cmdPrint("unidentification!");
+                    else
+                        cmdPrint("unidentification!");
                 }
             }
         }
@@ -1218,7 +1241,10 @@ void MainWindow::ln_instruction(string op) {
             cmdPrint("Don't allow making hard link to directory.");
         }
         else {
-            cmdPrint(dirOp->ln_q(sfileDir, tlastDir, tFileName));
+            QString tmpQString="";
+            tmpQString = dirOp->ln_q(sfileDir, tlastDir, tFileName);
+            if (tmpQString != "")
+                cmdPrint(tmpQString);
         }
 
     }
@@ -1317,3 +1343,10 @@ void MainWindow::chgrp_instruction(string op) {
     }
 }
 
+void MainWindow::whichgroup_instruction(string op) {
+    cmdPrint(QString::fromStdString(currentUser->get_group()));
+}
+
+void MainWindow::whoami_instruction(string op) {
+    cmdPrint(QString::fromStdString(currentUser->get_username()));
+}

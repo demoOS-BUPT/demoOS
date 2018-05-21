@@ -47,8 +47,8 @@ int DirOperate::create_file(Directory*lastDirectory,string fileName,char type) {
 			lastDir = newDirectory;
 		}
 		*/
-		newDirectory->set_curDir(curDir);
-	newDirectory->set_lastDir(lastDir);
+        newDirectory->set_curDir(lastDirectory);
+        newDirectory->set_lastDir(lastDirectory->get_curDir());
 		
 		if (!lastDirectory->add_fileDirectory(newDirectory)) {
 			return -1;
@@ -216,8 +216,9 @@ QString DirOperate::list_directory_q(Directory*directory) {
     //cout << directory->get_fileName() <<endl<< endl;
     QString ret;
     for (int i = 0; i < directory->get_fileListNum(); i++) {
-        ret+=QString::fromStdString(directory->get_fileList(i)->get_fileName())
-                +"\n";
+        ret+=QString::fromStdString(directory->get_fileList(i)->get_fileName());
+        if (i != directory->get_fileListNum()-1)
+            ret += "\n";
     }
     return ret;
 }
@@ -280,7 +281,7 @@ QString DirOperate::ll_directory_q(Directory*directory) {
     QString ret;
     if ('1' == directory->get_type()) {
         //cout << directory->get_fileName()<<endl;
-        return QString();
+        return QString::fromStdString("Not a directory");
     }
     else {
     //drwxr-xr-x  2 root root 4096 Feb  2 09:40 Videos
@@ -304,8 +305,9 @@ QString DirOperate::ll_directory_q(Directory*directory) {
                     +"  ";
             ret+=QString::fromStdString(tmpDirectory->get_change_time())
                     +" ";
-            ret+=QString::fromStdString(tmpDirectory->get_fileName())
-                    +"\n";
+            ret+=QString::fromStdString(tmpDirectory->get_fileName());
+            if (i != directory->get_fileListNum()-1)
+                ret += "\n";
         }
     }
     return ret;
@@ -347,9 +349,10 @@ void DirOperate::rm_directory(Directory*dir,Directory*lastDir) {
 	}
 }
 
-void DirOperate::change_directory(string inputNewPath) {
+QString DirOperate::change_directory(string inputNewPath) {
 	bool flag = true;
 	string backUpPath = currentDir;
+    QString ret = "";
 	Directory*backUpDir = curDir;
 	Directory*tmp;
 	if (inputNewPath[0] == '/') {
@@ -444,11 +447,12 @@ void DirOperate::change_directory(string inputNewPath) {
 	//找到要转换的文件夹目录
 	//更改当前目录以及最新记录指针
 	if (curDir->get_type() == '1'||flag==false) {
-		cout << "Error! Please input valid path." << endl;
+        ret = "Error! Please input valid path.";
 		currentDir = backUpPath;
 		curDir = backUpDir;
 		lastDir = curDir->get_curDir();
 	}
+    return ret;
 }
 
 void DirOperate::ln(Directory*sfiledir, Directory* tlastdir, string fileName) {

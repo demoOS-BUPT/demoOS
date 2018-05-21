@@ -17,7 +17,7 @@ public:
 	int create_file(Directory*lastDirectory, string fileName, char type); //创建成功返回0，失败返回-1
 	string cat_file(FCB*FCBptr, DiskOperate*diskOperate); //return content of file
 	void write_file(FCB*FCBptr, DiskOperate*diskOperate, string content);//
-	void change_directory(string inputNewPath);
+    QString change_directory(string inputNewPath);
 	bool rm_file(Directory*fileDir,Directory*lastDir); //remove a file, just change the recycleFlag  
 	void list_directory(Directory*directory);//列出当前目录下的文件或文件夹-1层
     QString list_directory_q(Directory*directory);
