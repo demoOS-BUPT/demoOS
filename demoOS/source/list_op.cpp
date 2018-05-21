@@ -394,26 +394,48 @@ void processDispatch(QList<Process*> &pcbPool,
                     break;
                 }
             }
-            else if(in->getPriority()>out->getPriority()){
-                ;//不能抢占更高级队列的进程
-            }
-            else if(in->getPriority()==out->getPriority()){
-                switch (out->getPriority()) {
+            else{ //先根据算法调出当前运行，再调入优先级最高
+                switch(out->getPriority()){
                 case 0:
                     out->setPriority(1);
                     moveProcess(runningQueue,RR2,out->getPid());
-                    moveProcess(RR1,runningQueue,in->getPid());
                     break;
                 case 1:
                     if(timer>=2){
                         out->setPriority(2);
                         moveProcess(runningQueue,FCFS,out->getPid());
-                        moveProcess(RR2,runningQueue,in->getPid());
                         timer=0;
                     }
+                    break;
                 case 2:
                 default:
                     break;
+                }
+
+                if(!runningQueue.isEmpty())break;//没有调出
+
+                //调出了，现在调入一个优先级最高的
+                if(!RR1.isEmpty()){
+                    in=RR1.at(0);
+                }
+                else if(!RR2.isEmpty()){
+                    in=RR2.at(0);
+                }
+                else if(!FCFS.isEmpty()){
+                    in=FCFS.at(0);
+                }
+
+                switch(in->getPriority()){
+                case 0:
+                    moveProcess(RR1,runningQueue,in->getPid());
+                    break;
+                case 1:
+                    moveProcess(RR2,runningQueue,in->getPid());
+                    timer=0;
+                    break;
+                case 2:
+                default:
+                    moveProcess(FCFS,runningQueue,in->getPid());
                 }
             }
             break;
